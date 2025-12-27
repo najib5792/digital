@@ -1,0 +1,1396 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GETQUOTE - QUOTATION ONLINE</title>
+
+<!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="GETQUOTE">
+    <meta property="og:title" content="Online Quotation">
+    <meta property="og:description" content="Dapatkan Quotation Plan Takaful Anda.">
+    <meta property="og:url" content="https://getakaful.website/TEST">
+
+<!-- TUKAR YANG INI JE -->
+    <meta property="og:image" content="https://arleta.site/interactivelink/2842/PROFILE-TEST.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+
+<!-- Tailwind & Fonts -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+
+<style>
+        :root {
+            --primary-color: #FFFFFF;
+            --secondary-color: #FFFFFF;
+        }
+
+/* TEMA */
+        body { 
+            font-family: 'Inter', sans-serif; 
+            color: #FFFFFF; 
+            background-color: var(--primary-color); 
+            overflow-x: hidden; 
+            transition: background-color 0.3s ease;
+        }
+        .font-poppins { font-family: 'Poppins', sans-serif; }
+        .corporate-primary-text { color: var(--primary-color); }
+        .corporate-secondary-blue-text { color: var(--secondary-color); }
+
+/* INPUTS */
+        .form-input { 
+            background-color: #FFFFFF; 
+            border: 1px solid #000000; 
+            color: #120F07; 
+            transition: all 0.2s ease-in-out; 
+        }
+        .form-input:focus { 
+            outline: none; 
+            border-color: var(--primary-color); 
+            box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.2); 
+        }
+
+/* BUTTONS */
+        .submit-btn { 
+            background-image: linear-gradient(to right, var(--secondary-color), var(--primary-color)); 
+            transition: all 0.3s ease; 
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
+        }
+        .submit-btn:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); 
+        }
+        .submit-btn:disabled { 
+            background-image: none; 
+            background-color: #cccccc; 
+            cursor: not-allowed; 
+            transform: none; 
+            box-shadow: none; 
+            opacity: 0.7; 
+        }
+
+.start-hidden { 
+            opacity: 0; 
+            transform: translateY(20px); 
+            display: none; 
+            transition: opacity 0.5s ease, transform 0.5s ease; 
+        }
+        .is-visible { 
+            opacity: 1; 
+            transform: translateY(0); 
+            display: block; 
+        }
+
+/* CARDS */
+        .plan-card { 
+            background-color: #FFFFFF; 
+            border: 1px solid #000000; 
+            transition: transform 0.3s ease, box-shadow 0.3s ease; 
+            border-radius: 0.75rem; 
+            display: flex; 
+            flex-direction: column; 
+        }
+        .plan-card:hover { 
+            transform: translateY(-5px); 
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08); 
+        }
+        .plan-card h4 { color: var(--primary-color); }
+
+.benefit-item { 
+            display: flex; 
+            align-items: center; 
+            gap: 0.75rem; 
+            color: #4B5563; 
+        }
+        .benefit-item strong { color: var(--primary-color); }
+        .highlight-benefit { 
+            background-color: #FFFFFF; 
+            color: var(--primary-color); 
+            padding: 2px 6px; 
+            border-radius: 4px; 
+            font-weight: 700; 
+        }
+
+/* ICONS */
+        .icon-option { 
+            border: 2px solid #000000; 
+            transition: all 0.2s ease-in-out; 
+            background-color: #FFFFFF; 
+            color: #4B5563; 
+        }
+        .icon-option.selected { 
+            border-color: var(--primary-color); 
+            background-color: #dbeafe; 
+            color: var(--primary-color); 
+        }
+
+.icon-wrapper { 
+            flex-shrink: 0; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            background-color: #FFFFFF; 
+        }
+        .whatsapp-btn { 
+            background-image: linear-gradient(to right, #25D366, #128C7E); 
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
+            transition: all 0.3s ease; 
+        }
+        .whatsapp-btn:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); 
+        }
+
+/* AGENT */
+        .agent-profile-section { 
+            background-color: #FFFFFF; 
+            border-radius: 0.75rem; 
+            padding: 2.5rem; 
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08); 
+            margin-top: 2rem; 
+            text-align: center; 
+        }
+        .agent-profile-img { 
+            width: 120px; 
+            height: 120px; 
+            border-radius: 50%; 
+            object-fit: cover; 
+            border: 4px solid var(--primary-color); 
+            margin: 0 auto 1rem; 
+            transition: opacity 0.3s ease;
+        }
+        .social-icon-link { 
+            display: inline-flex; 
+            align-items: center; 
+            justify-content: center; 
+            width: 40px; 
+            height: 40px; 
+            border-radius: 50%; 
+            background-color: var(--primary-color); 
+            color: #FFFFFF; 
+            transition: all 0.2s ease-in-out; 
+        }
+
+/* Skeleton Loading Animation */
+        .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            color: transparent !important;
+            border-radius: 4px;
+        }
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+/* MISC */
+        input[type="date"] { 
+            width: 100% !important; 
+            max-width: 100%; 
+            box-sizing: border-box; 
+            -webkit-appearance: none; 
+            appearance: none; 
+        }
+        input[type="date"]::-webkit-date-and-time-value { 
+            min-height: 1.4em; 
+        }
+        .loader { 
+            border: 4px solid #f3f3f3; 
+            border-top: 4px solid var(--primary-color); 
+            border-radius: 50%; 
+            width: 24px; 
+            height: 24px; 
+            animation: spin 2s linear infinite; 
+            display: inline-block; 
+            vertical-align: middle; 
+            margin-right: 10px; 
+        }
+        @keyframes spin { 
+            0% { transform: rotate(0deg); } 
+            100% { transform: rotate(360deg); } 
+        }
+
+/* Disabled State for Checkbox Container */
+        .checkbox-disabled { 
+            opacity: 0.5; 
+            pointer-events: none; 
+            background-color: #f3f4f6; 
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+<header class="w-full max-w-6xl mx-auto mb-10 text-center" style="margin-top: 20px;">
+    <h1 class="font-poppins text-5xl md:text-7xl text-white tracking-wide font-bold">GET QUOTE</h1>
+    <p class="text-white text-lg md:text-xl mt-2">Platform Quotation Online</p>
+</header>
+
+<section class="w-[92%] max-w-xl mx-auto agent-profile-section relative">
+    <!-- Loading Overlay for Agent (Optional UI enhancement) -->
+    <div id="agent-skeleton" class="hidden absolute inset-0 bg-white z-10 flex-col items-center justify-center rounded-xl p-10">
+        <div class="skeleton w-32 h-8 mb-6"></div>
+        <div class="skeleton w-[120px] h-[120px] rounded-full mb-4"></div>
+        <div class="skeleton w-48 h-6 mb-2"></div>
+        <div class="skeleton w-32 h-4 mb-6"></div>
+        <div class="flex gap-4"><div class="skeleton w-10 h-10 rounded-full"></div><div class="skeleton w-10 h-10 rounded-full"></div></div>
+    </div>
+
+<h3 id="agent-agency" class="font-poppins text-3xl font-semibold text-gray-800 mb-6">Loading...</h3>
+    <img id="agent-img" src="https://via.placeholder.com/120?text=Agent" onerror="this.src='https://via.placeholder.com/120?text=Agent'" alt="Gambar Profil Ejen" class="agent-profile-img">
+    <p id="agent-name" class="font-poppins text-xl font-semibold text-gray-800 mb-2">...</p>
+    <p id="agent-company" class="text-gray-600 mb-6">...</p>
+    <div class="flex justify-center space-x-4">
+        <a id="link-fb" href="#" target="_blank" class="social-icon-link pointer-events-none opacity-50">
+            <!-- FB ICON -->
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669c1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+        </a>
+        <a id="link-ig" href="#" target="_blank" class="social-icon-link pointer-events-none opacity-50">
+            <!-- IG ICON -->
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M12 0C8.74 0 8.333.015 7.053.072C5.775.132 4.905.333 4.14.63c-.789.306-1.459.717-2.126 1.384S.935 3.35.63 4.14C.333 4.905.131 5.775.072 7.053C.012 8.333 0 8.74 0 12s.015 3.667.072 4.947c.06 1.277.261 2.148.558 2.913a5.885 5.885 0 0 0 1.384 2.126A5.868 5.868 0 0 0 4.14 23.37c.766.296 1.636.499 2.913.558C8.333 23.988 8.74 24 12 24s3.667-.015 4.947-.072c1.277-.06 2.148-.262 2.148-.262a5.898 5.898 0 0 0 2.126-1.384a5.86 5.86 0 0 0 1.384-2.126c.296-.765.499-1.636.558-2.913c.06-1.28.072-1.687.072-4.947s-.015-3.667-.072-4.947c-.06-1.277-.262-2.149-.558-2.913a5.89 5.89 0 0 0-1.384-2.126A5.847 5.847 0 0 0 19.86.63c-.765-.297-1.636-.499-2.913-.558C15.667.012 15.26 0 12 0zm0 2.16c3.203 0 3.585.016 4.85.071c1.17.055 1.805.249 2.227.415c.562.217.96.477 1.382.896c.419.42.679.819.896 1.381c.164.422.36 1.057.413 2.227c.057 1.266.07 1.646.07 4.85s-.015 3.585-.074 4.85c-.061 1.17-.256 1.805-.421 2.227a3.81 3.81 0 0 1-.899 1.382a3.744 3.744 0 0 1-1.38.896c-.42.164-1.065.36-2.235.413c-1.274.057-1.649.07-4.859.07c-3.211 0-3.586-.015-4.859-.074c-1.171-.061-1.816-.256-2.236-.421a3.716 3.716 0 0 1-1.379-.899a3.644 3.644 0 0 1-.9-1.38c-.165-.42-.359-1.065-.42-2.235c-.045-1.26-.061-1.649-.061-4.844c0-3.196.016-3.586.61-4.861c.061-1.17.255-1.814.42-2.234c.21-.57.479-.96.9-1.381c.419-.419.81-.689 1.379-.898c.42-.166 1.051-.361 2.221-.421c1.275-.045 1.65-.06 4.859-.06l.045.03zm0 3.678a6.162 6.162 0 1 0 0 12.324a6.162 6.162 0 1 0 0-12.324zM12 16c-2.21 0-4-1.79-4-4s1.79-4 4-4s4 1.79 4 4s-1.79 4-4 4zm7.846-10.405a1.441 1.441 0 0 1-2.88 0a1.44 1.44 0 0 1 2.88 0z"/></svg>
+        </a>
+        <a id="link-tt" href="#" target="_blank" class="social-icon-link pointer-events-none opacity-50">
+            <!-- TIKTOK ICON -->
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M12.438 2.017C13.53 2 14.613 2.008 15.696 2c.067 1.275.525 2.575 1.459 3.475c.933.925 2.25 1.35 3.533 1.492v3.358c-1.2-.042-2.408-.292-3.5-.808c-.475-.217-.917-.492-1.35-.775c-.008 2.433.008 4.866-.017 7.291a6.36 6.36 0 0 1-1.125 3.283c-1.091 1.6-2.983 2.642-4.924 2.675c-1.192.067-2.384-.258-3.4-.858c-1.684-.992-2.867-2.808-3.042-4.758a16 16 0 0 1-.008-1.242c.15-1.583.933-3.1 2.15-4.133c1.383-1.2 3.316-1.775 5.125-1.433c.016 1.233-.034 2.466-.034 3.7c-.825-.267-1.791-.192-2.516.308a2.9 2.9 0 0 0-1.134 1.458c-.175.425-.125.892-.116 1.342c.2 1.366 1.516 2.516 2.916 2.392c.934-.009 1.825-.55 2.309-1.342c.158-.275.333-.559.341-.884c.084-1.491.05-2.975.059-4.466c.008-3.358-.009-6.708.016-10.058"/></svg>
+        </a>
+        <a id="link-wa" href="#" target="_blank" class="social-icon-link pointer-events-none opacity-50">
+            <!-- WA ICON -->
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 464 488"><path fill="currentColor" d="M462 228q0 93-66 159t-160 66q-56 0-109-28L2 464l40-120q-32-54-32-116q0-93 66-158.5T236 4t160 65.5T462 228zM236 39q-79 0-134.5 55.5T46 228q0 62 36 111l-24 70l74-23q49 31 104 31q79 0 134.5-55.5T426 228T370.5 94.5T236 39zm114 241q-1-1-10-7q-3-1-19-8.5t-19-8.5q-9-3-13 2q-1 3-4.5 7.5t-7.5 9t-5 5.5q-4 6-12 1q-34-17-45-27q-7-7-13.5-15t-12-15t-5.5-8q-3-7 3-11q4-6 8-10l6-9q2-5-1-10q-4-13-17-41q-3-9-12-9h-11q-9 0-15 7q-19 19-19 45q0 24 22 57l2 3q2 3 4.5 6.5t7 9t9 10.5t10.5 11.5t13 12.5t14.5 11.5t16.5 10t18 8.5q16 6 27.5 10t18 5t9.5 1t7-1t5-1q9-1 21.5-9t15.5-17q8-21 3-26z"/></svg>
+        </a>
+    </div>
+</section>
+
+<main id="form-section" class="mx-auto bg-white rounded-xl shadow-2xl mt-8 w-[90%] sm:max-w-xl md:max-w-2xl lg:max-w-3xl p-6 md:p-8">
+    <div class="text-center mb-10">
+        <h2 class="text-3xl md:text-4xl font-bold font-poppins text-gray-800">Generate Quotation Anda</h2>
+        <p class="text-gray-500 mt-2 text-md">Sila isikan butiran peribadi dan jenis pelan yang diminati.</p>
+    </div>
+
+<form id="quotationForm">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Pilihan Pelan</label>
+                <div class="flex gap-4" id="planType-options">
+                    <div data-value="medical" class="icon-option planType-option flex-1 cursor-pointer p-4 rounded-lg flex items-center justify-center gap-3 shadow-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-credit-card-icon lucide-credit-card"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
+                        <span>Medical Card</span>
+                    </div>
+                    <div data-value="hibah" class="icon-option planType-option flex-1 cursor-pointer p-4 rounded-lg flex items-center justify-center gap-3 shadow-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-hand-coins-icon lucide-hand-coins"><path d="M11 15h2a2 0 1 0 0-4h-3c-.6 0-1.1.2-1.4.6L3 17"/><path d="m7 21 1.6-1.4c.3-.4.8-.6 1.4-.6h4c1.1 0 2.1-.4 2.8-1.2l4.6-4.4a2 2 0 0 0-2.75-2.91l-4.2 3.9"/><path d="m2 16 6 6"/><circle cx="16" cy="9" r="2.9"/><circle cx="6" cy="5" r="3"/></svg>
+                        <span>Hibah Takaful</span>
+                    </div>
+                </div>
+                <input type="hidden" id="planType" name="planType">
+            </div>
+
+<div>
+                <label for="name" class="block text-sm font-semibold text-gray-700 mb-2">Nama Penuh</label>
+                <input type="text" id="name" class="w-full px-4 py-3 rounded-lg shadow-sm form-input" required placeholder="Contoh: Ahmad bin Ali">
+            </div>
+            <div>
+                <label for="dob" class="block text-sm font-semibold text-gray-700 mb-2">Tarikh Lahir (DD/MM/YYYY)</label>
+                <input type="text" inputmode="numeric" id="dob" class="w-full px-4 py-3 rounded-lg shadow-sm form-input" required placeholder="Contoh: 31/01/1990" maxlength="10">
+            </div>
+            <div>
+                <label for="phone" class="block text-sm font-semibold text-gray-700 mb-2">Nombor Telefon</label>
+                <input type="tel" id="phone" class="w-full px-4 py-3 rounded-lg shadow-sm form-input" required placeholder="Contoh: 60123456789">
+            </div>
+            <div>
+                <label for="occupation" class="block text-sm font-semibold text-gray-700 mb-2">Pekerjaan (Class 1/2 sahaja)</label>
+                <input type="text" id="occupation" class="w-full px-4 py-3 rounded-lg shadow-sm form-input" required placeholder="Contoh: Eksekutif Pemasaran">
+            </div>
+
+<div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Jantina</label>
+                <div class="flex gap-4" id="gender-options">
+                    <div data-value="lelaki" class="icon-option gender-option flex-1 cursor-pointer p-4 rounded-lg flex items-center justify-center gap-3 shadow-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-mars-icon lucide-mars"><path d="M16 3h5v5"/><path d="m21 3-6.75 6.75"/><circle cx="10" cy="14" r="6"/></svg>
+                        <span>Lelaki</span>
+                    </div>
+                    <div data-value="perempuan" class="icon-option gender-option flex-1 cursor-pointer p-4 rounded-lg flex items-center justify-center gap-3 shadow-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-venus-icon lucide-venus"><path d="M12 15v7"/><path d="M9 19h6"/><circle cx="12" cy="9" r="6"/></svg>
+                        <span>Perempuan</span>
+                    </div>
+                </div>
+                <input type="hidden" id="gender" name="gender">
+            </div>
+
+<div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Status Merokok</label>
+                <div class="flex gap-4" id="smoker-options">
+                    <div data-value="tidak" class="icon-option smoker-option flex-1 cursor-pointer p-4 rounded-lg flex items-center justify-center gap-3 shadow-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-cigarette-off-icon lucide-cigarette-off"><path d="M12 12H3a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h13"/><path d="M18 8c0-2.5-2-2.5-2-5"/><path d="m2 2 20 20"/><path d="M21 12a1 1 0 0 1 1 1v2a1 1 0 0 1-.5.866"/><path d="M22 8c0-2.5-2-2.5-2-5"/><path d="M7 12v4"/></svg>
+                        <span>Tidak</span>
+                    </div>
+                    <div data-value="ya" class="icon-option smoker-option flex-1 cursor-pointer p-4 rounded-lg flex items-center justify-center gap-3 shadow-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-cigarette-icon lucide-cigarette"><path d="M17 12H3a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h14"/><path d="M18 8c0-2.5-2-2.5-2-5"/><path d="M21 16a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M22 8c0-2.5-2-2.5-2-5"/><path d="M7 12v4"/></svg>
+                        <span>Ya</span>
+                    </div>
+                </div>
+                <input type="hidden" id="smoker" name="smoker">
+            </div>
+        </div>
+
+<div class="mt-8 flex justify-center">
+            <button type="submit" id="calculateBtn" class="submit-btn text-white font-bold text-xl py-4 px-16 rounded-full transition-transform transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
+                KIRAKAN QUOTATION
+            </button>
+        </div>
+    </form>
+    <div id="error-message" class="mt-6 text-center text-red-600 font-semibold text-lg hidden"></div>
+</main>
+
+<section id="medicalCardResult" class="w-full max-w-7xl mx-auto mt-16 start-hidden">
+    <div class="text-center mb-8">
+        <h2 class="font-poppins text-4xl md:text-5xl text-white tracking-wide font-bold">Pakej Medical Card</h2>
+        <p class="text-white text-lg">Nama: <span id="resultNameMC" class="font-bold"></span> | Umur: <span id="resultAgeMC" class="font-bold"></span> Tahun</p>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div class="plan-card w-[92%] sm:w-[20rem] md:w-[22rem] lg:w-[24rem] mx-auto p-5 lg:p-6">
+            <h4 class="font-poppins text-2xl md:text-3xl font-semibold mb-2 whitespace-nowrap">Plan Basic Evolusi 150</h4>
+            <p class="text-gray-500 text-sm">Caruman Bulanan:</p>
+            <p class="font-poppins text-5xl corporate-primary-text font-bold mb-6">RM<span id="basicMonthly150">0.00</span></p>
+            <div id="basic-benefits-150" class="space-y-4 flex-grow"></div>
+            <button id="selectBasicBtn150" class="mt-8 w-full whatsapp-btn text-white font-bold py-3 px-6 rounded-full shadow-lg transition-transform transform hover:scale-105 active:scale-95 disabled:bg-gray-400 disabled:cursor-not-allowed" disabled>Whatsapp Agent</button>
+        </div>
+        <div class="plan-card w-[92%] sm:w-[20rem] md:w-[22rem] lg:w-[24rem] mx-auto p-5 lg:p-6">
+            <div class="flex justify-between items-center mb-2">
+                <h4 class="font-poppins text-2xl md:text-3xl font-semibold whitespace-nowrap">Plan Premium Evolusi 150</h4>
+            </div>
+            <p class="text-gray-500 text-sm">Caruman Bulanan:</p>
+            <p class="font-poppins text-5xl corporate-primary-text font-bold mb-6">RM<span id="fullMonthly150">0.00</span></p>
+            <div id="full-benefits-150" class="space-y-4 flex-grow"></div>
+            <button id="selectFullBtn150" class="mt-8 w-full whatsapp-btn text-white font-bold py-3 px-6 rounded-full shadow-lg transition-transform transform hover:scale-105 active:scale-95 disabled:bg-gray-400 disabled:cursor-not-allowed" disabled>Whatsapp Agent</button>
+        </div>
+        <div class="plan-card w-[92%] sm:w-[20rem] md:w-[22rem] lg:w-[24rem] mx-auto p-5 lg:p-6">
+            <h4 class="font-poppins text-2xl md:text-3xl font-semibold mb-2 whitespace-nowrap">Plan Basic Evolusi 200</h4>
+            <p class="text-gray-500 text-sm">Caruman Bulanan:</p>
+            <p class="font-poppins text-5xl corporate-primary-text font-bold mb-6">RM<span id="basicMonthly200">0.00</span></p>
+            <div id="basic-benefits-200" class="space-y-4 flex-grow"></div>
+            <button id="selectBasicBtn200" class="mt-8 w-full whatsapp-btn text-white font-bold py-3 px-6 rounded-full shadow-lg transition-transform transform hover:scale-105 active:scale-95 disabled:bg-gray-400 disabled:cursor-not-allowed" disabled>Whatsapp Agent</button>
+        </div>
+        <div class="plan-card w-[92%] sm:w-[20rem] md:w-[22rem] lg:w-[24rem] mx-auto p-5 lg:p-6">
+            <div class="flex justify-between items-center mb-2">
+                <h4 class="font-poppins text-2xl md:text-3xl font-semibold whitespace-nowrap">Plan Premium Evolusi 200</h4>
+            </div>
+            <p class="text-gray-500 text-sm">Caruman Bulanan:</p>
+            <p class="font-poppins text-5xl corporate-primary-text font-bold mb-6">RM<span id="fullMonthly200">0.00</span></p>
+            <div id="full-benefits-200" class="space-y-4 flex-grow"></div>
+            <button id="selectFullBtn200" class="mt-8 w-full whatsapp-btn text-white font-bold py-3 px-6 rounded-full shadow-lg transition-transform transform hover:scale-105 active:scale-95 disabled:bg-gray-400 disabled:cursor-not-allowed" disabled>Whatsapp Agent</button>
+        </div>
+    </div>
+</section>
+
+<section id="hibahResult" class="w-full max-w-7xl mx-auto mt-16 mb-20 start-hidden">
+    <div class="text-center mb-8">
+        <h2 class="font-poppins text-4xl md:text-5xl text-white tracking-wide font-bold">Pakej Hibah Takaful</h2>
+        <p class="text-white text-lg">Nama: <span id="resultNameHibah" class="font-bold"></span> | Umur Seterusnya: <span id="resultAgeHibah" class="font-bold"></span> Tahun</p>
+    </div>
+
+<!-- GRID UTAMA HIBAH -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+        <!-- NOVA -->
+        <div class="plan-card w-[92%] sm:w-[20rem] md:w-[22rem] lg:w-[24rem] mx-auto p-5 lg:p-6">
+            <h4 class="font-poppins text-2xl md:text-3xl font-semibold mb-2 whitespace-nowrap">Hibah Nova</h4>
+            <p class="text-gray-500 text-sm">Caruman Bulanan:</p>
+            <p class="font-poppins text-5xl corporate-primary-text font-bold mb-6">RM<span id="novaMonthly">0.00</span></p>
+
+<div id="novaCheckContainer" class="mb-2 bg-blue-50 p-3 rounded-lg border border-blue-200">
+                <label class="flex items-center cursor-pointer select-none">
+                    <input type="checkbox" id="novaWaiverCheck" class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500 border-gray-300">
+                    <span id="novaCheckLabel" class="ml-3 text-sm font-semibold text-gray-700">Add-on Waiver</span>
+                </label>
+            </div>
+            <div id="novaCICheckContainer" class="mb-4 bg-red-50 p-3 rounded-lg border border-red-200">
+                <label class="flex items-center cursor-pointer select-none">
+                    <input type="checkbox" id="novaCICheck" class="w-5 h-5 text-red-600 rounded focus:ring-red-500 border-gray-300">
+                    <span id="novaCICheckLabel" class="ml-3 text-sm font-semibold text-gray-700">Add-on CI + Waiver</span>
+                </label>
+            </div>
+
+<div id="nova-benefits" class="space-y-4 flex-grow"></div>
+            <button id="selectNovaBtn" class="mt-8 w-full whatsapp-btn text-white font-bold py-3 px-6 rounded-full shadow-lg transition-transform transform hover:scale-105 active:scale-95 disabled:bg-gray-400 disabled:cursor-not-allowed" disabled>Whatsapp Agent</button>
+        </div>
+
+<!-- CHINTA -->
+        <div class="plan-card w-[92%] sm:w-[20rem] md:w-[22rem] lg:w-[24rem] mx-auto p-5 lg:p-6">
+            <div class="flex justify-between items-center mb-2">
+                <h4 class="font-poppins text-2xl md:text-3xl font-semibold whitespace-nowrap">Hibah Chinta</h4>
+            </div>
+            <p class="text-gray-500 text-sm">Caruman Bulanan:</p>
+            <p class="font-poppins text-5xl corporate-primary-text font-bold mb-6">RM<span id="chintaMonthly">0.00</span></p>
+
+<div id="chintaCheckContainer" class="mb-2 bg-blue-50 p-3 rounded-lg border border-blue-200">
+                <label class="flex items-center cursor-pointer select-none">
+                    <input type="checkbox" id="chintaWaiverCheck" class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500 border-gray-300">
+                    <span id="chintaCheckLabel" class="ml-3 text-sm font-semibold text-gray-700">Add-on Waiver</span>
+                </label>
+            </div>
+            <div id="chintaCICheckContainer" class="mb-4 bg-red-50 p-3 rounded-lg border border-red-200">
+                <label class="flex items-center cursor-pointer select-none">
+                    <input type="checkbox" id="chintaCICheck" class="w-5 h-5 text-red-600 rounded focus:ring-red-500 border-gray-300">
+                    <span id="chintaCILabel" class="ml-3 text-sm font-semibold text-gray-700">Add-on CI + Waiver</span>
+                </label>
+            </div>
+
+<div id="chinta-benefits" class="space-y-4 flex-grow"></div>
+            <button id="selectChintaBtn" class="mt-8 w-full whatsapp-btn text-white font-bold py-3 px-6 rounded-full shadow-lg transition-transform transform hover:scale-105 active:scale-95 disabled:bg-gray-400 disabled:cursor-not-allowed" disabled>Whatsapp Agent</button>
+        </div>
+
+<!-- INSPIRASI -->
+        <div class="plan-card w-[92%] sm:w-[20rem] md:w-[22rem] lg:w-[24rem] mx-auto p-5 lg:p-6">
+            <h4 class="font-poppins text-2xl md:text-3xl font-semibold mb-2 whitespace-nowrap">Hibah Inspirasi</h4>
+            <p class="text-gray-500 text-sm">Caruman Bulanan:</p>
+            <p class="font-poppins text-5xl corporate-primary-text font-bold mb-6">RM<span id="inspirasiMonthly">0.00</span></p>
+            <div id="inspirasi-benefits" class="space-y-4 flex-grow"></div>
+            <button id="selectInspirasiBtn" class="mt-8 w-full whatsapp-btn text-white font-bold py-3 px-6 rounded-full shadow-lg transition-transform transform hover:scale-105 active:scale-95 disabled:bg-gray-400 disabled:cursor-not-allowed" disabled>Whatsapp Agent</button>
+        </div>
+
+<!-- EVO 50 -->
+        <div class="plan-card w-[92%] sm:w-[20rem] md:w-[22rem] lg:w-[24rem] mx-auto p-5 lg:p-6">
+            <h4 class="font-poppins text-2xl md:text-3xl font-semibold mb-2">Hibah Evo 50</h4>
+            <p class="text-gray-500 text-sm">Caruman Bulanan:</p>
+            <p class="font-poppins text-5xl corporate-primary-text font-bold mb-6">RM50.00</p>
+
+<div class="space-y-4 flex-grow">
+                <div class="benefit-item">
+                    <div class="icon-wrapper w-9 h-9 rounded-full bg-blue-100 text-corporate-secondary-blue-text">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-skull-icon lucide-skull"><path d="m12.5 17-.5-1-.5 1h1z"/><path d="M15 22a1 1 0 0 0 1-1v-1a2 2 0 0 0 1.56-3.25 8 8 0 1 0-11.12 0A2 2 0 0 0 8 20v1a1 1 0 0 0 1 1z"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="12" r="1"/></svg>
+                    </div>
+                    <div>Kematian/Lumpuh: <strong>RM<span id="evo50Value">0</span></strong></div>
+                </div>
+                <div class="benefit-item">
+                    <div class="icon-wrapper w-9 h-9 rounded-full bg-blue-100 text-corporate-secondary-blue-text">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-coins-icon lucide-coins"><circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/><path d="m16.71 13.88.7.71-2.82 2.82"/></svg>
+                    </div>
+                    <div>Nilai Tunai (Surrender Value)</div>
+                </div>
+                <div class="benefit-item">
+                    <div class="icon-wrapper w-9 h-9 rounded-full bg-blue-100 text-corporate-secondary-blue-text">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </div>
+                    <div>Khairat Kematian: <strong>RM2,000</strong></div>
+                </div>
+                <div class="benefit-item">
+                    <div class="icon-wrapper w-9 h-9 rounded-full bg-blue-100 text-corporate-secondary-blue-text">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shield-check-icon lucide-shield-check"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/><path d="m9 12 2 2 4-4"/></svg>
+                    </div>
+                    <div>Coverage: <strong>Sehingga Umur 80</strong></div>
+                </div>
+                <div class="benefit-item">
+                    <div class="icon-wrapper w-9 h-9 rounded-full bg-blue-100 text-corporate-secondary-blue-text">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-tag-icon lucide-tag"><path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z"/><path d="M7 7h.01"/></svg>
+                    </div>
+                    <div>Harga: <strong>Tetap</strong></div>
+                </div>
+            </div>
+            <button id="selectEvo50Btn" class="mt-8 w-full whatsapp-btn text-white font-bold py-3 px-6 rounded-full shadow-lg transition-transform transform hover:scale-105">Whatsapp Agent</button>
+        </div>
+    </div>
+</section>
+
+<script>
+    // =========================
+    // 1. CONFIG AGEN & DETECT SLUG
+    // =========================
+
+    // URL Apps Script yang baca Google Sheet config ejen
+   const CONFIG_API_URL = "https://script.google.com/macros/s/AKfycbxBgNRcxnJg9DM0jn91REAucFDi3VuWGZ5KaCow7fPypuF80ga3e8fQSfajMW7TsCbr/exec";
+
+    // ✅ BENEFITS API (baru)
+    const BENEFITS_API_URL = "https://script.google.com/macros/s/AKfycbzMKzsXrGF4dsMyaiYr7xp4jtuNtTxY1joHCssks4e2UZ6ivHjBQS4n5Yt5uc4oWfuzrQ/exec?type=benefits";
+    // contoh: https://script.google.com/macros/s/XXXX/exec?type=benefits
+    const CACHE_KEY_BENEFITS = "benefits_data_v1";
+    let PLAN_BENEFITS = {};
+    let isBenefitsLoaded = false;
+
+    function getAgentIdFromPath() {
+      // Detect if running in a generic environment (Preview/Localhost)
+      const hostname = window.location.hostname;
+      if (hostname.includes('googleusercontent') || hostname.includes('localhost') || hostname === '') {
+        return 'bj'; // Default Demo Agent ID
+      }
+
+      const path = window.location.pathname; 
+      const parts = path.split('/').filter(Boolean);
+      if (!parts.length) return 'bj';
+      const candidate = parts[parts.length - 1].toLowerCase();
+      if (candidate.includes('index.html') || candidate.includes('preview')) return 'bj';
+      return candidate;
+    }
+
+    const AGENT_ID = getAgentIdFromPath();
+    const CACHE_KEY_CONFIG = `agent_config_${AGENT_ID || 'default'}`;
+    const CACHE_KEY_PRICING = `pricing_data_${AGENT_ID || 'default'}`;
+
+    // Variables
+    let URL_HARGA_BARU = "";
+    let URL_LEADS_LAMA = "";
+    let AGENT_CONFIG = null;
+    window.AGENT_WHATSAPP = null;
+    
+    // Pricing Data
+    let medicalPriceData150 = [];
+    let medicalPriceData200 = [];
+    let hibahPriceData = { nova: [], novaWaiver: [], novaCI: [], chinta: [], chintaWaiver: [], chintaCI: [], inspirasi: [], evo: [] };
+    let isPricingLoaded = false;
+
+    // --- DOM Elements ---
+    const form = document.getElementById('quotationForm');
+    const medicalResultDiv = document.getElementById('medicalCardResult');
+    const hibahResultDiv = document.getElementById('hibahResult');
+    const errorMessageDiv = document.getElementById('error-message');
+    const agentSkeleton = document.getElementById('agent-skeleton');
+    let quotationData = {};
+
+    function showError(message) {
+        if (errorMessageDiv) {
+            errorMessageDiv.textContent = message;
+            errorMessageDiv.classList.remove('hidden');
+        }
+    }
+
+    // =========================
+    // 2. LOGIC CACHING & UI
+    // =========================
+
+    function updateAgentUI(data) {
+        if (!data) return;
+
+        AGENT_CONFIG = data;
+        URL_HARGA_BARU = data.hargaUrl;
+        URL_LEADS_LAMA = data.leadsUrl;
+        window.AGENT_WHATSAPP = data.whatsapp;
+
+        // Hide Skeleton, Show Data
+        if(agentSkeleton) agentSkeleton.classList.add('hidden');
+
+        // Text Content
+        const elAgency = document.getElementById('agent-agency');
+        const elName = document.getElementById('agent-name');
+        const elCompany = document.getElementById('agent-company');
+        const elImg = document.getElementById('agent-img');
+
+        if (elAgency) elAgency.textContent = data.agency || "Takaful Agent";
+        if (elName) elName.textContent = data.name || "Agent Takaful";
+        if (elCompany) elCompany.textContent = data.company || "Takaful Company";
+        if (elImg && data.photo) {
+             elImg.src = data.photo;
+        }
+
+        // Social Links
+        const socialMap = {
+            'link-fb': data.facebook,
+            'link-ig': data.instagram,
+            'link-tt': data.tiktok,
+            'link-wa': data.whatsapp ? `https://wa.me/${data.whatsapp}` : null
+        };
+
+        for (const [id, url] of Object.entries(socialMap)) {
+            const el = document.getElementById(id);
+            if (el) {
+                if (url) {
+                    el.href = url;
+                    el.classList.remove('pointer-events-none', 'opacity-50');
+                } else {
+                    el.href = '#';
+                    el.classList.add('pointer-events-none', 'opacity-50');
+                }
+            }
+        }
+
+        // Colors
+        if (data.primaryColor || data.secondaryColor) {
+            document.documentElement.style.setProperty('--primary-color', data.primaryColor || '#FFFFFF');
+            document.documentElement.style.setProperty('--secondary-color', data.secondaryColor || '#FFFFFF');
+        }
+    }
+
+    // Function to process pricing data into variables
+    function processPricingData(data) {
+        medicalPriceData150 = data.medical150 || [];
+        medicalPriceData200 = data.medical200 || [];
+        hibahPriceData.nova = data.hibahNova || [];
+        hibahPriceData.novaWaiver = data.hibahNovaWaiver || [];
+        hibahPriceData.novaCI = data.hibahNovaCI || [];
+        hibahPriceData.chinta = data.hibahChinta || [];
+        hibahPriceData.chintaWaiver = data.hibahChintaWaiver || [];
+        hibahPriceData.chintaCI = data.hibahChintaCI || [];
+        hibahPriceData.inspirasi = data.hibahInspirasi || [];
+        hibahPriceData.evo = data.hibahEvo || [];
+        isPricingLoaded = true;
+        console.log("Pricing Data Ready (Source: " + (data._source || "Unknown") + ")");
+    }
+    
+    // Function to fetch pricing data (Missing in original code)
+    async function fetchPricingData(url) {
+        if (!url) return;
+        try {
+            const res = await fetch(url);
+            const data = await res.json();
+            
+            // Add timestamp and source for cache logic
+            data._ts = Date.now();
+            data._source = "Network";
+            
+            localStorage.setItem(CACHE_KEY_PRICING, JSON.stringify(data));
+            processPricingData(data);
+        } catch (error) {
+            console.error("Failed to fetch pricing:", error);
+        }
+    }
+
+    // MAIN LOADER FUNCTION
+    async function initializeApp() {
+        if (!AGENT_ID) {
+            showError("Ralat: ID ejen tidak dijumpai.");
+            return;
+        }
+
+        await loadBenefits();
+        // Once benefits loaded, render them immediately so they are ready before user calculates
+        renderHibahBenefits();
+        
+        // --- STEP 1: CHECK CACHE FOR INSTANT LOAD ---
+        let hasCache = false;
+        const cachedConfig = localStorage.getItem(CACHE_KEY_CONFIG);
+        
+        if (cachedConfig) {
+            try {
+                const configData = JSON.parse(cachedConfig);
+                console.log("Loaded Config from Cache");
+                updateAgentUI(configData);
+                hasCache = true;
+                
+                // If we have config, we likely have pricing URL. Check pricing cache too.
+                const cachedPricing = localStorage.getItem(CACHE_KEY_PRICING);
+                if (cachedPricing) {
+                      try {
+                          const pricingData = JSON.parse(cachedPricing);
+                          
+                          // TTL Logic: 1 Minute
+                          const ageMs = Date.now() - (pricingData._ts || 0);
+
+                          if (ageMs < 1 * 60 * 1000) {
+                              pricingData._source = "Cache";
+                              processPricingData(pricingData);
+                          } else {
+                              console.log("Pricing Cache Expired");
+                              localStorage.removeItem(CACHE_KEY_PRICING);
+                          }
+                      } catch(e) { console.error("Invalid Pricing Cache"); }
+                }
+
+                // If pricing not in cache but we have URL from config cache, fetch it now (Parallel)
+                if (!isPricingLoaded && configData.hargaUrl) {
+                    fetchPricingData(configData.hargaUrl);
+                }
+
+            } catch (e) {
+                console.error("Cache Parse Error", e);
+                localStorage.removeItem(CACHE_KEY_CONFIG);
+            }
+        } else {
+            // Show skeleton if no cache
+            if(agentSkeleton) agentSkeleton.classList.remove('hidden');
+        }
+
+        // --- STEP 2: FETCH FRESH DATA (BACKGROUND) ---
+        // Even if we loaded from cache, we fetch again to update for next time
+        try {
+            const res = await fetch(`${CONFIG_API_URL}?agent=${encodeURIComponent(AGENT_ID)}`);
+            const data = await res.json();
+            
+            if (data.error) throw new Error(data.error);
+
+            // Update Cache
+            localStorage.setItem(CACHE_KEY_CONFIG, JSON.stringify(data));
+            
+            // Update UI (only if no cache to prevent jitter, OR if you want to force update)
+            // Here we update to ensure latest data is shown even if cache existed
+            updateAgentUI(data);
+
+            // Now fetch pricing if we haven't already or if URL changed
+            if (!isPricingLoaded || (hasCache && data.hargaUrl !== URL_HARGA_BARU)) {
+                fetchPricingData(data.hargaUrl);
+            }
+
+        } catch (err) {
+            console.error("Network Config Error:", err);
+            if (!hasCache) showError("Gagal memuatkan data. Sila refresh.");
+        }
+    }
+
+    async function loadBenefits() {
+      try {
+        const cached = localStorage.getItem(CACHE_KEY_BENEFITS);
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          PLAN_BENEFITS = parsed && parsed.hibah ? parsed.hibah : {};
+          isBenefitsLoaded = true;
+          console.log("Benefits loaded from cache", parsed.version);
+        }
+
+        const res = await fetch(BENEFITS_API_URL);
+        const fresh = await res.json();
+
+        if (fresh && fresh.ok && fresh.hibah) {
+          localStorage.setItem(CACHE_KEY_BENEFITS, JSON.stringify(fresh));
+          PLAN_BENEFITS = fresh.hibah;
+          isBenefitsLoaded = true;
+          console.log("Benefits loaded from network", fresh.version);
+        }
+      } catch (e) {
+        console.error("Benefits load failed", e);
+      }
+    }
+
+
+    // =========================
+    // 3. HANTAR LEADS
+    // =========================
+    function submitLeadData(data) {
+        if (!URL_LEADS_LAMA) return;
+        fetch(URL_LEADS_LAMA, {
+            method: "POST",
+            mode: "no-cors",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+        }).catch(e => console.error("Lead submission failed", e));
+    }
+
+    // =========================
+    // 4. HELPER FUNCTIONS
+    // =========================
+
+    const dobInput = document.getElementById('dob');
+    if (dobInput) {
+        dobInput.addEventListener('input', function (e) {
+            let input = e.target.value.replace(/\D/g, '');
+            if (input.length > 8) input = input.substring(0, 8);
+            let formatted = input;
+            if (input.length > 2) formatted = input.substring(0, 2) + '/' + input.substring(2);
+            if (input.length > 4) formatted = formatted.substring(0, 5) + '/' + formatted.substring(5);
+            e.target.value = formatted;
+        });
+    }
+
+    function setupIconOptions(groupName) {
+        const options = document.querySelectorAll(`.${groupName}-option`);
+        const hiddenInput = document.getElementById(groupName);
+        options.forEach(option => {
+            option.addEventListener('click', () => {
+                options.forEach(opt => opt.classList.remove('selected'));
+                option.classList.add('selected');
+                hiddenInput.value = option.dataset.value;
+            });
+        });
+    }
+
+    function calculateNextBirthdayAge(dob) {
+        let birthDate;
+        if (dob.includes('/')) {
+            const parts = dob.split('/');
+            birthDate = new Date(parts[2], parts[1] - 1, parts[0]);
+        } else {
+            birthDate = new Date(dob);
+        }
+        const today = new Date();
+        if (isNaN(birthDate.getTime())) return 0;
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const m = today.getMonth() - birthDate.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
+        return age + 1;
+    }
+
+    const icons = {
+        hibah: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-skull-icon lucide-skull"><path d="m12.5 17-.5-1-.5 1h1z"/><path d="M15 22a1 1 0 0 0 1-1v-1a2 2 0 0 0 1.56-3.25 8 8 0 1 0-11.12 0A2 2 0 0 0 8 20v1a1 1 0 0 0 1 1z"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="12" r="1"/></svg>',
+        bilik: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bed-icon lucide-bed"><path d="M2 4v16"/><path d="M2 8h18a2 2 0 0 1 2 2v10"/><path d="M2 17h20"/><path d="M6 8v9"/></svg>',
+        tahunan: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar1-icon lucude-calendar-1"><path d="M11 14h1v4"/><path d="M16 2v4"/><path d="M3 10h18"/><path d="M8 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/></svg>',
+        seumur: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-infinity-icon lucide-infinity"><path d="M6 16c5 0 7-8 12-8a4 4 0 0 1 0 8c-5 0-7-8-12-8a4 4 0 1 0 0 8"/></svg>',
+        kanser: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shield-alert-icon lucide-shield-alert"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>',
+        klinik: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-hospital-icon lucide-hospital"><path d="M12 7v4"/><path d="M14 21v-3a2 2 0 0 0-4 0v3"/><path d="M14 9h-4"/><path d="M18 11h2a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2h2"/><path d="M18 21V5a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16"/></svg>',
+        saving: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-coins-icon lucide-coins"><circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/><path d="m16.71 13.88.7.71-2.82 2.82"/></svg>',
+        deductible: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>',
+        waiver: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>',
+        elaun: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 00 2 2h2m2 4h10a2 2 00 2-2v-6a2 2 00-2-2H9a2 2 0 00-2 2v6a2 2 00 2 2zm7-5a2 2 00-4 0 2 2 00 4 0z"></path></svg>',
+        cross: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>',
+        haji: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plane-icon lucide-plane"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg>',
+        khairat: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>',
+        coverage: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shield-check-icon lucide-shield-check"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/><path d="m9 12 2 2 4-4"/></svg>',
+        priceType: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-tag-icon lucide-tag"><path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z"/><path d="M7 7h.01"/></svg>'
+    };
+
+    const getMedicalBenefits = (roomRate, annualLimit) => [
+        { id: 'hibah', icon: icons.hibah, text: "Hibah Kematian/Lumpuh:", value: "RM15,000", included: 'both' },
+        { id: 'bilik', icon: icons.bilik, text: "Bilik Hospital:", value: `RM${roomRate} / hari`, included: 'both' },
+        { id: 'tahunan', icon: icons.tahunan, text: "Had Tahunan:", value: annualLimit, included: 'both' },
+        { id: 'seumur', icon: icons.seumur, text: "Had Seumur Hidup:", value: "Tiada Had", included: 'both' },
+        { id: 'kanser', icon: icons.kanser, text: "Rawatan Kanser & Dialisis", value: "(Outpatient)", included: 'both' },
+        { id: 'klinik', icon: icons.klinik, text: "Rawatan Klinik 12 Penyakit", value: "(Outpatient)", included: 'both' },
+        { id: 'saving', icon: icons.saving, text: "Nilai Tunai", value: "(Surrender Value)", included: 'both' },
+        { id: 'deductible', icon: icons.deductible, text: "Deductible:", value: "RM500", included: 'both' },
+        { id: 'waiver', icon: icons.waiver, text: "Waiver Sakit Kritikal", value: "", included: 'full' },
+        { id: 'elaun', icon: icons.elaun, text: "Elaun Wad Swasta:", value: "RM100 / hari", included: 'full' }
+    ];
+
+   const hibahBenefits = new Proxy({}, {
+      get: function(_, key) {
+        return PLAN_BENEFITS && PLAN_BENEFITS[key] ? PLAN_BENEFITS[key] : [];
+      }
+    });
+
+
+    function getPremium(item, gender, smoker) {
+        if (!item) return null;
+        let val = null;
+        if (gender === 'perempuan') {
+            if (smoker === 'tidak') {
+                val = item.p || item['p waiver'] || item.P || item['P Waiver'] || item.p_waiver || item.P_Waiver;
+            }
+        } else {
+            if (smoker === 'ya') {
+                val = item.l_s || item['l_s waiver'] || item.L_S || item['L_S Waiver'] || item.l_s_waiver || item.L_S_Waiver;
+            } else {
+                val = item.l_ns || item['l_ns waiver'] || item.L_NS || item['L_NS Waiver'] || item.l_ns_waiver || item.L_NS_Waiver;
+            }
+        }
+        return val;
+    }
+
+    function calculateMedicalCard(name, age, gender, smoker, occupation, dob, phone) {
+        const priceInfo150 = medicalPriceData150.find(item => item.age == age);
+        let basicPremium150 = null, fullPremium150 = null;
+        if (priceInfo150) {
+            if (gender === 'perempuan') {
+                if (smoker === 'tidak') {
+                    basicPremium150 = priceInfo150.p_basic;
+                    fullPremium150 = priceInfo150.p_full;
+                }
+            } else {
+                basicPremium150 = smoker === 'ya' ? priceInfo150.l_s_basic : priceInfo150.l_ns_basic;
+                fullPremium150 = smoker === 'ya' ? priceInfo150.l_s_full : priceInfo150.l_ns_full;
+            }
+        }
+
+        const priceInfo200 = medicalPriceData200.find(item => item.age == age);
+        let basicPremium200 = null, fullPremium200 = null;
+        if (priceInfo200) {
+            if (gender === 'perempuan') {
+                if (smoker === 'tidak') {
+                    basicPremium200 = priceInfo200.p_basic;
+                    fullPremium200 = priceInfo200.p_full;
+                }
+            } else {
+                basicPremium200 = smoker === 'ya' ? priceInfo200.l_s_basic : priceInfo200.l_ns_basic;
+                fullPremium200 = smoker === 'ya' ? priceInfo200.l_s_full : priceInfo200.l_ns_full;
+            }
+        }
+
+        if (!priceInfo150 || !priceInfo200) {
+            showError(`Maaf, tiada data harga Medical Card untuk umur ${age} tahun.`);
+            return;
+        }
+
+        quotationData = { 
+            name, dob, phone, occupation, gender, smoker, nextBirthdayAge: age, 
+            basicPremium150, fullPremium150, basicPremium200, fullPremium200, 
+            planType: 'medical' 
+        };
+
+        document.getElementById('resultNameMC').textContent = name;
+        document.getElementById('resultAgeMC').textContent = age;
+
+        document.getElementById('basicMonthly150').textContent = basicPremium150 ? basicPremium150.toFixed(2) : "N/A";
+        document.getElementById('fullMonthly150').textContent = fullPremium150 ? fullPremium150.toFixed(2) : "N/A";
+        document.getElementById('basicMonthly200').textContent = basicPremium200 ? basicPremium200.toFixed(2) : "N/A";
+        document.getElementById('fullMonthly200').textContent = fullPremium200 ? fullPremium200.toFixed(2) : "N/A";
+
+        document.getElementById('selectBasicBtn150').disabled = !basicPremium150;
+        document.getElementById('selectFullBtn150').disabled = !fullPremium150;
+        document.getElementById('selectBasicBtn200').disabled = !basicPremium200;
+        document.getElementById('selectFullBtn200').disabled = !fullPremium200;
+
+        medicalResultDiv.classList.add('is-visible');
+        medicalResultDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function calculateHibah(name, age, gender, smoker, occupation, dob, phone) {
+        let novaPremium = null;
+        let novaWaiverPremium = null;
+        let novaCIPremium = null;
+
+        if (age <= 60) {
+            const novaAge = age < 25 ? 25 : age;
+            const novaPriceInfo = hibahPriceData.nova.find(item => item.age == novaAge);
+            novaPremium = getPremium(novaPriceInfo, gender, smoker);
+
+            const novaWaiverInfo = (hibahPriceData.novaWaiver || []).find(item => item.age == novaAge);
+            novaWaiverPremium = getPremium(novaWaiverInfo, gender, smoker);
+
+            const novaCIInfo = (hibahPriceData.novaCI || []).find(item => item.age == novaAge);
+            novaCIPremium = getPremium(novaCIInfo, gender, smoker);
+        }
+
+        document.getElementById('novaMonthly').textContent = novaPremium ? novaPremium.toFixed(2) : "N/A";
+        document.getElementById('selectNovaBtn').disabled = !novaPremium;
+
+        const novaCheck = document.getElementById('novaWaiverCheck');
+        const novaContainer = document.getElementById('novaCheckContainer');
+        const novaLabel = document.getElementById('novaCheckLabel');
+
+        const novaCICheck = document.getElementById('novaCICheck');
+        const novaCIContainer = document.getElementById('novaCICheckContainer');
+        const novaCILabel = document.getElementById('novaCICheckLabel');
+
+        if (novaCheck) novaCheck.checked = false;
+        if (novaCICheck) novaCICheck.checked = false;
+
+        if (novaCheck) {
+            if (!novaWaiverPremium) {
+                novaCheck.disabled = true;
+                if (novaContainer) novaContainer.classList.add('checkbox-disabled');
+                if (novaLabel) novaLabel.textContent = "Add-on Waiver (Tidak Ditawarkan)";
+            } else {
+                novaCheck.disabled = false;
+                if (novaContainer) novaContainer.classList.remove('checkbox-disabled');
+                if (novaLabel) novaLabel.textContent = "Add-on Waiver";
+            }
+        }
+
+        if (novaCICheck) {
+            if (!novaCIPremium) {
+                novaCICheck.disabled = true;
+                if (novaCIContainer) novaCIContainer.classList.add('checkbox-disabled');
+                if (novaCILabel) novaCILabel.textContent = "Add-on CI + Waiver (Tidak Ditawarkan)";
+            } else {
+                novaCICheck.disabled = false;
+                if (novaCIContainer) novaCIContainer.classList.remove('checkbox-disabled');
+                if (novaCILabel) novaCILabel.textContent = "Add-on CI + Waiver";
+            }
+        }
+
+        let chintaPremium = null;
+        let chintaWaiverPremium = null;
+        let chintaCIPremium = null;
+
+        if (age <= 60) {
+            const chintaAge = age < 20 ? 20 : age;
+            const chintaPriceInfo = hibahPriceData.chinta.find(item => item.age == chintaAge);
+            chintaPremium = getPremium(chintaPriceInfo, gender, smoker);
+
+            const chintaWaiverInfo = (hibahPriceData.chintaWaiver || []).find(item => item.age == chintaAge);
+            chintaWaiverPremium = getPremium(chintaWaiverInfo, gender, smoker);
+
+            const chintaCIInfo = (hibahPriceData.chintaCI || []).find(item => item.age == chintaAge);
+            chintaCIPremium = getPremium(chintaCIInfo, gender, smoker);
+        }
+
+        document.getElementById('chintaMonthly').textContent = chintaPremium ? chintaPremium.toFixed(2) : "N/A";
+        document.getElementById('selectChintaBtn').disabled = !chintaPremium;
+
+        const chintaCheck = document.getElementById('chintaWaiverCheck');
+        const chintaContainer = document.getElementById('chintaCheckContainer');
+        const chintaLabel = document.getElementById('chintaCheckLabel');
+
+        const chintaCICheck = document.getElementById('chintaCICheck');
+        const chintaCIContainer = document.getElementById('chintaCICheckContainer');
+        const chintaCILabel = document.getElementById('chintaCILabel');
+
+        if (chintaCheck) chintaCheck.checked = false;
+        if (chintaCICheck) chintaCICheck.checked = false;
+
+        if (chintaCheck) {
+            if (!chintaWaiverPremium) {
+                chintaCheck.disabled = true;
+                if (chintaContainer) chintaContainer.classList.add('checkbox-disabled');
+                if (chintaLabel) chintaLabel.textContent = "Add-on Waiver (Tidak Ditawarkan)";
+            } else {
+                chintaCheck.disabled = false;
+                if (chintaContainer) chintaContainer.classList.remove('checkbox-disabled');
+                if (chintaLabel) chintaLabel.textContent = "Add-on Waiver";
+            }
+        }
+
+        if (chintaCICheck) {
+            if (!chintaCIPremium) {
+                chintaCICheck.disabled = true;
+                if (chintaCIContainer) chintaCIContainer.classList.add('checkbox-disabled');
+                if (chintaCILabel) chintaCILabel.textContent = "Add-on CI + Waiver (Tidak Ditawarkan)";
+            } else {
+                chintaCICheck.disabled = false;
+                if (chintaCIContainer) chintaCIContainer.classList.remove('checkbox-disabled');
+                if (chintaCILabel) chintaCILabel.textContent = "Add-on CI + Waiver";
+            }
+        }
+
+        const inspirasiPriceInfo = hibahPriceData.inspirasi.find(item => item.age == age);
+        let inspirasiPremium = null;
+        if (inspirasiPriceInfo) {
+            if (gender === 'perempuan') {
+                inspirasiPremium = smoker === 'ya' ? inspirasiPriceInfo.p_s : inspirasiPriceInfo.p_ns;
+            } else {
+                inspirasiPremium = smoker === 'ya' ? inspirasiPriceInfo.l_s : inspirasiPriceInfo.l_ns;
+            }
+        }
+        document.getElementById('inspirasiMonthly').textContent = inspirasiPremium ? inspirasiPremium.toFixed(2) : "N/A";
+        document.getElementById('selectInspirasiBtn').disabled = !inspirasiPremium;
+
+        let evo50Value = 0;
+        if (hibahPriceData.evo && hibahPriceData.evo.length > 0) {
+            const evoData = hibahPriceData.evo.find(item => item.age == age);
+            if (evoData) {
+                if (gender === 'perempuan') {
+                    evo50Value = evoData.rm50_p;
+                } else {
+                    evo50Value = smoker === 'ya' ? evoData.rm50_ls : evoData.rm50_lns;
+                }
+            }
+        }
+        document.getElementById('evo50Value').textContent = evo50Value.toLocaleString();
+
+        quotationData = {
+            name, dob, phone, occupation, gender, smoker, nextBirthdayAge: age,
+            novaPremium, novaWaiverPremium, novaCIPremium,
+            chintaPremium, chintaWaiverPremium, chintaCIPremium,
+            inspirasiPremium,
+            evo50Value,
+            planType: 'hibah'
+        };
+
+        renderSingleHibahBenefit('nova', 'nova');
+        renderSingleHibahBenefit('chinta', 'chinta');
+        renderSingleHibahBenefit('inspirasi', 'inspirasi');
+
+
+        document.getElementById('resultNameHibah').textContent = name;
+        document.getElementById('resultAgeHibah').textContent = age;
+        hibahResultDiv.classList.add('is-visible');
+        hibahResultDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function updateNovaCard(e) {
+        const isWaiver = document.getElementById('novaWaiverCheck').checked;
+        const isCI = document.getElementById('novaCICheck').checked;
+        const priceDisplay = document.getElementById('novaMonthly');
+
+        if (e && e.target.id === 'novaCICheck' && isCI) {
+            document.getElementById('novaWaiverCheck').checked = false;
+        } else if (e && e.target.id === 'novaWaiverCheck' && isWaiver) {
+            document.getElementById('novaCICheck').checked = false;
+        }
+
+        const finalWaiver = document.getElementById('novaWaiverCheck').checked;
+        const finalCI = document.getElementById('novaCICheck').checked;
+
+        if (finalCI && quotationData.novaCIPremium) {
+            priceDisplay.textContent = quotationData.novaCIPremium.toFixed(2);
+            renderSingleHibahBenefit('nova', 'novaCI');
+        } else if (finalWaiver && quotationData.novaWaiverPremium) {
+            priceDisplay.textContent = quotationData.novaWaiverPremium.toFixed(2);
+            renderSingleHibahBenefit('nova', 'novaWaiver');
+        } else if (quotationData.novaPremium) {
+            priceDisplay.textContent = quotationData.novaPremium.toFixed(2);
+            renderSingleHibahBenefit('nova', 'nova');
+        }
+    }
+
+    function updateChintaCard(e) {
+        const isWaiver = document.getElementById('chintaWaiverCheck').checked;
+        const isCI = document.getElementById('chintaCICheck').checked;
+        const priceDisplay = document.getElementById('chintaMonthly');
+
+        if (e && e.target.id === 'chintaCICheck' && isCI) {
+            document.getElementById('chintaWaiverCheck').checked = false;
+        } else if (e && e.target.id === 'chintaWaiverCheck' && isWaiver) {
+            document.getElementById('chintaCICheck').checked = false;
+        }
+
+        const finalWaiver = document.getElementById('chintaWaiverCheck').checked;
+        const finalCI = document.getElementById('chintaCICheck').checked;
+
+        if (finalCI && quotationData.chintaCIPremium) {
+            priceDisplay.textContent = quotationData.chintaCIPremium.toFixed(2);
+            renderSingleHibahBenefit('chinta', 'chintaCI');
+        } else if (finalWaiver && quotationData.chintaWaiverPremium) {
+            priceDisplay.textContent = quotationData.chintaWaiverPremium.toFixed(2);
+            renderSingleHibahBenefit('chinta', 'chintaWaiver');
+        } else if (quotationData.chintaPremium) {
+            priceDisplay.textContent = quotationData.chintaPremium.toFixed(2);
+            renderSingleHibahBenefit('chinta', 'chinta');
+        }
+    }
+
+    document.getElementById('novaWaiverCheck').addEventListener('change', updateNovaCard);
+    document.getElementById('novaCICheck').addEventListener('change', updateNovaCard);
+    document.getElementById('chintaWaiverCheck').addEventListener('change', updateChintaCard);
+    document.getElementById('chintaCICheck').addEventListener('change', updateChintaCard);
+
+    function getVal(id) {
+        const el = document.getElementById(id);
+        return el ? el.value : '';
+    }
+
+    function handleFormSubmit() {
+        if (!isPricingLoaded) {
+            const btn = document.getElementById('calculateBtn');
+            btn.innerHTML = '<div class="loader"></div> SEDANG MEMPROSES...';
+            // Simple retry logic if pricing is still loading
+            setTimeout(() => {
+                 if(!isPricingLoaded) {
+                    showError("Data harga sedang dimuat turun dari server. Sila cuba sebentar lagi.");
+                    btn.innerHTML = 'KIRAKAN QUOTATION';
+                 } else {
+                     handleFormSubmit();
+                 }
+            }, 1500);
+            return;
+        }
+
+        if (medicalResultDiv) medicalResultDiv.classList.remove('is-visible');
+        if (hibahResultDiv) hibahResultDiv.classList.remove('is-visible');
+        if (errorMessageDiv) errorMessageDiv.classList.add('hidden');
+
+        const planType = getVal('planType');
+        const name = getVal('name');
+        const dob = getVal('dob');
+        const phone = getVal('phone');
+        const gender = getVal('gender');
+        const smoker = getVal('smoker');
+        const occupation = getVal('occupation');
+
+        if (!planType || !name || !dob || !phone || !gender || !smoker || !occupation) {
+            showError("Sila lengkapkan semua butiran di dalam borang (Pastikan anda memilih ikon Pelan, Jantina dan Status Merokok).");
+            return;
+        }
+
+        const nextBirthdayAge = calculateNextBirthdayAge(dob);
+        if (nextBirthdayAge < 1 || nextBirthdayAge > 60) {
+            showError("Maaf, sebut harga hanya tersedia untuk umur antara 1 hingga 60 tahun.");
+            return;
+        }
+
+        if (planType === 'medical') {
+            calculateMedicalCard(name, nextBirthdayAge, gender, smoker, occupation, dob, phone);
+        } else if (planType === 'hibah') {
+            calculateHibah(name, nextBirthdayAge, gender, smoker, occupation, dob, phone);
+        }
+        
+        // Reset Button Text
+        document.getElementById('calculateBtn').innerHTML = 'KIRAKAN QUOTATION';
+
+        submitLeadData({ planType, name, dob, phone, gender, smoker, occupation, agentId: AGENT_ID });
+    }
+
+    if (form) {
+        form.addEventListener('submit', function (event) {
+            event.preventDefault();
+            handleFormSubmit();
+        });
+    }
+
+    function sendWhatsAppMessage(planName, premiumOrValue) {
+        if (Object.keys(quotationData).length === 0) return;
+        const data = quotationData;
+        let benefitsText = "";
+        let message = "";
+
+        if (planName.includes("Hibah Evo")) {
+            const sumAssured = premiumOrValue;
+            let evoBenefits = "";
+            evoBenefits += `\n- Kematian/Lumpuh: RM${sumAssured.toLocaleString()}`;
+            evoBenefits += `\n- Nilai Tunai (Surrender Value)`;
+            evoBenefits += `\n- Khairat Kematian: RM2,000`;
+            evoBenefits += `\n- Coverage: Sehingga Umur 80`;
+            evoBenefits += `\n- Harga: Tetap`;
+
+            message = `Salam, saya berminat dengan Pakej Takaful - GETQUOTE.\n\nBerikut adalah butiran saya:\n*Nama:* ${data.name}\n*Umur Seterusnya:* ${data.nextBirthdayAge} Tahun\n*Nombor Telefon:* ${data.phone}\n*Pekerjaan:* ${data.occupation}\n*Jantina:* ${data.gender.charAt(0).toUpperCase() + data.gender.slice(1)}\n*Status Merokok:* ${data.smoker.charAt(0).toUpperCase() + data.smoker.slice(1)}\n\n*Pakej Pilihan:* ${planName}\n*Caruman Bulanan:* RM50.00\n\n*Manfaat Pelan:*\n${evoBenefits}\n\nBoleh bantu saya untuk langkah seterusnya? Terima kasih.`;
+        } else {
+            if (!premiumOrValue) return;
+
+            if (data.planType === 'medical') {
+                let roomRate, annualLimit, isFullPlan;
+                if (planName.includes('150')) {
+                    roomRate = 150;
+                    annualLimit = 'RM1.5 Juta';
+                } else {
+                    roomRate = 200;
+                    annualLimit = 'RM2.0 Juta';
+                }
+                isFullPlan = planName.includes('Premium');
+                const benefits = getMedicalBenefits(roomRate, annualLimit);
+                benefits.forEach(b => {
+                    const includeBenefit = b.included === 'both' || (b.included === 'full' && isFullPlan);
+                    if (includeBenefit) {
+                        benefitsText += `\n- ${b.text} ${b.value || ''}`;
+                    }
+                });
+            } else if (data.planType === 'hibah') {
+                let planKey;
+                if (planName === 'Hibah Nova') planKey = 'nova';
+                else if (planName === 'Hibah Nova (Waiver)') planKey = 'novaWaiver';
+                else if (planName === 'Hibah Nova (Add-on CI + Waiver)') planKey = 'novaCI';
+                else if (planName === 'Hibah Chinta') planKey = 'chinta';
+                else if (planName === 'Hibah Chinta (Waiver)') planKey = 'chintaWaiver';
+                else if (planName === 'Hibah Chinta (Add-on CI + Waiver)') planKey = 'chintaCI';
+                else if (planName.includes('Inspirasi')) planKey = 'inspirasi';
+
+                if (planKey) {
+                    const benefits = hibahBenefits[planKey];
+                    benefits.forEach(b => {
+                        benefitsText += `\n- ${b.text} ${b.value || ''}`;
+                    });
+                }
+            }
+            message = `Salam, saya berminat dengan Pakej Takaful - GETQUOTE.\n\nBerikut adalah butiran saya:\n*Nama:* ${data.name}\n*Umur Seterusnya:* ${data.nextBirthdayAge} Tahun\n*Nombor Telefon:* ${data.phone}\n*Pekerjaan:* ${data.occupation}\n*Jantina:* ${data.gender.charAt(0).toUpperCase() + data.gender.slice(1)}\n*Status Merokok:* ${data.smoker.charAt(0).toUpperCase() + data.smoker.slice(1)}\n\n*Pakej Pilihan:* ${planName}\n*Caruman Bulanan:* RM${typeof premiumOrValue === 'number' ? premiumOrValue.toFixed(2) : premiumOrValue}\n\n*Manfaat Pelan:*\n${benefitsText}\n\nBoleh bantu saya untuk langkah seterusnya? Terima kasih.`;
+        }
+        const targetPhone = (window.AGENT_WHATSAPP || "60173225153").replace(/\D/g, '');
+        const whatsappUrl = `https://wa.me/${targetPhone}?text=${encodeURIComponent(message)}`;
+        window.open(whatsappUrl, '_blank');
+    }
+
+    // =========================
+    // WHATSAPP – HIBAH
+    // =========================
+    document.getElementById('selectNovaBtn').addEventListener('click', () => {
+        const isWaiver = document.getElementById('novaWaiverCheck').checked;
+        const isCI = document.getElementById('novaCICheck').checked;
+        if (isCI) sendWhatsAppMessage('Hibah Nova (Add-on CI + Waiver)', quotationData.novaCIPremium);
+        else if (isWaiver) sendWhatsAppMessage('Hibah Nova (Waiver)', quotationData.novaWaiverPremium);
+        else sendWhatsAppMessage('Hibah Nova', quotationData.novaPremium);
+    });
+
+    document.getElementById('selectChintaBtn').addEventListener('click', () => {
+        const isWaiver = document.getElementById('chintaWaiverCheck').checked;
+        const isCI = document.getElementById('chintaCICheck').checked;
+        if (isCI) sendWhatsAppMessage('Hibah Chinta (Add-on CI + Waiver)', quotationData.chintaCIPremium);
+        else if (isWaiver) sendWhatsAppMessage('Hibah Chinta (Waiver)', quotationData.chintaWaiverPremium);
+        else sendWhatsAppMessage('Hibah Chinta', quotationData.chintaPremium);
+    });
+
+    document.getElementById('selectInspirasiBtn')
+      .addEventListener('click', () =>
+        sendWhatsAppMessage('Hibah Inspirasi', quotationData.inspirasiPremium)
+      );
+
+    document.getElementById('selectEvo50Btn')
+      .addEventListener('click', () =>
+        sendWhatsAppMessage('Hibah Evo 50', quotationData.evo50Value)
+      );
+
+
+    // =========================
+    // WHATSAPP – MEDICAL CARD
+    // =========================
+    document.getElementById('selectBasicBtn150')
+      .addEventListener('click', () =>
+        sendWhatsAppMessage('Plan Basic Evolusi 150', quotationData.basicPremium150)
+      );
+
+    document.getElementById('selectFullBtn150')
+      .addEventListener('click', () =>
+        sendWhatsAppMessage('Plan Premium Evolusi 150', quotationData.fullPremium150)
+      );
+
+    document.getElementById('selectBasicBtn200')
+      .addEventListener('click', () =>
+        sendWhatsAppMessage('Plan Basic Evolusi 200', quotationData.basicPremium200)
+      );
+
+    document.getElementById('selectFullBtn200')
+      .addEventListener('click', () =>
+        sendWhatsAppMessage('Plan Premium Evolusi 200', quotationData.fullPremium200)
+      );
+
+
+    setupIconOptions('planType');
+    setupIconOptions('gender');
+    setupIconOptions('smoker');
+
+    function renderMedicalBenefits(containerId, roomRate, annualLimit) {
+        const container = document.getElementById(containerId);
+        const benefits = getMedicalBenefits(roomRate, annualLimit);
+        container.innerHTML = '';
+        const isBasic = containerId.includes('basic');
+        const isPlan200 = roomRate === 200;
+        benefits.forEach(b => {
+            const iconColor = b.id === 'deductible' ? 'text-corporate-secondary-blue-text' : 'text-black-600';
+            const iconWrapper = `<div class="icon-wrapper w-9 h-9 rounded-full ${iconColor}">${b.icon}</div>`;
+            let valueHtml;
+            if (isPlan200 && (b.id === 'bilik' || b.id === 'tahunan')) {
+                valueHtml = `<strong class="highlight-benefit">${b.value}</strong>`;
+            } else {
+                valueHtml = `<strong>${b.value}</strong>`;
+            }
+            if (b.included === 'both' || (b.included === 'full' && !isBasic)) {
+                container.innerHTML += `<div class="benefit-item">${iconWrapper}<div>${b.text} ${valueHtml}</div></div>`;
+            } else if (isBasic && b.included === 'full') {
+                container.innerHTML += `<div class="benefit-item text-gray-400 line-through"><div class="icon-wrapper w-9 h-9 rounded-full bg-gray-200 text-gray-500">${icons.cross}</div><div>${b.text} <strong>${b.value}</strong></div></div>`;
+            }
+        });
+    }
+
+    function renderAllMedicalBenefits() {
+        renderMedicalBenefits('basic-benefits-150', 150, 'RM1.5 Juta');
+        renderMedicalBenefits('full-benefits-150', 150, 'RM1.5 Juta');
+        renderMedicalBenefits('basic-benefits-200', 200, 'RM2.0 Juta');
+        renderMedicalBenefits('full-benefits-200', 200, 'RM2.0 Juta');
+    }
+
+    function renderSingleHibahBenefit(containerKey, benefitsKey) {
+      if (!isBenefitsLoaded) return;
+
+      const container = document.getElementById(`${containerKey}-benefits`);
+      const benefits = hibahBenefits[benefitsKey] || [];
+      if (!container) return;
+
+      container.innerHTML = '';
+
+      benefits.forEach(b => {
+        const iconSvg = icons[b.icon] || icons.coverage || '';
+        const iconWrapper = `<div class="icon-wrapper w-9 h-9 rounded-full bg-blue-100 text-corporate-secondary-blue-text">${iconSvg}</div>`;
+        const valueHtml = b.value ? `<strong>${b.value}</strong>` : '';
+        container.innerHTML += `<div class="benefit-item">${iconWrapper}<div>${b.text} ${valueHtml}</div></div>`;
+      });
+    }
+
+    function renderHibahBenefits() {
+        renderSingleHibahBenefit('inspirasi', 'inspirasi');
+    }
+
+    renderAllMedicalBenefits();
+    // Move renderHibahBenefits to end of loading sequence inside initializeApp to ensure data exists
+
+    function autoRecalculateIfVisible() {
+        const isMCVisible = medicalResultDiv && medicalResultDiv.classList.contains('is-visible');
+        const isHVisible = hibahResultDiv && hibahResultDiv.classList.contains('is-visible');
+        if (!isMCVisible && !isHVisible) return;
+
+        // guna balik input semasa
+        const planType = getVal('planType');
+        const name = getVal('name');
+        const dob = getVal('dob');
+        const phone = getVal('phone');
+        const gender = getVal('gender');
+        const smoker = getVal('smoker');
+        const occupation = getVal('occupation');
+        const nextBirthdayAge = calculateNextBirthdayAge(dob);
+
+        if (!planType || !name || !dob || !phone || !gender || !smoker || !occupation) return;
+        if (nextBirthdayAge < 1 || nextBirthdayAge > 60) return;
+
+        if (planType === 'medical') calculateMedicalCard(name, nextBirthdayAge, gender, smoker, occupation, dob, phone);
+        if (planType === 'hibah') calculateHibah(name, nextBirthdayAge, gender, smoker, occupation, dob, phone);
+    }
+
+    // =========================
+    // 5. BOOTSTRAP: INITIALIZE APP
+    // =========================
+    window.addEventListener('DOMContentLoaded', initializeApp);
+</script>
+</body>
+</html>
