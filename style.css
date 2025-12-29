@@ -1,0 +1,197 @@
+:root {
+    --primary-color: #FFFFFF;
+    --secondary-color: #FFFFFF;
+}
+
+/* TEMA */
+body { 
+    font-family: 'Inter', sans-serif; 
+    color: #FFFFFF; 
+    background-color: var(--primary-color); 
+    overflow-x: hidden; 
+    transition: background-color 0.3s ease;
+}
+.font-poppins { font-family: 'Poppins', sans-serif; }
+.corporate-primary-text { color: var(--primary-color); }
+.corporate-secondary-blue-text { color: var(--secondary-color); }
+
+/* INPUTS */
+.form-input { 
+    background-color: #FFFFFF; 
+    border: 1px solid #000000; 
+    color: #120F07; 
+    transition: all 0.2s ease-in-out; 
+}
+.form-input:focus { 
+    outline: none; 
+    border-color: var(--primary-color); 
+    box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.2); 
+}
+
+/* BUTTONS */
+.submit-btn { 
+    background-image: linear-gradient(to right, var(--secondary-color), var(--primary-color)); 
+    transition: all 0.3s ease; 
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
+}
+.submit-btn:hover { 
+    transform: translateY(-2px); 
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); 
+}
+.submit-btn:disabled { 
+    background-image: none; 
+    background-color: #cccccc; 
+    cursor: not-allowed; 
+    transform: none; 
+    box-shadow: none; 
+    opacity: 0.7; 
+}
+
+.start-hidden { 
+    opacity: 0; 
+    transform: translateY(20px); 
+    display: none; 
+    transition: opacity 0.5s ease, transform 0.5s ease; 
+}
+.is-visible { 
+    opacity: 1; 
+    transform: translateY(0); 
+    display: block; 
+}
+
+/* CARDS */
+.plan-card { 
+    background-color: #FFFFFF; 
+    border: 1px solid #000000; 
+    transition: transform 0.3s ease, box-shadow 0.3s ease; 
+    border-radius: 0.75rem; 
+    display: flex; 
+    flex-direction: column; 
+}
+.plan-card:hover { 
+    transform: translateY(-5px); 
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08); 
+}
+.plan-card h4 { color: var(--primary-color); }
+
+.benefit-item { 
+    display: flex; 
+    align-items: center; 
+    gap: 0.75rem; 
+    color: #4B5563; 
+}
+.benefit-item strong { color: var(--primary-color); }
+.highlight-benefit { 
+    background-color: #FFFFFF; 
+    color: var(--primary-color); 
+    padding: 2px 6px; 
+    border-radius: 4px; 
+    font-weight: 700; 
+}
+
+/* ICONS */
+.icon-option { 
+    border: 2px solid #000000; 
+    transition: all 0.2s ease-in-out; 
+    background-color: #FFFFFF; 
+    color: #4B5563; 
+}
+.icon-option.selected { 
+    border-color: var(--primary-color); 
+    background-color: #dbeafe; 
+    color: var(--primary-color); 
+}
+
+.icon-wrapper { 
+    flex-shrink: 0; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    background-color: #FFFFFF; 
+}
+.whatsapp-btn { 
+    background-image: linear-gradient(to right, #25D366, #128C7E); 
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
+    transition: all 0.3s ease; 
+}
+.whatsapp-btn:hover { 
+    transform: translateY(-2px); 
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); 
+}
+
+/* AGENT */
+.agent-profile-section { 
+    background-color: #FFFFFF; 
+    border-radius: 0.75rem; 
+    padding: 2.5rem; 
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08); 
+    margin-top: 2rem; 
+    text-align: center; 
+}
+.agent-profile-img { 
+    width: 120px; 
+    height: 120px; 
+    border-radius: 50%; 
+    object-fit: cover; 
+    border: 4px solid var(--primary-color); 
+    margin: 0 auto 1rem; 
+    transition: opacity 0.3s ease;
+}
+.social-icon-link { 
+    display: inline-flex; 
+    align-items: center; 
+    justify-content: center; 
+    width: 40px; 
+    height: 40px; 
+    border-radius: 50%; 
+    background-color: var(--primary-color); 
+    color: #FFFFFF; 
+    transition: all 0.2s ease-in-out; 
+}
+
+/* Skeleton Loading Animation */
+.skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    color: transparent !important;
+    border-radius: 4px;
+}
+@keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* MISC */
+input[type="date"] { 
+    width: 100% !important; 
+    max-width: 100%; 
+    box-sizing: border-box; 
+    -webkit-appearance: none; 
+    appearance: none; 
+}
+input[type="date"]::-webkit-date-and-time-value { 
+    min-height: 1.4em; 
+}
+.loader { 
+    border: 4px solid #f3f3f3; 
+    border-top: 4px solid var(--primary-color); 
+    border-radius: 50%; 
+    width: 24px; 
+    height: 24px; 
+    animation: spin 2s linear infinite; 
+    display: inline-block; 
+    vertical-align: middle; 
+    margin-right: 10px; 
+}
+@keyframes spin { 
+    0% { transform: rotate(0deg); } 
+    100% { transform: rotate(360deg); } 
+}
+
+/* Disabled State for Checkbox Container */
+.checkbox-disabled { 
+    opacity: 0.5; 
+    pointer-events: none; 
+    background-color: #f3f4f6; 
+}
