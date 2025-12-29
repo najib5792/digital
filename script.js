@@ -2,6 +2,7 @@
 // 1. CONFIG AGEN & DETECT SLUG
 // =========================
 
+// URL Apps Script that reads the Google Sheet agent config
 const CONFIG_API_URL = "https://script.google.com/macros/s/AKfycbxBgNRcxnJg9DM0jn91REAucFDi3VuWGZ5KaCow7fPypuF80ga3e8fQSfajMW7TsCbr/exec";
 
 function getAgentIdFromPath() {
@@ -173,18 +174,29 @@ function updateAgentUI(data) {
     URL_LEADS_LAMA = data.leadsUrl;
     window.AGENT_WHATSAPP = data.whatsapp;
 
-    // --- CUSTOMIZE META TAGS START ---
+    // --- CUSTOMIZE META TAGS & TITLE START ---
+    
+    // 1. Change the Browser Tab Title
+    document.title = `Quotation Takaful - ${data.name || 'GETQUOTE'}`;
+
+    // 2. Change the Meta Title (for sharing)
+    const ogTitle = document.querySelector('meta[property="og:title"]');
+    if (ogTitle) {
+        ogTitle.setAttribute('content', `Dapatkan Quotation Takaful dari ${data.name}`);
+    }
+
+    // 3. Change the WhatsApp Thumbnail (Agent Photo)
+    if (data.photo) {
+        const ogImage = document.querySelector('meta[property="og:image"]');
+        if (ogImage) {
+            ogImage.setAttribute('content', data.photo);
+        }
+    }
+    
     const currentUrl = window.location.href;
     const ogUrlMeta = document.querySelector('meta[property="og:url"]');
     if (ogUrlMeta) {
         ogUrlMeta.setAttribute('content', currentUrl);
-    }
-
-    if (data.photo) {
-        const ogImageMeta = document.querySelector('meta[property="og:image"]');
-        if (ogImageMeta) {
-            ogImageMeta.setAttribute('content', data.photo);
-        }
     }
     // --- CUSTOMIZE META TAGS END ---
 
