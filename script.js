@@ -72,7 +72,7 @@ const icons = {
     klinik: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-hospital"><path d="M12 7v4"/><path d="M14 21v-3a2 2 0 0 0-4 0v3"/><path d="M14 9h-4"/><path d="M18 11h2a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2h2"/><path d="M18 21V5a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16"/></svg>',
     deductible: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>',
     waiver: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>',
-    elaun: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 00 2 2h2m2 4h10a2 2 00 2-2v-6a2 2 00-2-2H9a2 2 0 00-2 2v6a2 2 00 2 2zm7-5a2 2 00-4 0 2 2 00 4 0z"></path></svg>',
+    elaun: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="#000000" d="M12 12.5a3.5 3.5 0 1 0 0 7a3.5 3.5 0 0 0 0-7ZM10.5 16a1.5 1.5 0 1 1 3 0a1.5 1.5 0 0 1-3 0Z"/><path fill="#000000" d="M17.526 5.116L14.347.659L2.658 9.997L2.01 9.99V10H1.5v12h21V10h-.962l-1.914-5.599l-2.098.715ZM19.425 10H9.397l7.469-2.546l1.522-.487L19.425 10ZM15.55 5.79L7.84 8.418l6.106-4.878l1.604 2.25ZM3.5 18.169v-4.34A3.008 3.008 0 0 0 5.33 12h13.34a3.009 3.009 0 0 0 1.83 1.83v4.34A3.009 3.009 0 0 0 18.67 20H5.332A3.01 3.01 0 0 0 3.5 18.169Z"/></svg>',
     cross: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>'
 };
 
@@ -109,8 +109,8 @@ const PLAN_BENEFITS = {
 
     // === HIBAH CHINTA ===
     chinta: [
-        { icon: 'skull', text: 'Kematian/Lumpuh:', value: 'RM500k' },
-        { icon: 'plane', text: 'Kematian Haji/Umrah:', value: 'RM1 Juta' },
+        { icon: 'skull', text: 'Kematian/Lumpuh:', value: 'RM800k' },
+        { icon: 'plane', text: 'Kematian Haji/Umrah:', value: 'RM1.6 Juta' },
         // REMOVED 'Sakit Kritikal' from here (Basic Plan)
         { icon: 'coins', text: 'Nilai Tunai (Surrender Value)', value: '' },
         { icon: 'clock', text: 'Khairat Kematian:', value: 'RM5,000' },
@@ -118,8 +118,8 @@ const PLAN_BENEFITS = {
         { icon: 'tag', text: 'Harga:', value: 'Tetap' }
     ],
     chintaWaiver: [
-        { icon: 'skull', text: 'Kematian/Lumpuh:', value: 'RM500k' },
-        { icon: 'plane', text: 'Kematian Haji/Umrah:', value: 'RM1 Juta' },
+        { icon: 'skull', text: 'Kematian/Lumpuh:', value: 'RM800k' },
+        { icon: 'plane', text: 'Kematian Haji/Umrah:', value: 'RM1.6 Juta' },
         // REMOVED 'Sakit Kritikal' lump sum from here (Waiver Plan usually just waives payment)
         { icon: 'checkCircle', text: 'Waiver Sakit Kritikal', subtext: '(Dikecualikan Caruman)', highlight: true },
         { icon: 'coins', text: 'Nilai Tunai (Surrender Value)', value: '' },
@@ -128,8 +128,8 @@ const PLAN_BENEFITS = {
         { icon: 'tag', text: 'Harga:', value: 'Tetap' }
     ],
     chintaCI: [
-        { icon: 'skull', text: 'Kematian/Lumpuh:', value: 'RM500k' },
-        { icon: 'plane', text: 'Kematian Haji/Umrah:', value: 'RM1 Juta' },
+        { icon: 'skull', text: 'Kematian/Lumpuh:', value: 'RM800k' },
+        { icon: 'plane', text: 'Kematian Haji/Umrah:', value: 'RM1.6 Juta' },
         { icon: 'shieldAlert', text: 'Sakit Kritikal:', value: 'RM100,000', highlight: true }, // KEEPS IT HERE (CI Plan)
         { icon: 'checkCircle', text: 'Waiver Sakit Kritikal', subtext: '(Dikecualikan Caruman)', highlight: true },
         { icon: 'coins', text: 'Nilai Tunai (Surrender Value)', value: '' },
@@ -687,7 +687,7 @@ function handleFormSubmit() {
         setTimeout(() => {
              if(!isPricingLoaded) {
                 showError("Data harga sedang dimuat turun dari server. Sila cuba sebentar lagi.");
-                btn.innerHTML = 'KIRAKAN QUOTATION';
+                btn.innerHTML = 'GET QUOTATION';
              } else {
                  handleFormSubmit();
              }
@@ -724,7 +724,7 @@ function handleFormSubmit() {
         calculateHibah(name, nextBirthdayAge, gender, smoker, occupation, dob, phone);
     }
     
-    document.getElementById('calculateBtn').innerHTML = 'KIRAKAN QUOTATION';
+    document.getElementById('calculateBtn').innerHTML = 'GET QUOTATION';
 
     submitLeadData({ planType, name, dob, phone, gender, smoker, occupation, agentId: AGENT_ID });
 }
