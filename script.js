@@ -1,54 +1,72 @@
 // =========================
-// 1. CONFIG AGEN & DETECT SLUG
+// 1. CONFIG AGEN & DETECT SLUG (PWA FIX APPLIED)
 // =========================
 
+// URL Apps Script that reads the Google Sheet agent config
 const CONFIG_API_URL = "https://script.google.com/macros/s/AKfycbxBgNRcxnJg9DM0jn91REAucFDi3VuWGZ5KaCow7fPypuF80ga3e8fQSfajMW7TsCbr/exec";
 
 function getAgentIdFromPath() {
   const hostname = window.location.hostname;
   
+  // Jika di localhost atau googleusercontent, kita anggap default/demo mode
   if (hostname.includes('googleusercontent') || hostname.includes('localhost')) {
-    return null; 
+    return null; // Return null supaya boleh check localStorage nanti
   }
 
   const path = window.location.pathname; 
   const parts = path.split('/').filter(Boolean);
   
+  // Jika tiada path (root domain), return null
   if (!parts.length) return null;
   
   const candidate = parts[parts.length - 1].toLowerCase();
   
+  // Jika file index.html atau preview, anggap tiada ejen spesifik di URL
   if (candidate.includes('index.html') || candidate.includes('preview')) return null;
   
   return candidate;
 }
 
-// === LOGIC STICKY AGENT ID ===
+// === LOGIC STICKY AGENT ID (FIX UNTUK PWA) ===
 let detectedId = getAgentIdFromPath();
 const STORAGE_KEY_AGENT = 'preferred_agent_id';
 
-if (detectedId && detectedId !== 'null') {
+// 1. Jika URL ada ID ejen yang sah (contoh: getquote.my/najib)
+if (detectedId && detectedId !== 'bj') {
+    // Simpan dalam memori telefon
     localStorage.setItem(STORAGE_KEY_AGENT, detectedId);
-} else {
-    detectedId = null;
+} 
+// 2. Jika URL tiada ID (contoh: buka dari home screen PWA / index.html)
+else {
+    // Cuba ambil dari memori telefon
+    const savedId = localStorage.getItem(STORAGE_KEY_AGENT);
+    if (savedId) {
+        detectedId = savedId; // Guna ID yang tersimpan
+    } else {
+        detectedId = 'bj'; // Jika tiada memori & tiada URL, guna default 'bj'
+    }
 }
 
+// Tetapkan AGENT_ID muktamad
 const AGENT_ID = detectedId;
 const CACHE_KEY_CONFIG = `agent_config_${AGENT_ID || 'default'}`;
 const CACHE_KEY_PRICING = `pricing_data_${AGENT_ID || 'default'}`;
 
-console.log("Current Agent ID:", AGENT_ID); 
+console.log("Current Agent ID:", AGENT_ID); // Debugging
 
+// Variables
 let URL_HARGA_BARU = "";
 let URL_LEADS_LAMA = "";
 let AGENT_CONFIG = null;
 window.AGENT_WHATSAPP = null;
 
+// Pricing Data
 let medicalPriceData150 = [];
 let medicalPriceData200 = [];
 let hibahPriceData = { nova: [], novaWaiver: [], novaCI: [], chinta: [], chintaWaiver: [], chintaCI: [], inspirasi: [], evo: [] };
 let isPricingLoaded = false;
 
+// --- DOM Elements ---
 const form = document.getElementById('quotationForm');
 const medicalResultDiv = document.getElementById('medicalCardResult');
 const hibahResultDiv = document.getElementById('hibahResult');
@@ -66,7 +84,6 @@ function showError(message) {
 // =========================
 // 2. HARDCODED BENEFITS DATA
 // =========================
-// (Bahagian ini dikekalkan sama seperti sebelum ini - tiada perubahan pada logic data)
 
 const icons = {
     skull: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-skull"><path d="m12.5 17-.5-1-.5 1h1z"/><path d="M15 22a1 1 0 0 0 1-1v-1a2 2 0 0 0 1.56-3.25 8 8 0 1 0-11.12 0A2 2 0 0 0 8 20v1a1 1 0 0 0 1 1z"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="12" r="1"/></svg>',
@@ -90,7 +107,9 @@ const icons = {
     cross: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>'
 };
 
+// Hardcoded Plan Benefits Matching the Image
 const PLAN_BENEFITS = {
+    // === HIBAH NOVA ===
     nova: [
         { icon: 'skull', text: 'Kematian/Lumpuh:', value: 'RM250k' },
         { icon: 'plane', text: 'Kematian Haji/Umrah:', value: 'RM500k' },
@@ -118,9 +137,12 @@ const PLAN_BENEFITS = {
         { icon: 'shieldCheck', text: 'Coverage:', value: 'Sehingga Umur 60' },
         { icon: 'tag', text: 'Harga:', value: 'Tetap' }
     ],
+
+    // === HIBAH CHINTA ===
     chinta: [
         { icon: 'skull', text: 'Kematian/Lumpuh:', value: 'RM800k' },
         { icon: 'plane', text: 'Kematian Haji/Umrah:', value: 'RM1.6 Juta' },
+        // REMOVED 'Sakit Kritikal' from here (Basic Plan)
         { icon: 'coins', text: 'Nilai Tunai (Surrender Value)', value: '' },
         { icon: 'clock', text: 'Khairat Kematian:', value: 'RM5,000' },
         { icon: 'shieldCheck', text: 'Coverage:', value: 'Sehingga Umur 60' },
@@ -129,6 +151,7 @@ const PLAN_BENEFITS = {
     chintaWaiver: [
         { icon: 'skull', text: 'Kematian/Lumpuh:', value: 'RM800k' },
         { icon: 'plane', text: 'Kematian Haji/Umrah:', value: 'RM1.6 Juta' },
+        // REMOVED 'Sakit Kritikal' lump sum from here (Waiver Plan usually just waives payment)
         { icon: 'checkCircle', text: 'Waiver Sakit Kritikal', subtext: '(Dikecualikan Caruman)', highlight: true },
         { icon: 'coins', text: 'Nilai Tunai (Surrender Value)', value: '' },
         { icon: 'clock', text: 'Khairat Kematian:', value: 'RM5,000' },
@@ -138,13 +161,15 @@ const PLAN_BENEFITS = {
     chintaCI: [
         { icon: 'skull', text: 'Kematian/Lumpuh:', value: 'RM800k' },
         { icon: 'plane', text: 'Kematian Haji/Umrah:', value: 'RM1.6 Juta' },
-        { icon: 'shieldAlert', text: 'Sakit Kritikal:', value: 'RM100,000', highlight: true },
+        { icon: 'shieldAlert', text: 'Sakit Kritikal:', value: 'RM100,000', highlight: true }, // KEEPS IT HERE (CI Plan)
         { icon: 'checkCircle', text: 'Waiver Sakit Kritikal', subtext: '(Dikecualikan Caruman)', highlight: true },
         { icon: 'coins', text: 'Nilai Tunai (Surrender Value)', value: '' },
         { icon: 'clock', text: 'Khairat Kematian:', value: 'RM5,000' },
         { icon: 'shieldCheck', text: 'Coverage:', value: 'Sehingga Umur 60' },
         { icon: 'tag', text: 'Harga:', value: 'Tetap' }
     ],
+
+    // === HIBAH INSPIRASI ===
     inspirasi: [
         { icon: 'skull', text: 'Kematian/Lumpuh:', value: 'RM100k' },
         { icon: 'skull', text: 'Kematian Kemalangan:', value: 'RM200k' },
@@ -180,14 +205,31 @@ function updateAgentUI(data) {
     URL_LEADS_LAMA = data.leadsUrl;
     window.AGENT_WHATSAPP = data.whatsapp;
 
+    // --- CUSTOMIZE META TAGS & TITLE START ---
+    
+    // 1. Change the Browser Tab Title
     document.title = `Quotation Takaful - ${data.name || 'GETQUOTE'}`;
-    const ogTitle = document.querySelector('meta[property="og:title"]');
-    if (ogTitle) ogTitle.setAttribute('content', `Dapatkan Quotation Takaful dari ${data.name}`);
 
+    // 2. Change the Meta Title (for sharing)
+    const ogTitle = document.querySelector('meta[property="og:title"]');
+    if (ogTitle) {
+        ogTitle.setAttribute('content', `Dapatkan Quotation Takaful dari ${data.name}`);
+    }
+
+    // 3. Change the WhatsApp Thumbnail (Agent Photo)
     if (data.photo) {
         const ogImage = document.querySelector('meta[property="og:image"]');
-        if (ogImage) ogImage.setAttribute('content', data.photo);
+        if (ogImage) {
+            ogImage.setAttribute('content', data.photo);
+        }
     }
+    
+    const currentUrl = window.location.href;
+    const ogUrlMeta = document.querySelector('meta[property="og:url"]');
+    if (ogUrlMeta) {
+        ogUrlMeta.setAttribute('content', currentUrl);
+    }
+    // --- CUSTOMIZE META TAGS END ---
 
     if(agentSkeleton) agentSkeleton.classList.add('hidden');
 
@@ -259,7 +301,10 @@ async function fetchPricingData(url) {
 }
 
 async function initializeApp() {
-    if (!AGENT_ID) return;
+    if (!AGENT_ID) {
+        showError("Ralat: ID ejen tidak dijumpai.");
+        return;
+    }
 
     renderHibahBenefits();
     
@@ -269,6 +314,7 @@ async function initializeApp() {
     if (cachedConfig) {
         try {
             const configData = JSON.parse(cachedConfig);
+            console.log("Loaded Config from Cache");
             updateAgentUI(configData);
             hasCache = true;
             
@@ -281,9 +327,10 @@ async function initializeApp() {
                           pricingData._source = "Cache";
                           processPricingData(pricingData);
                       } else {
+                          console.log("Pricing Cache Expired");
                           localStorage.removeItem(CACHE_KEY_PRICING);
                       }
-                  } catch(e) { }
+                  } catch(e) { console.error("Invalid Pricing Cache"); }
             }
 
             if (!isPricingLoaded && configData.hargaUrl) {
@@ -291,6 +338,7 @@ async function initializeApp() {
             }
 
         } catch (e) {
+            console.error("Cache Parse Error", e);
             localStorage.removeItem(CACHE_KEY_CONFIG);
         }
     } else {
@@ -862,6 +910,9 @@ function renderAllMedicalBenefits() {
     renderMedicalBenefits('full-benefits-200', 200, 'RM2.0 Juta');
 }
 
+// =========================================================================
+// RENDER HIBAH BENEFITS (UPDATED WITH HIGHLIGHT LOGIC)
+// =========================================================================
 function renderSingleHibahBenefit(containerKey, benefitsKey) {
   const container = document.getElementById(`${containerKey}-benefits`);
   const benefits = PLAN_BENEFITS[benefitsKey] || [];
@@ -872,8 +923,10 @@ function renderSingleHibahBenefit(containerKey, benefitsKey) {
   benefits.forEach(b => {
     const iconSvg = icons[b.icon] || icons.shieldCheck || '';
     
+    // Normal Icon Style
     let iconWrapper = `<div class="icon-wrapper w-9 h-9 rounded-full bg-blue-100 text-corporate-secondary-blue-text" style="background-color: #dbeafe !important;">${iconSvg}</div>`;
     
+    // Check if highlight (yellow box) is needed
     let itemClass = "benefit-item";
     if (b.highlight) {
         itemClass += " bg-yellow-50 border border-yellow-200 rounded-lg p-2 -mx-2 mb-2";
@@ -924,57 +977,6 @@ function autoRecalculateIfVisible() {
 }
 
 // =========================
-// 6. VIEW CONTROL: LANDING VS APP
+// 6. BOOTSTRAP: INITIALIZE APP
 // =========================
-window.addEventListener('DOMContentLoaded', () => {
-    const landingView = document.getElementById('landing-view');
-    const appView = document.getElementById('app-view');
-
-    // === TAMBAHAN LOGIC UNTUK INPUT LINK AGENT ===
-    const goBtn = document.getElementById('goToAgentBtn');
-    const slugInput = document.getElementById('agentSlugInput');
-
-    if (goBtn && slugInput) {
-        const doRedirect = () => {
-            const val = slugInput.value.trim().toLowerCase();
-            if (val) {
-                window.location.href = `/${val}`;
-            }
-        };
-
-        goBtn.addEventListener('click', doRedirect);
-        slugInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') doRedirect();
-        });
-    }
-
-    // === LOGIC TUKAR WARNA BACKGROUND (PENTING) ===
-    if (!AGENT_ID) {
-        // --- MODE LANDING PAGE (MERAH) ---
-        if (landingView) landingView.classList.remove('hidden');
-        if (appView) appView.classList.add('hidden');
-        
-        // Set Body jadi MERAH
-        document.body.classList.add('bg-red-900');
-        document.body.classList.remove('bg-blue-900');
-        
-        // Tukar warna browser bar (mobile) ke Merah
-        const metaTheme = document.querySelector('meta[name="theme-color"]');
-        if(metaTheme) metaTheme.setAttribute('content', '#7f1d1d');
-
-    } else {
-        // --- MODE EJEN / APP (BIRU ASAL) ---
-        if (landingView) landingView.classList.add('hidden');
-        if (appView) appView.classList.remove('hidden');
-        
-        // Set Body jadi BIRU (Warna asal GetQuote)
-        document.body.classList.add('bg-blue-900');
-        document.body.classList.remove('bg-red-900');
-
-        // Tukar warna browser bar (mobile) ke Biru
-        const metaTheme = document.querySelector('meta[name="theme-color"]');
-        if(metaTheme) metaTheme.setAttribute('content', '#1e3a8a');
-        
-        initializeApp();
-    }
-});
+window.addEventListener('DOMContentLoaded', initializeApp);
