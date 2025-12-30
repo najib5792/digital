@@ -1,7 +1,7 @@
 {
   "name": "GETQUOTE Takaful",
   "short_name": "GETQUOTE",
-  "start_url": "/?source=pwa",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#1e3a8a",
