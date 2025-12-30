@@ -1,8 +1,7 @@
 // =========================
-// 1. CONFIG AGEN & DETECT SLUG (LOGIC LANDING PAGE)
+// 1. CONFIG AGEN & DETECT SLUG
 // =========================
 
-// URL Apps Script that reads the Google Sheet agent config
 const CONFIG_API_URL = "https://script.google.com/macros/s/AKfycbxBgNRcxnJg9DM0jn91REAucFDi3VuWGZ5KaCow7fPypuF80ga3e8fQSfajMW7TsCbr/exec";
 
 function getAgentIdFromPath() {
@@ -936,31 +935,45 @@ window.addEventListener('DOMContentLoaded', () => {
     const slugInput = document.getElementById('agentSlugInput');
 
     if (goBtn && slugInput) {
-        // Function untuk redirect
         const doRedirect = () => {
             const val = slugInput.value.trim().toLowerCase();
             if (val) {
-                // Redirect ke url /namaejen
                 window.location.href = `/${val}`;
             }
         };
 
-        // Klik Button
         goBtn.addEventListener('click', doRedirect);
-
-        // Tekan Enter
         slugInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') doRedirect();
         });
     }
-    // === TAMAT LOGIC INPUT ===
 
+    // === LOGIC TUKAR WARNA BACKGROUND (PENTING) ===
     if (!AGENT_ID) {
+        // --- MODE LANDING PAGE (MERAH) ---
         if (landingView) landingView.classList.remove('hidden');
         if (appView) appView.classList.add('hidden');
+        
+        // Set Body jadi MERAH
+        document.body.classList.add('bg-red-900');
+        document.body.classList.remove('bg-blue-900');
+        
+        // Tukar warna browser bar (mobile) ke Merah
+        const metaTheme = document.querySelector('meta[name="theme-color"]');
+        if(metaTheme) metaTheme.setAttribute('content', '#7f1d1d');
+
     } else {
+        // --- MODE EJEN / APP (BIRU ASAL) ---
         if (landingView) landingView.classList.add('hidden');
         if (appView) appView.classList.remove('hidden');
+        
+        // Set Body jadi BIRU (Warna asal GetQuote)
+        document.body.classList.add('bg-blue-900');
+        document.body.classList.remove('bg-red-900');
+
+        // Tukar warna browser bar (mobile) ke Biru
+        const metaTheme = document.querySelector('meta[name="theme-color"]');
+        if(metaTheme) metaTheme.setAttribute('content', '#1e3a8a');
         
         initializeApp();
     }
