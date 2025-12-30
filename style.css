@@ -1,16 +1,27 @@
 :root {
-    --primary-color: #FFFFFF;
-    --secondary-color: #FFFFFF;
+    /* Warna Default App (Biru Gelap) */
+    --primary-color: #1e3a8a; 
+    --secondary-color: #ffffff;
 }
 
-/* TEMA */
+/* TEMA BODY */
 body { 
     font-family: 'Inter', sans-serif; 
     color: #FFFFFF; 
-    background-color: var(--primary-color); 
+    
+    /* Guna variable supaya warna boleh berubah ikut Ejen */
+    background-color: var(--primary-color) !important; 
+    
     overflow-x: hidden; 
-    transition: background-color 0.3s ease;
+    transition: background-color 0.5s ease;
 }
+
+/* KHAS UNTUK LANDING PAGE SAHAJA (Override jadi Merah) */
+body.landing-mode {
+    background-color: #7f1d1d !important; 
+}
+
+/* FONT */
 .font-poppins { font-family: 'Poppins', sans-serif; }
 .corporate-primary-text { color: var(--primary-color); }
 .corporate-secondary-blue-text { color: var(--secondary-color); }
@@ -18,7 +29,7 @@ body {
 /* INPUTS */
 .form-input { 
     background-color: #FFFFFF; 
-    border: 1px solid #000000; 
+    border: 1px solid #000000;
     color: #120F07; 
     transition: all 0.2s ease-in-out; 
 }
@@ -160,6 +171,23 @@ body {
 @keyframes shimmer {
     0% { background-position: 200% 0; }
     100% { background-position: -200% 0; }
+}
+
+/* Landing Page Animations */
+@keyframes blob {
+    0% { transform: translate(0px, 0px) scale(1); }
+    33% { transform: translate(30px, -50px) scale(1.1); }
+    66% { transform: translate(-20px, 20px) scale(0.9); }
+    100% { transform: translate(0px, 0px) scale(1); }
+}
+.animate-blob {
+    animation: blob 7s infinite;
+}
+.animation-delay-2000 {
+    animation-delay: 2s;
+}
+.animation-delay-4000 {
+    animation-delay: 4s;
 }
 
 /* MISC */

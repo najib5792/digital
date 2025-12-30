@@ -1,72 +1,56 @@
 // =========================
-// 1. CONFIG AGEN & DETECT SLUG (PWA FIX APPLIED)
+// 1. CONFIG AGEN & DETECT SLUG
 // =========================
 
-// URL Apps Script that reads the Google Sheet agent config
 const CONFIG_API_URL = "https://script.google.com/macros/s/AKfycbxBgNRcxnJg9DM0jn91REAucFDi3VuWGZ5KaCow7fPypuF80ga3e8fQSfajMW7TsCbr/exec";
 
 function getAgentIdFromPath() {
   const hostname = window.location.hostname;
   
-  // Jika di localhost atau googleusercontent, kita anggap default/demo mode
+  // UNTUK DEPLOY/SERVER: Biarkan return null.
+  // UNTUK LOCALHOST TESTING: Boleh tukar return null kepada return 'najib' jika nak test paparan ejen.
   if (hostname.includes('googleusercontent') || hostname.includes('localhost')) {
-    return null; // Return null supaya boleh check localStorage nanti
+    return null; 
   }
 
   const path = window.location.pathname; 
   const parts = path.split('/').filter(Boolean);
   
-  // Jika tiada path (root domain), return null
   if (!parts.length) return null;
   
   const candidate = parts[parts.length - 1].toLowerCase();
   
-  // Jika file index.html atau preview, anggap tiada ejen spesifik di URL
   if (candidate.includes('index.html') || candidate.includes('preview')) return null;
   
   return candidate;
 }
 
-// === LOGIC STICKY AGENT ID (FIX UNTUK PWA) ===
+// === LOGIC STICKY AGENT ID ===
 let detectedId = getAgentIdFromPath();
 const STORAGE_KEY_AGENT = 'preferred_agent_id';
 
-// 1. Jika URL ada ID ejen yang sah (contoh: getquote.my/najib)
-if (detectedId && detectedId !== 'bj') {
-    // Simpan dalam memori telefon
+if (detectedId && detectedId !== 'null') {
     localStorage.setItem(STORAGE_KEY_AGENT, detectedId);
-} 
-// 2. Jika URL tiada ID (contoh: buka dari home screen PWA / index.html)
-else {
-    // Cuba ambil dari memori telefon
-    const savedId = localStorage.getItem(STORAGE_KEY_AGENT);
-    if (savedId) {
-        detectedId = savedId; // Guna ID yang tersimpan
-    } else {
-        detectedId = 'bj'; // Jika tiada memori & tiada URL, guna default 'bj'
-    }
+} else {
+    detectedId = null;
 }
 
-// Tetapkan AGENT_ID muktamad
 const AGENT_ID = detectedId;
 const CACHE_KEY_CONFIG = `agent_config_${AGENT_ID || 'default'}`;
 const CACHE_KEY_PRICING = `pricing_data_${AGENT_ID || 'default'}`;
 
-console.log("Current Agent ID:", AGENT_ID); // Debugging
+console.log("Current Agent ID:", AGENT_ID); 
 
-// Variables
 let URL_HARGA_BARU = "";
 let URL_LEADS_LAMA = "";
 let AGENT_CONFIG = null;
 window.AGENT_WHATSAPP = null;
 
-// Pricing Data
 let medicalPriceData150 = [];
 let medicalPriceData200 = [];
 let hibahPriceData = { nova: [], novaWaiver: [], novaCI: [], chinta: [], chintaWaiver: [], chintaCI: [], inspirasi: [], evo: [] };
 let isPricingLoaded = false;
 
-// --- DOM Elements ---
 const form = document.getElementById('quotationForm');
 const medicalResultDiv = document.getElementById('medicalCardResult');
 const hibahResultDiv = document.getElementById('hibahResult');
@@ -84,7 +68,6 @@ function showError(message) {
 // =========================
 // 2. HARDCODED BENEFITS DATA
 // =========================
-
 const icons = {
     skull: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-skull"><path d="m12.5 17-.5-1-.5 1h1z"/><path d="M15 22a1 1 0 0 0 1-1v-1a2 2 0 0 0 1.56-3.25 8 8 0 1 0-11.12 0A2 2 0 0 0 8 20v1a1 1 0 0 0 1 1z"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="12" r="1"/></svg>',
     coins: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-coins"><circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/><path d="m16.71 13.88.7.71-2.82 2.82"/></svg>',
@@ -95,7 +78,6 @@ const icons = {
     checkCircle: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check-circle-2"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>',
     shieldAlert: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shield-alert"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>',
     bed: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bed"><path d="M2 4v16"/><path d="M2 8h18a2 2 0 0 1 2 2v10"/><path d="M2 17h20"/><path d="M6 8v9"/></svg>',
-    // Medical
     bilik: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bed"><path d="M2 4v16"/><path d="M2 8h18a2 2 0 0 1 2 2v10"/><path d="M2 17h20"/><path d="M6 8v9"/></svg>',
     tahunan: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar-1"><path d="M11 14h1v4"/><path d="M16 2v4"/><path d="M3 10h18"/><path d="M8 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/></svg>',
     seumur: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-infinity"><path d="M6 16c5 0 7-8 12-8a4 4 0 0 1 0 8c-5 0-7-8-12-8a4 4 0 1 0 0 8"/></svg>',
@@ -107,9 +89,7 @@ const icons = {
     cross: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>'
 };
 
-// Hardcoded Plan Benefits Matching the Image
 const PLAN_BENEFITS = {
-    // === HIBAH NOVA ===
     nova: [
         { icon: 'skull', text: 'Kematian/Lumpuh:', value: 'RM250k' },
         { icon: 'plane', text: 'Kematian Haji/Umrah:', value: 'RM500k' },
@@ -137,12 +117,9 @@ const PLAN_BENEFITS = {
         { icon: 'shieldCheck', text: 'Coverage:', value: 'Sehingga Umur 60' },
         { icon: 'tag', text: 'Harga:', value: 'Tetap' }
     ],
-
-    // === HIBAH CHINTA ===
     chinta: [
         { icon: 'skull', text: 'Kematian/Lumpuh:', value: 'RM800k' },
         { icon: 'plane', text: 'Kematian Haji/Umrah:', value: 'RM1.6 Juta' },
-        // REMOVED 'Sakit Kritikal' from here (Basic Plan)
         { icon: 'coins', text: 'Nilai Tunai (Surrender Value)', value: '' },
         { icon: 'clock', text: 'Khairat Kematian:', value: 'RM5,000' },
         { icon: 'shieldCheck', text: 'Coverage:', value: 'Sehingga Umur 60' },
@@ -151,7 +128,6 @@ const PLAN_BENEFITS = {
     chintaWaiver: [
         { icon: 'skull', text: 'Kematian/Lumpuh:', value: 'RM800k' },
         { icon: 'plane', text: 'Kematian Haji/Umrah:', value: 'RM1.6 Juta' },
-        // REMOVED 'Sakit Kritikal' lump sum from here (Waiver Plan usually just waives payment)
         { icon: 'checkCircle', text: 'Waiver Sakit Kritikal', subtext: '(Dikecualikan Caruman)', highlight: true },
         { icon: 'coins', text: 'Nilai Tunai (Surrender Value)', value: '' },
         { icon: 'clock', text: 'Khairat Kematian:', value: 'RM5,000' },
@@ -161,15 +137,13 @@ const PLAN_BENEFITS = {
     chintaCI: [
         { icon: 'skull', text: 'Kematian/Lumpuh:', value: 'RM800k' },
         { icon: 'plane', text: 'Kematian Haji/Umrah:', value: 'RM1.6 Juta' },
-        { icon: 'shieldAlert', text: 'Sakit Kritikal:', value: 'RM100,000', highlight: true }, // KEEPS IT HERE (CI Plan)
+        { icon: 'shieldAlert', text: 'Sakit Kritikal:', value: 'RM100,000', highlight: true },
         { icon: 'checkCircle', text: 'Waiver Sakit Kritikal', subtext: '(Dikecualikan Caruman)', highlight: true },
         { icon: 'coins', text: 'Nilai Tunai (Surrender Value)', value: '' },
         { icon: 'clock', text: 'Khairat Kematian:', value: 'RM5,000' },
         { icon: 'shieldCheck', text: 'Coverage:', value: 'Sehingga Umur 60' },
         { icon: 'tag', text: 'Harga:', value: 'Tetap' }
     ],
-
-    // === HIBAH INSPIRASI ===
     inspirasi: [
         { icon: 'skull', text: 'Kematian/Lumpuh:', value: 'RM100k' },
         { icon: 'skull', text: 'Kematian Kemalangan:', value: 'RM200k' },
@@ -205,31 +179,14 @@ function updateAgentUI(data) {
     URL_LEADS_LAMA = data.leadsUrl;
     window.AGENT_WHATSAPP = data.whatsapp;
 
-    // --- CUSTOMIZE META TAGS & TITLE START ---
-    
-    // 1. Change the Browser Tab Title
     document.title = `Quotation Takaful - ${data.name || 'GETQUOTE'}`;
-
-    // 2. Change the Meta Title (for sharing)
     const ogTitle = document.querySelector('meta[property="og:title"]');
-    if (ogTitle) {
-        ogTitle.setAttribute('content', `Dapatkan Quotation Takaful dari ${data.name}`);
-    }
+    if (ogTitle) ogTitle.setAttribute('content', `Dapatkan Quotation Takaful dari ${data.name}`);
 
-    // 3. Change the WhatsApp Thumbnail (Agent Photo)
     if (data.photo) {
         const ogImage = document.querySelector('meta[property="og:image"]');
-        if (ogImage) {
-            ogImage.setAttribute('content', data.photo);
-        }
+        if (ogImage) ogImage.setAttribute('content', data.photo);
     }
-    
-    const currentUrl = window.location.href;
-    const ogUrlMeta = document.querySelector('meta[property="og:url"]');
-    if (ogUrlMeta) {
-        ogUrlMeta.setAttribute('content', currentUrl);
-    }
-    // --- CUSTOMIZE META TAGS END ---
 
     if(agentSkeleton) agentSkeleton.classList.add('hidden');
 
@@ -265,9 +222,16 @@ function updateAgentUI(data) {
         }
     }
 
-    if (data.primaryColor || data.secondaryColor) {
-        document.documentElement.style.setProperty('--primary-color', data.primaryColor || '#FFFFFF');
-        document.documentElement.style.setProperty('--secondary-color', data.secondaryColor || '#FFFFFF');
+    // UPDATE WARNA DARI CONFIG SHEET
+    if (data.primaryColor) {
+        document.documentElement.style.setProperty('--primary-color', data.primaryColor);
+        // Tukar warna browser bar ikut tema ejen
+        const metaTheme = document.querySelector('meta[name="theme-color"]');
+        if(metaTheme) metaTheme.setAttribute('content', data.primaryColor);
+    }
+    
+    if (data.secondaryColor) {
+        document.documentElement.style.setProperty('--secondary-color', data.secondaryColor);
     }
 }
 
@@ -301,10 +265,7 @@ async function fetchPricingData(url) {
 }
 
 async function initializeApp() {
-    if (!AGENT_ID) {
-        showError("Ralat: ID ejen tidak dijumpai.");
-        return;
-    }
+    if (!AGENT_ID) return;
 
     renderHibahBenefits();
     
@@ -314,7 +275,6 @@ async function initializeApp() {
     if (cachedConfig) {
         try {
             const configData = JSON.parse(cachedConfig);
-            console.log("Loaded Config from Cache");
             updateAgentUI(configData);
             hasCache = true;
             
@@ -327,10 +287,9 @@ async function initializeApp() {
                           pricingData._source = "Cache";
                           processPricingData(pricingData);
                       } else {
-                          console.log("Pricing Cache Expired");
                           localStorage.removeItem(CACHE_KEY_PRICING);
                       }
-                  } catch(e) { console.error("Invalid Pricing Cache"); }
+                  } catch(e) { }
             }
 
             if (!isPricingLoaded && configData.hargaUrl) {
@@ -338,7 +297,6 @@ async function initializeApp() {
             }
 
         } catch (e) {
-            console.error("Cache Parse Error", e);
             localStorage.removeItem(CACHE_KEY_CONFIG);
         }
     } else {
@@ -910,9 +868,6 @@ function renderAllMedicalBenefits() {
     renderMedicalBenefits('full-benefits-200', 200, 'RM2.0 Juta');
 }
 
-// =========================================================================
-// RENDER HIBAH BENEFITS (UPDATED WITH HIGHLIGHT LOGIC)
-// =========================================================================
 function renderSingleHibahBenefit(containerKey, benefitsKey) {
   const container = document.getElementById(`${containerKey}-benefits`);
   const benefits = PLAN_BENEFITS[benefitsKey] || [];
@@ -923,10 +878,8 @@ function renderSingleHibahBenefit(containerKey, benefitsKey) {
   benefits.forEach(b => {
     const iconSvg = icons[b.icon] || icons.shieldCheck || '';
     
-    // Normal Icon Style
     let iconWrapper = `<div class="icon-wrapper w-9 h-9 rounded-full bg-blue-100 text-corporate-secondary-blue-text" style="background-color: #dbeafe !important;">${iconSvg}</div>`;
     
-    // Check if highlight (yellow box) is needed
     let itemClass = "benefit-item";
     if (b.highlight) {
         itemClass += " bg-yellow-50 border border-yellow-200 rounded-lg p-2 -mx-2 mb-2";
@@ -977,6 +930,55 @@ function autoRecalculateIfVisible() {
 }
 
 // =========================
-// 6. BOOTSTRAP: INITIALIZE APP
+// 6. VIEW CONTROL: LANDING VS APP
 // =========================
-window.addEventListener('DOMContentLoaded', initializeApp);
+window.addEventListener('DOMContentLoaded', () => {
+    const landingView = document.getElementById('landing-view');
+    const appView = document.getElementById('app-view');
+
+    // === LOGIC REDIRECT BUTANG GO ===
+    const goBtn = document.getElementById('goToAgentBtn');
+    const slugInput = document.getElementById('agentSlugInput');
+
+    if (goBtn && slugInput) {
+        const doRedirect = () => {
+            const val = slugInput.value.trim().toLowerCase();
+            if (val) {
+                window.location.href = `/${val}`;
+            }
+        };
+
+        goBtn.addEventListener('click', doRedirect);
+        slugInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') doRedirect();
+        });
+    }
+
+    // === LOGIC TUKAR WARNA BACKGROUND DAN VIEW ===
+    if (!AGENT_ID) {
+        // --- MODE LANDING PAGE (MERAH) ---
+        if (landingView) landingView.classList.remove('hidden');
+        if (appView) appView.classList.add('hidden');
+        
+        // 1. Tambah class khas landing page (Override jadi Merah)
+        document.body.classList.add('landing-mode');
+        
+        // 2. Tukar theme color browser (Mobile) jadi merah
+        const metaTheme = document.querySelector('meta[name="theme-color"]');
+        if(metaTheme) metaTheme.setAttribute('content', '#7f1d1d');
+
+    } else {
+        // --- MODE EJEN / APP (WARNA DARI GOOGLE SHEET) ---
+        if (landingView) landingView.classList.add('hidden');
+        if (appView) appView.classList.remove('hidden');
+        
+        // 1. Buang class landing page (Kembali ke variable CSS asal)
+        document.body.classList.remove('landing-mode');
+
+        // 2. Default theme color (Biru) sementara tunggu Config load
+        const metaTheme = document.querySelector('meta[name="theme-color"]');
+        if(metaTheme) metaTheme.setAttribute('content', '#1e3a8a');
+        
+        initializeApp();
+    }
+});
