@@ -7,8 +7,8 @@ const CONFIG_API_URL = "https://script.google.com/macros/s/AKfycbxBgNRcxnJg9DM0j
 function getAgentIdFromPath() {
   const hostname = window.location.hostname;
   
-  // UNTUK DEPLOY/SERVER: Biarkan return null.
-  // UNTUK LOCALHOST TESTING: Boleh tukar return null kepada return 'najib' jika nak test paparan ejen.
+  // 1. Abaikan localhost/google preview (Return NULL supaya jadi Landing Page secara default di local)
+  // Kalau nak test ejen di local, baru hardcode sementara. UNTUK DEPLOY, BIAR NULL.
   if (hostname.includes('googleusercontent') || hostname.includes('localhost')) {
     return null; 
   }
@@ -16,13 +16,15 @@ function getAgentIdFromPath() {
   const path = window.location.pathname; 
   const parts = path.split('/').filter(Boolean);
   
+  // 2. Jika tiada path (contoh: getquote.my/), return NULL -> Landing Page
   if (!parts.length) return null;
   
   const candidate = parts[parts.length - 1].toLowerCase();
   
+  // 3. Jika URL berakhir dengan index.html, return NULL -> Landing Page
   if (candidate.includes('index.html') || candidate.includes('preview')) return null;
   
-  return candidate;
+  return candidate; // Ini akan jadi ID ejen (contoh: 'najib')
 }
 
 // === LOGIC STICKY AGENT ID ===
