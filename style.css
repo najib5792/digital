@@ -18,7 +18,7 @@ body {
 /* INPUTS */
 .form-input { 
     background-color: #FFFFFF; 
-    border: 1px solid #000000; 
+    border: 1px solid #000000;
     color: #120F07; 
     transition: all 0.2s ease-in-out; 
 }
