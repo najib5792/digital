@@ -1,5 +1,5 @@
 // =========================
-// 1. CONFIG AGEN & DETECT SLUG
+// 1. CONFIG AGEN & DETECT SLUG (PWA FIX APPLIED)
 // =========================
 
 // URL Apps Script that reads the Google Sheet agent config
@@ -7,21 +7,52 @@ const CONFIG_API_URL = "https://script.google.com/macros/s/AKfycbxBgNRcxnJg9DM0j
 
 function getAgentIdFromPath() {
   const hostname = window.location.hostname;
-  if (hostname.includes('googleusercontent') || hostname.includes('localhost') || hostname === '') {
-    return 'bj'; // Default Demo Agent ID
+  
+  // Jika di localhost atau googleusercontent, kita anggap default/demo mode
+  if (hostname.includes('googleusercontent') || hostname.includes('localhost')) {
+    return null; // Return null supaya boleh check localStorage nanti
   }
 
   const path = window.location.pathname; 
   const parts = path.split('/').filter(Boolean);
-  if (!parts.length) return 'bj';
+  
+  // Jika tiada path (root domain), return null
+  if (!parts.length) return null;
+  
   const candidate = parts[parts.length - 1].toLowerCase();
-  if (candidate.includes('index.html') || candidate.includes('preview')) return 'bj';
+  
+  // Jika file index.html atau preview, anggap tiada ejen spesifik di URL
+  if (candidate.includes('index.html') || candidate.includes('preview')) return null;
+  
   return candidate;
 }
 
-const AGENT_ID = getAgentIdFromPath();
+// === LOGIC STICKY AGENT ID (FIX UNTUK PWA) ===
+let detectedId = getAgentIdFromPath();
+const STORAGE_KEY_AGENT = 'preferred_agent_id';
+
+// 1. Jika URL ada ID ejen yang sah (contoh: getquote.my/najib)
+if (detectedId && detectedId !== 'bj') {
+    // Simpan dalam memori telefon
+    localStorage.setItem(STORAGE_KEY_AGENT, detectedId);
+} 
+// 2. Jika URL tiada ID (contoh: buka dari home screen PWA / index.html)
+else {
+    // Cuba ambil dari memori telefon
+    const savedId = localStorage.getItem(STORAGE_KEY_AGENT);
+    if (savedId) {
+        detectedId = savedId; // Guna ID yang tersimpan
+    } else {
+        detectedId = 'bj'; // Jika tiada memori & tiada URL, guna default 'bj'
+    }
+}
+
+// Tetapkan AGENT_ID muktamad
+const AGENT_ID = detectedId;
 const CACHE_KEY_CONFIG = `agent_config_${AGENT_ID || 'default'}`;
 const CACHE_KEY_PRICING = `pricing_data_${AGENT_ID || 'default'}`;
+
+console.log("Current Agent ID:", AGENT_ID); // Debugging
 
 // Variables
 let URL_HARGA_BARU = "";
