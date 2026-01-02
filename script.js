@@ -5,26 +5,29 @@
 const CONFIG_API_URL = "https://script.google.com/macros/s/AKfycbxBgNRcxnJg9DM0jn91REAucFDi3VuWGZ5KaCow7fPypuF80ga3e8fQSfajMW7TsCbr/exec";
 
 function getAgentIdFromPath() {
-  const hostname = window.location.hostname;
-  
-  // 1. Abaikan localhost/google preview (Return NULL supaya jadi Landing Page secara default di local)
-  // Kalau nak test ejen di local, baru hardcode sementara. UNTUK DEPLOY, BIAR NULL.
-  if (hostname.includes('googleusercontent') || hostname.includes('localhost')) {
-    return null; 
-  }
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('agent')) return params.get('agent').toLowerCase();
 
-  const path = window.location.pathname; 
-  const parts = path.split('/').filter(Boolean);
-  
-  // 2. Jika tiada path (contoh: getquote.my/), return NULL -> Landing Page
-  if (!parts.length) return null;
-  
-  const candidate = parts[parts.length - 1].toLowerCase();
-  
-  // 3. Jika URL berakhir dengan index.html, return NULL -> Landing Page
-  if (candidate.includes('index.html') || candidate.includes('preview')) return null;
-  
-  return candidate; // Ini akan jadi ID ejen (contoh: 'najib')
+    const hostname = window.location.hostname;
+
+    // 1. Abaikan localhost/google preview (Return NULL supaya jadi Landing Page secara default di local)
+    // Kalau nak test ejen di local, baru hardcode sementara. UNTUK DEPLOY, BIAR NULL.
+    if (hostname.includes('googleusercontent') || hostname.includes('localhost')) {
+        return null;
+    }
+
+    const path = window.location.pathname;
+    const parts = path.split('/').filter(Boolean);
+
+    // 2. Jika tiada path (contoh: getquote.my/), return NULL -> Landing Page
+    if (!parts.length) return null;
+
+    const candidate = parts[parts.length - 1].toLowerCase();
+
+    // 3. Jika URL berakhir dengan index.html, return NULL -> Landing Page
+    if (candidate.includes('index.html') || candidate.includes('preview')) return null;
+
+    return candidate; // Ini akan jadi ID ejen (contoh: 'najib')
 }
 
 // === LOGIC STICKY AGENT ID ===
@@ -41,7 +44,7 @@ const AGENT_ID = detectedId;
 const CACHE_KEY_CONFIG = `agent_config_${AGENT_ID || 'default'}`;
 const CACHE_KEY_PRICING = `pricing_data_${AGENT_ID || 'default'}`;
 
-console.log("Current Agent ID:", AGENT_ID); 
+console.log("Current Agent ID:", AGENT_ID);
 
 let URL_HARGA_BARU = "";
 let URL_LEADS_LAMA = "";
@@ -190,7 +193,7 @@ function updateAgentUI(data) {
         if (ogImage) ogImage.setAttribute('content', data.photo);
     }
 
-    if(agentSkeleton) agentSkeleton.classList.add('hidden');
+    if (agentSkeleton) agentSkeleton.classList.add('hidden');
 
     const elAgency = document.getElementById('agent-agency');
     const elName = document.getElementById('agent-name');
@@ -201,7 +204,7 @@ function updateAgentUI(data) {
     if (elName) elName.textContent = data.name || "Agent Takaful";
     if (elCompany) elCompany.textContent = data.company || "Takaful Company";
     if (elImg && data.photo) {
-         elImg.src = data.photo;
+        elImg.src = data.photo;
     }
 
     const socialMap = {
@@ -229,9 +232,9 @@ function updateAgentUI(data) {
         document.documentElement.style.setProperty('--primary-color', data.primaryColor);
         // Tukar warna browser bar ikut tema ejen
         const metaTheme = document.querySelector('meta[name="theme-color"]');
-        if(metaTheme) metaTheme.setAttribute('content', data.primaryColor);
+        if (metaTheme) metaTheme.setAttribute('content', data.primaryColor);
     }
-    
+
     if (data.secondaryColor) {
         document.documentElement.style.setProperty('--secondary-color', data.secondaryColor);
     }
@@ -270,28 +273,28 @@ async function initializeApp() {
     if (!AGENT_ID) return;
 
     renderHibahBenefits();
-    
+
     let hasCache = false;
     const cachedConfig = localStorage.getItem(CACHE_KEY_CONFIG);
-    
+
     if (cachedConfig) {
         try {
             const configData = JSON.parse(cachedConfig);
             updateAgentUI(configData);
             hasCache = true;
-            
+
             const cachedPricing = localStorage.getItem(CACHE_KEY_PRICING);
             if (cachedPricing) {
-                  try {
-                      const pricingData = JSON.parse(cachedPricing);
-                      const ageMs = Date.now() - (pricingData._ts || 0);
-                      if (ageMs < 1 * 60 * 1000) {
-                          pricingData._source = "Cache";
-                          processPricingData(pricingData);
-                      } else {
-                          localStorage.removeItem(CACHE_KEY_PRICING);
-                      }
-                  } catch(e) { }
+                try {
+                    const pricingData = JSON.parse(cachedPricing);
+                    const ageMs = Date.now() - (pricingData._ts || 0);
+                    if (ageMs < 1 * 60 * 1000) {
+                        pricingData._source = "Cache";
+                        processPricingData(pricingData);
+                    } else {
+                        localStorage.removeItem(CACHE_KEY_PRICING);
+                    }
+                } catch (e) { }
             }
 
             if (!isPricingLoaded && configData.hargaUrl) {
@@ -302,7 +305,7 @@ async function initializeApp() {
             localStorage.removeItem(CACHE_KEY_CONFIG);
         }
     } else {
-        if(agentSkeleton) agentSkeleton.classList.remove('hidden');
+        if (agentSkeleton) agentSkeleton.classList.remove('hidden');
     }
 
     try {
@@ -329,12 +332,31 @@ async function initializeApp() {
 // =========================
 function submitLeadData(data) {
     if (!URL_LEADS_LAMA) return;
+
+    const payload = Object.assign({}, {
+        token: (AGENT_CONFIG && AGENT_CONFIG.leadsSecret) || undefined,
+        slug: AGENT_ID || undefined,
+        agentName: (AGENT_CONFIG && AGENT_CONFIG.name) || undefined,
+        source: window.location.href || undefined
+    }, data);
+
+    // Try a normal CORS POST first (ideal). If CORS blocks (or network error), retry with no-cors as a best-effort fallback.
     fetch(URL_LEADS_LAMA, {
-        method: "POST",
-        mode: "no-cors",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-    }).catch(e => console.error("Lead submission failed", e));
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    }).then(res => {
+        if (!res.ok) console.warn('Lead submission returned non-OK status', res.status);
+        else console.log('Lead submitted (CORS)');
+    }).catch(err => {
+        console.warn('CORS POST failed, retrying with no-cors fallback', err);
+        fetch(URL_LEADS_LAMA, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        }).catch(e => console.error('Lead submission failed (no-cors)', e));
+    });
 }
 
 // =========================
@@ -432,10 +454,10 @@ function calculateMedicalCard(name, age, gender, smoker, occupation, dob, phone)
         return;
     }
 
-    quotationData = { 
-        name, dob, phone, occupation, gender, smoker, nextBirthdayAge: age, 
-        basicPremium150, fullPremium150, basicPremium200, fullPremium200, 
-        planType: 'medical' 
+    quotationData = {
+        name, dob, phone, occupation, gender, smoker, nextBirthdayAge: age,
+        basicPremium150, fullPremium150, basicPremium200, fullPremium200,
+        planType: 'medical'
     };
 
     document.getElementById('resultNameMC').textContent = name;
@@ -676,12 +698,12 @@ function handleFormSubmit() {
         const btn = document.getElementById('calculateBtn');
         btn.innerHTML = '<div class="loader"></div> SEDANG MEMPROSES...';
         setTimeout(() => {
-             if(!isPricingLoaded) {
+            if (!isPricingLoaded) {
                 showError("Data harga sedang dimuat turun dari server. Sila cuba sebentar lagi.");
                 btn.innerHTML = 'GET QUOTATION';
-             } else {
-                 handleFormSubmit();
-             }
+            } else {
+                handleFormSubmit();
+            }
         }, 1500);
         return;
     }
@@ -714,7 +736,7 @@ function handleFormSubmit() {
     } else if (planType === 'hibah') {
         calculateHibah(name, nextBirthdayAge, gender, smoker, occupation, dob, phone);
     }
-    
+
     document.getElementById('calculateBtn').innerHTML = 'GET QUOTATION';
 
     submitLeadData({ planType, name, dob, phone, gender, smoker, occupation, agentId: AGENT_ID });
@@ -806,34 +828,34 @@ document.getElementById('selectChintaBtn').addEventListener('click', () => {
 });
 
 document.getElementById('selectInspirasiBtn')
-  .addEventListener('click', () =>
-    sendWhatsAppMessage('Hibah Inspirasi', quotationData.inspirasiPremium)
-  );
+    .addEventListener('click', () =>
+        sendWhatsAppMessage('Hibah Inspirasi', quotationData.inspirasiPremium)
+    );
 
 document.getElementById('selectEvo50Btn')
-  .addEventListener('click', () =>
-    sendWhatsAppMessage('Hibah Evo 50', quotationData.evo50Value)
-  );
+    .addEventListener('click', () =>
+        sendWhatsAppMessage('Hibah Evo 50', quotationData.evo50Value)
+    );
 
 document.getElementById('selectBasicBtn150')
-  .addEventListener('click', () =>
-    sendWhatsAppMessage('Plan Basic Evolusi 150', quotationData.basicPremium150)
-  );
+    .addEventListener('click', () =>
+        sendWhatsAppMessage('Plan Basic Evolusi 150', quotationData.basicPremium150)
+    );
 
 document.getElementById('selectFullBtn150')
-  .addEventListener('click', () =>
-    sendWhatsAppMessage('Plan Premium Evolusi 150', quotationData.fullPremium150)
-  );
+    .addEventListener('click', () =>
+        sendWhatsAppMessage('Plan Premium Evolusi 150', quotationData.fullPremium150)
+    );
 
 document.getElementById('selectBasicBtn200')
-  .addEventListener('click', () =>
-    sendWhatsAppMessage('Plan Basic Evolusi 200', quotationData.basicPremium200)
-  );
+    .addEventListener('click', () =>
+        sendWhatsAppMessage('Plan Basic Evolusi 200', quotationData.basicPremium200)
+    );
 
 document.getElementById('selectFullBtn200')
-  .addEventListener('click', () =>
-    sendWhatsAppMessage('Plan Premium Evolusi 200', quotationData.fullPremium200)
-  );
+    .addEventListener('click', () =>
+        sendWhatsAppMessage('Plan Premium Evolusi 200', quotationData.fullPremium200)
+    );
 
 
 setupIconOptions('planType');
@@ -871,26 +893,26 @@ function renderAllMedicalBenefits() {
 }
 
 function renderSingleHibahBenefit(containerKey, benefitsKey) {
-  const container = document.getElementById(`${containerKey}-benefits`);
-  const benefits = PLAN_BENEFITS[benefitsKey] || [];
-  if (!container) return;
+    const container = document.getElementById(`${containerKey}-benefits`);
+    const benefits = PLAN_BENEFITS[benefitsKey] || [];
+    if (!container) return;
 
-  container.innerHTML = '';
+    container.innerHTML = '';
 
-  benefits.forEach(b => {
-    const iconSvg = icons[b.icon] || icons.shieldCheck || '';
-    
-    let iconWrapper = `<div class="icon-wrapper w-9 h-9 rounded-full bg-blue-100 text-corporate-secondary-blue-text" style="background-color: #dbeafe !important;">${iconSvg}</div>`;
-    
-    let itemClass = "benefit-item";
-    if (b.highlight) {
-        itemClass += " bg-yellow-50 border border-yellow-200 rounded-lg p-2 -mx-2 mb-2";
-    }
+    benefits.forEach(b => {
+        const iconSvg = icons[b.icon] || icons.shieldCheck || '';
 
-    const valueHtml = b.value ? `<strong>${b.value}</strong>` : '';
-    const subtextHtml = b.subtext ? `<div class="text-xs text-blue-600 font-bold">${b.subtext}</div>` : '';
+        let iconWrapper = `<div class="icon-wrapper w-9 h-9 rounded-full bg-blue-100 text-corporate-secondary-blue-text" style="background-color: #dbeafe !important;">${iconSvg}</div>`;
 
-    container.innerHTML += `
+        let itemClass = "benefit-item";
+        if (b.highlight) {
+            itemClass += " bg-yellow-50 border border-yellow-200 rounded-lg p-2 -mx-2 mb-2";
+        }
+
+        const valueHtml = b.value ? `<strong>${b.value}</strong>` : '';
+        const subtextHtml = b.subtext ? `<div class="text-xs text-blue-600 font-bold">${b.subtext}</div>` : '';
+
+        container.innerHTML += `
         <div class="${itemClass}">
             ${iconWrapper}
             <div>
@@ -899,7 +921,7 @@ function renderSingleHibahBenefit(containerKey, benefitsKey) {
             </div>
         </div>
     `;
-  });
+    });
 }
 
 function renderHibahBenefits() {
@@ -961,26 +983,26 @@ window.addEventListener('DOMContentLoaded', () => {
         // --- MODE LANDING PAGE (MERAH) ---
         if (landingView) landingView.classList.remove('hidden');
         if (appView) appView.classList.add('hidden');
-        
+
         // 1. Tambah class khas landing page (Override jadi Merah)
         document.body.classList.add('landing-mode');
-        
+
         // 2. Tukar theme color browser (Mobile) jadi merah
         const metaTheme = document.querySelector('meta[name="theme-color"]');
-        if(metaTheme) metaTheme.setAttribute('content', '#7f1d1d');
+        if (metaTheme) metaTheme.setAttribute('content', '#7f1d1d');
 
     } else {
         // --- MODE EJEN / APP (WARNA DARI GOOGLE SHEET) ---
         if (landingView) landingView.classList.add('hidden');
         if (appView) appView.classList.remove('hidden');
-        
+
         // 1. Buang class landing page (Kembali ke variable CSS asal)
         document.body.classList.remove('landing-mode');
 
         // 2. Default theme color (Biru) sementara tunggu Config load
         const metaTheme = document.querySelector('meta[name="theme-color"]');
-        if(metaTheme) metaTheme.setAttribute('content', '#1e3a8a');
-        
+        if (metaTheme) metaTheme.setAttribute('content', '#1e3a8a');
+
         initializeApp();
     }
 });

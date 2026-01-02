@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dashboard - GETQUOTE Leads</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-gray-50 text-gray-800 transition-colors duration-500">
+
+<div id="auth-screen" class="min-h-screen flex items-center justify-center px-4">
+    <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-sm text-center">
+        <h2 class="text-2xl font-bold mb-6 font-poppins text-gray-800">Agent Login</h2>
+        <input type="password" id="accessPin" placeholder="Masukkan PIN Keselamatan" class="w-full px-4 py-3 rounded-lg border border-gray-300 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-600 transition-all">
+        <button id="loginBtn" class="w-full bg-blue-900 text-white font-bold py-3 rounded-lg hover:bg-blue-800 transition-all">ACCESS DASHBOARD</button>
+        <p id="loginError" class="text-red-500 text-sm mt-3 hidden">PIN Salah!</p>
+    </div>
+</div>
+
+<div id="dashboard-screen" class="min-h-screen hidden">
+    <!-- Navbar -->
+    <nav class="bg-blue-900 text-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <span class="font-poppins text-xl font-bold tracking-wider">GETQUOTE DASHBOARD</span>
+                </div>
+                <div>
+                     <span id="agentNameDisplay" class="text-sm md:text-base font-medium opacity-90 mr-4">Loading...</span>
+                     <button id="logoutBtn" class="text-xs bg-red-600 px-3 py-1 rounded hover:bg-red-500 transition">LOGOUT</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
+                <div>
+                    <p class="text-gray-500 text-sm">Total Leads</p>
+                    <h3 id="statTotal" class="text-3xl font-bold text-gray-800 mt-1">0</h3>
+                </div>
+                <div class="p-3 bg-blue-50 rounded-full text-blue-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                </div>
+            </div>
+            
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
+                 <div>
+                    <p class="text-gray-500 text-sm">Today's Leads</p>
+                    <h3 id="statToday" class="text-3xl font-bold text-gray-800 mt-1">0</h3>
+                </div>
+                <div class="p-3 bg-green-50 rounded-full text-green-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
+                <div>
+                     <p class="text-gray-500 text-sm">Conversion Rate</p>
+                     <h3 class="text-3xl font-bold text-gray-800 mt-1">-</h3>
+                     <p class="text-xs text-gray-400 mt-1">(Coming Soon)</p>
+                </div>
+                <div class="p-3 bg-purple-50 rounded-full text-purple-600">
+                     <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                </div>
+           </div>
+        </div>
+
+        <!-- Leads List -->
+        <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+            <div class="p-6 border-b border-gray-200 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <h3 class="text-xl font-bold text-gray-800">Recent Leads</h3>
+                <div class="flex gap-2">
+                    <button id="refreshBtn" class="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.28l2.032.152M20.488 9H15V3.512A9.025 9.025 0 0120.488 9zM15 9V3.512c-2.479 0-4.66.906-6.4 2.406" />
+                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 15v5.488c2.479 0 4.66-.906 6.4-2.406M20 20v-5h-.28l-2.032-.152" />
+                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 15H3.512A9.025 9.025 0 019 15z" />
+                             <path d="M12 4v1m0 14v1m8-8h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707" /> 
+                         </svg>
+                        Refresh
+                    </button>
+                </div>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-gray-50 text-gray-600 text-xs uppercase tracking-wider">
+                            <th class="p-4 font-semibold border-b">Timestamp</th>
+                            <th class="p-4 font-semibold border-b">Name</th>
+                            <th class="p-4 font-semibold border-b">Phone</th>
+                            <th class="p-4 font-semibold border-b">Plan</th>
+                            <th class="p-4 font-semibold border-b">Summary</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leadsTableBody" class="text-sm text-gray-700 divide-y divide-gray-100">
+                        <!-- Data will be populated here -->
+                        <tr>
+                            <td colspan="5" class="p-8 text-center text-gray-500 italic">No leads found or loading...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<script src="dashboard.js"></script>
+</body>
+</html>
