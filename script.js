@@ -154,7 +154,7 @@ const PLAN_BENEFITS = {
         { icon: 'skull', text: 'Kematian Kemalangan:', value: 'RM200k' },
         { icon: 'shieldAlert', text: 'Sakit Kritikal:', value: 'RM50k' },
         { icon: 'bed', text: 'Elaun Wad:', value: 'RM50 / hari' },
-        { icon: 'shieldCheck', text: 'Coverage:', value: 'Sehingga Umur 70' },
+        { icon: 'shieldCheck', text: 'Coverage:', value: 'Sehingga Umur 85' },
         { icon: 'tag', text: 'Harga:', value: 'Berubah setiap 5 tahun' }
     ]
 };
