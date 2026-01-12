@@ -605,10 +605,11 @@ function getPremium(item, gender, smoker) {
     if (!item) return null;
     let val = null;
     if (gender === 'perempuan') {
-        if (smoker === 'tidak') {
-            val = item.p || item['p waiver'] || item.P || item['P Waiver'] || item.p_waiver || item.P_Waiver;
-        }
+        // For females, use 'p' column regardless of smoking status
+        // (Most Takaful products have same rate for female smokers/non-smokers)
+        val = item.p || item['p waiver'] || item.P || item['P Waiver'] || item.p_waiver || item.P_Waiver;
     } else {
+        // For males, differentiate between smoker and non-smoker
         if (smoker === 'ya') {
             val = item.l_s || item['l_s waiver'] || item.L_S || item['L_S Waiver'] || item.l_s_waiver || item.L_S_Waiver;
         } else {
