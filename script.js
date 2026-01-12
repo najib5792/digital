@@ -4,10 +4,171 @@
 
 const CONFIG_API_URL = "https://script.google.com/macros/s/AKfycbxBgNRcxnJg9DM0jn91REAucFDi3VuWGZ5KaCow7fPypuF80ga3e8fQSfajMW7TsCbr/exec";
 
-function getAgentIdFromPath() {
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('agent')) return params.get('agent').toLowerCase();
+// =========================
+// PLAN CONFIGURATION (CONFIG-DRIVEN)
+// =========================
+// HOW TO ADD A NEW PLAN:
+// 1. Add an entry to HIBAH_PLAN_CONFIG with a unique key (e.g., 'newPlan')
+// 2. Ensure your pricing data source includes the corresponding keys (e.g., 'hibahNewPlan')
+// 3. Add benefits to PLAN_BENEFITS using the same key
+// 4. Add corresponding HTML elements in index.html with matching IDs
+//
+// HOW TO DELETE A PLAN:
+// 1. Remove the plan's entry from HIBAH_PLAN_CONFIG
+// 2. Remove corresponding entries from PLAN_BENEFITS
+// 3. Remove or hide the corresponding HTML elements
+// =========================
 
+const HIBAH_PLAN_CONFIG = {
+    // Each plan key maps to its configuration
+    // =========================================
+    // HIBAH NOVA 150 - Lower coverage option
+    // =========================================
+    nova150: {
+        displayName: 'Hibah Nova 150',
+        pricingKey: 'hibahNova150',         // Key in pricing data from API
+        minAge: 1,                           // Minimum age (no adjustment needed)
+        maxAge: 60,                          // Maximum age for eligibility
+        priceElementId: 'nova150Monthly',    // ID of price display element
+        selectBtnId: 'selectNova150Btn',     // ID of select button
+        benefitsContainerId: 'nova150-benefits', // ID of benefits container
+        variants: {
+            waiver: {
+                pricingKey: 'hibahNova150Waiver',
+                checkboxId: 'nova150WaiverCheck',
+                containerId: 'nova150CheckContainer',
+                labelId: 'nova150CheckLabel',
+                benefitsKey: 'nova150Waiver',
+                label: 'Add-on Waiver',
+                disabledLabel: 'Add-on Waiver'
+            },
+            ci: {
+                pricingKey: 'hibahNova150CI',
+                checkboxId: 'nova150CICheck',
+                containerId: 'nova150CICheckContainer',
+                labelId: 'nova150CICheckLabel',
+                benefitsKey: 'nova150CI',
+                label: 'Add-on CI + Waiver',
+                disabledLabel: 'Add-on CI + Waiver'
+            }
+        },
+        customPricingFn: null,
+        premiumKey: 'nova150Premium'
+    },
+    // =========================================
+    // HIBAH NOVA - Standard coverage
+    // =========================================
+    nova: {
+        displayName: 'Hibah Nova',
+        pricingKey: 'hibahNova',           // Key in pricing data from API
+        minAge: 25,                         // Minimum age (younger ages use this)
+        maxAge: 60,                         // Maximum age for eligibility
+        priceElementId: 'novaMonthly',      // ID of price display element
+        selectBtnId: 'selectNovaBtn',       // ID of select button
+        benefitsContainerId: 'nova-benefits', // ID of benefits container
+        // Variants (add-ons) - set to null if not available
+        variants: {
+            waiver: {
+                pricingKey: 'hibahNovaWaiver',
+                checkboxId: 'novaWaiverCheck',
+                containerId: 'novaCheckContainer',
+                labelId: 'novaCheckLabel',
+                benefitsKey: 'novaWaiver',
+                label: 'Add-on Waiver',
+                disabledLabel: 'Add-on Waiver'
+            },
+            ci: {
+                pricingKey: 'hibahNovaCI',
+                checkboxId: 'novaCICheck',
+                containerId: 'novaCICheckContainer',
+                labelId: 'novaCICheckLabel',
+                benefitsKey: 'novaCI',
+                label: 'Add-on CI + Waiver',
+                disabledLabel: 'Add-on CI + Waiver'
+            }
+        },
+        // Special pricing function (null = use standard getPremium)
+        customPricingFn: null,
+        // quotationData key prefix for storing premiums
+        premiumKey: 'novaPremium'
+    },
+    chinta: {
+        displayName: 'Hibah Chinta',
+        pricingKey: 'hibahChinta',
+        minAge: 20,
+        maxAge: 60,
+        priceElementId: 'chintaMonthly',
+        selectBtnId: 'selectChintaBtn',
+        benefitsContainerId: 'chinta-benefits',
+        variants: {
+            waiver: {
+                pricingKey: 'hibahChintaWaiver',
+                checkboxId: 'chintaWaiverCheck',
+                containerId: 'chintaCheckContainer',
+                labelId: 'chintaCheckLabel',
+                benefitsKey: 'chintaWaiver',
+                label: 'Add-on Waiver',
+                disabledLabel: 'Add-on Waiver'
+            },
+            ci: {
+                pricingKey: 'hibahChintaCI',
+                checkboxId: 'chintaCICheck',
+                containerId: 'chintaCICheckContainer',
+                labelId: 'chintaCILabel',
+                benefitsKey: 'chintaCI',
+                label: 'Add-on CI + Waiver',
+                disabledLabel: 'Add-on CI + Waiver'
+            }
+        },
+        customPricingFn: null,
+        premiumKey: 'chintaPremium'
+    },
+    inspirasi: {
+        displayName: 'Hibah Inspirasi',
+        pricingKey: 'hibahInspirasi',
+        minAge: null,                       // No minimum age adjustment
+        maxAge: 70,
+        priceElementId: 'inspirasiMonthly',
+        selectBtnId: 'selectInspirasiBtn',
+        benefitsContainerId: 'inspirasi-benefits',
+        variants: null,                     // No variants for this plan
+        // Custom pricing function for Inspirasi (different column names)
+        customPricingFn: 'inspirasi',
+        premiumKey: 'inspirasiPremium'
+    },
+    evo: {
+        displayName: 'Hibah Evo',
+        pricingKey: 'hibahEvo',
+        minAge: null,
+        maxAge: 80,
+        priceElementId: 'evo50Value',
+        selectBtnId: 'selectEvo50Btn',
+        benefitsContainerId: null,          // Evo doesn't use benefits container
+        variants: null,
+        customPricingFn: 'evo',             // Special pricing for Evo
+        premiumKey: 'evo50Value',
+        isValueNotPremium: true             // This shows sum assured, not premium
+    }
+};
+
+// Mapping from API pricing keys to internal hibahPriceData keys
+// This allows the processPricingData function to dynamically map data
+const PRICING_KEY_MAP = {};
+Object.keys(HIBAH_PLAN_CONFIG).forEach(planKey => {
+    const config = HIBAH_PLAN_CONFIG[planKey];
+    // Map main plan
+    PRICING_KEY_MAP[config.pricingKey] = planKey;
+    // Map variants using their benefitsKey for consistency
+    if (config.variants) {
+        Object.keys(config.variants).forEach(variantKey => {
+            const variant = config.variants[variantKey];
+            // e.g., 'hibahNovaWaiver' -> 'novaWaiver'
+            PRICING_KEY_MAP[variant.pricingKey] = variant.benefitsKey;
+        });
+    }
+});
+
+function getAgentIdFromPath() {
     const hostname = window.location.hostname;
 
     // 1. Abaikan localhost/google preview (Return NULL supaya jadi Landing Page secara default di local)
@@ -53,7 +214,10 @@ window.AGENT_WHATSAPP = null;
 
 let medicalPriceData150 = [];
 let medicalPriceData200 = [];
-let hibahPriceData = { nova: [], novaWaiver: [], novaCI: [], chinta: [], chintaWaiver: [], chintaCI: [], inspirasi: [], evo: [] };
+// Dynamically initialize hibahPriceData based on PRICING_KEY_MAP
+// New plans are automatically included when added to HIBAH_PLAN_CONFIG
+let hibahPriceData = {};
+Object.values(PRICING_KEY_MAP).forEach(key => { hibahPriceData[key] = []; });
 let isPricingLoaded = false;
 
 const form = document.getElementById('quotationForm');
@@ -95,6 +259,39 @@ const icons = {
 };
 
 const PLAN_BENEFITS = {
+    // =========================================
+    // HIBAH NOVA 150 BENEFITS
+    // =========================================
+    nova150: [
+        { icon: 'skull', text: 'Kematian/Lumpuh:', value: 'RM150k' },
+        { icon: 'plane', text: 'Kematian Haji/Umrah:', value: 'RM300k' },
+        { icon: 'coins', text: 'Nilai Tunai (Surrender Value)', value: '' },
+        { icon: 'clock', text: 'Khairat Kematian:', value: 'RM2,000' },
+        { icon: 'shieldCheck', text: 'Coverage:', value: 'Sehingga Umur 60' },
+        { icon: 'tag', text: 'Harga:', value: 'Tetap' }
+    ],
+    nova150Waiver: [
+        { icon: 'skull', text: 'Kematian/Lumpuh:', value: 'RM150k' },
+        { icon: 'plane', text: 'Kematian Haji/Umrah:', value: 'RM300k' },
+        { icon: 'coins', text: 'Nilai Tunai (Surrender Value)', value: '' },
+        { icon: 'clock', text: 'Khairat Kematian:', value: 'RM2,000' },
+        { icon: 'checkCircle', text: 'Waiver Sakit Kritikal', subtext: '(Dikecualikan Caruman)', highlight: true },
+        { icon: 'shieldCheck', text: 'Coverage:', value: 'Sehingga Umur 60' },
+        { icon: 'tag', text: 'Harga:', value: 'Tetap' }
+    ],
+    nova150CI: [
+        { icon: 'skull', text: 'Kematian/Lumpuh:', value: 'RM150k' },
+        { icon: 'plane', text: 'Kematian Haji/Umrah:', value: 'RM300k' },
+        { icon: 'shieldAlert', text: 'Sakit Kritikal:', value: 'RM100,000', highlight: true },
+        { icon: 'checkCircle', text: 'Waiver Sakit Kritikal', subtext: '(Dikecualikan Caruman)', highlight: true },
+        { icon: 'coins', text: 'Nilai Tunai (Surrender Value)', value: '' },
+        { icon: 'clock', text: 'Khairat Kematian:', value: 'RM2,000' },
+        { icon: 'shieldCheck', text: 'Coverage:', value: 'Sehingga Umur 60' },
+        { icon: 'tag', text: 'Harga:', value: 'Tetap' }
+    ],
+    // =========================================
+    // HIBAH NOVA BENEFITS (Standard)
+    // =========================================
     nova: [
         { icon: 'skull', text: 'Kematian/Lumpuh:', value: 'RM250k' },
         { icon: 'plane', text: 'Kematian Haji/Umrah:', value: 'RM500k' },
@@ -154,7 +351,7 @@ const PLAN_BENEFITS = {
         { icon: 'skull', text: 'Kematian Kemalangan:', value: 'RM200k' },
         { icon: 'shieldAlert', text: 'Sakit Kritikal:', value: 'RM50k' },
         { icon: 'bed', text: 'Elaun Wad:', value: 'RM50 / hari' },
-        { icon: 'shieldCheck', text: 'Coverage:', value: 'Sehingga Umur 85' },
+        { icon: 'shieldCheck', text: 'Coverage:', value: 'Sehingga Umur 70' },
         { icon: 'tag', text: 'Harga:', value: 'Berubah setiap 5 tahun' }
     ]
 };
@@ -241,16 +438,17 @@ function updateAgentUI(data) {
 }
 
 function processPricingData(data) {
+    // Medical card data (remains static as it's a separate product type)
     medicalPriceData150 = data.medical150 || [];
     medicalPriceData200 = data.medical200 || [];
-    hibahPriceData.nova = data.hibahNova || [];
-    hibahPriceData.novaWaiver = data.hibahNovaWaiver || [];
-    hibahPriceData.novaCI = data.hibahNovaCI || [];
-    hibahPriceData.chinta = data.hibahChinta || [];
-    hibahPriceData.chintaWaiver = data.hibahChintaWaiver || [];
-    hibahPriceData.chintaCI = data.hibahChintaCI || [];
-    hibahPriceData.inspirasi = data.hibahInspirasi || [];
-    hibahPriceData.evo = data.hibahEvo || [];
+
+    // Dynamically map Hibah pricing data based on PRICING_KEY_MAP
+    // This allows new plans to be added without modifying this function
+    Object.keys(PRICING_KEY_MAP).forEach(apiKey => {
+        const internalKey = PRICING_KEY_MAP[apiKey];
+        hibahPriceData[internalKey] = data[apiKey] || [];
+    });
+
     isPricingLoaded = true;
     console.log("Pricing Data Ready (Source: " + (data._source || "Unknown") + ")");
 }
@@ -477,154 +675,135 @@ function calculateMedicalCard(name, age, gender, smoker, occupation, dob, phone)
     medicalResultDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
+// =========================
+// CUSTOM PRICING FUNCTIONS
+// =========================
+// These handle special pricing logic for plans that don't use standard getPremium
+function getInspirasiPremium(priceInfo, gender, smoker) {
+    if (!priceInfo) return null;
+    if (gender === 'perempuan') {
+        return smoker === 'ya' ? priceInfo.p_s : priceInfo.p_ns;
+    } else {
+        return smoker === 'ya' ? priceInfo.l_s : priceInfo.l_ns;
+    }
+}
+
+function getEvoPremium(priceInfo, gender, smoker) {
+    if (!priceInfo) return 0;
+    if (gender === 'perempuan') {
+        return priceInfo.rm50_p;
+    } else {
+        return smoker === 'ya' ? priceInfo.rm50_ls : priceInfo.rm50_lns;
+    }
+}
+
+// Map custom pricing function names to actual functions
+const CUSTOM_PRICING_FNS = {
+    'inspirasi': getInspirasiPremium,
+    'evo': getEvoPremium
+};
+
 function calculateHibah(name, age, gender, smoker, occupation, dob, phone) {
-    let novaPremium = null;
-    let novaWaiverPremium = null;
-    let novaCIPremium = null;
-
-    if (age <= 60) {
-        const novaAge = age < 25 ? 25 : age;
-        const novaPriceInfo = hibahPriceData.nova.find(item => item.age == novaAge);
-        novaPremium = getPremium(novaPriceInfo, gender, smoker);
-
-        const novaWaiverInfo = (hibahPriceData.novaWaiver || []).find(item => item.age == novaAge);
-        novaWaiverPremium = getPremium(novaWaiverInfo, gender, smoker);
-
-        const novaCIInfo = (hibahPriceData.novaCI || []).find(item => item.age == novaAge);
-        novaCIPremium = getPremium(novaCIInfo, gender, smoker);
-    }
-
-    document.getElementById('novaMonthly').textContent = novaPremium ? novaPremium.toFixed(2) : "N/A";
-    document.getElementById('selectNovaBtn').disabled = !novaPremium;
-
-    const novaCheck = document.getElementById('novaWaiverCheck');
-    const novaContainer = document.getElementById('novaCheckContainer');
-    const novaLabel = document.getElementById('novaCheckLabel');
-
-    const novaCICheck = document.getElementById('novaCICheck');
-    const novaCIContainer = document.getElementById('novaCICheckContainer');
-    const novaCILabel = document.getElementById('novaCICheckLabel');
-
-    if (novaCheck) novaCheck.checked = false;
-    if (novaCICheck) novaCICheck.checked = false;
-
-    if (novaCheck) {
-        if (!novaWaiverPremium) {
-            novaCheck.disabled = true;
-            if (novaContainer) novaContainer.classList.add('checkbox-disabled');
-            if (novaLabel) novaLabel.textContent = "Add-on Waiver (Tidak Ditawarkan)";
-        } else {
-            novaCheck.disabled = false;
-            if (novaContainer) novaContainer.classList.remove('checkbox-disabled');
-            if (novaLabel) novaLabel.textContent = "Add-on Waiver";
-        }
-    }
-
-    if (novaCICheck) {
-        if (!novaCIPremium) {
-            novaCICheck.disabled = true;
-            if (novaCIContainer) novaCIContainer.classList.add('checkbox-disabled');
-            if (novaCILabel) novaCILabel.textContent = "Add-on CI + Waiver (Tidak Ditawarkan)";
-        } else {
-            novaCICheck.disabled = false;
-            if (novaCIContainer) novaCIContainer.classList.remove('checkbox-disabled');
-            if (novaCILabel) novaCILabel.textContent = "Add-on CI + Waiver";
-        }
-    }
-
-    let chintaPremium = null;
-    let chintaWaiverPremium = null;
-    let chintaCIPremium = null;
-
-    if (age <= 60) {
-        const chintaAge = age < 20 ? 20 : age;
-        const chintaPriceInfo = hibahPriceData.chinta.find(item => item.age == chintaAge);
-        chintaPremium = getPremium(chintaPriceInfo, gender, smoker);
-
-        const chintaWaiverInfo = (hibahPriceData.chintaWaiver || []).find(item => item.age == chintaAge);
-        chintaWaiverPremium = getPremium(chintaWaiverInfo, gender, smoker);
-
-        const chintaCIInfo = (hibahPriceData.chintaCI || []).find(item => item.age == chintaAge);
-        chintaCIPremium = getPremium(chintaCIInfo, gender, smoker);
-    }
-
-    document.getElementById('chintaMonthly').textContent = chintaPremium ? chintaPremium.toFixed(2) : "N/A";
-    document.getElementById('selectChintaBtn').disabled = !chintaPremium;
-
-    const chintaCheck = document.getElementById('chintaWaiverCheck');
-    const chintaContainer = document.getElementById('chintaCheckContainer');
-    const chintaLabel = document.getElementById('chintaCheckLabel');
-
-    const chintaCICheck = document.getElementById('chintaCICheck');
-    const chintaCIContainer = document.getElementById('chintaCICheckContainer');
-    const chintaCILabel = document.getElementById('chintaCILabel');
-
-    if (chintaCheck) chintaCheck.checked = false;
-    if (chintaCICheck) chintaCICheck.checked = false;
-
-    if (chintaCheck) {
-        if (!chintaWaiverPremium) {
-            chintaCheck.disabled = true;
-            if (chintaContainer) chintaContainer.classList.add('checkbox-disabled');
-            if (chintaLabel) chintaLabel.textContent = "Add-on Waiver (Tidak Ditawarkan)";
-        } else {
-            chintaCheck.disabled = false;
-            if (chintaContainer) chintaContainer.classList.remove('checkbox-disabled');
-            if (chintaLabel) chintaLabel.textContent = "Add-on Waiver";
-        }
-    }
-
-    if (chintaCICheck) {
-        if (!chintaCIPremium) {
-            chintaCICheck.disabled = true;
-            if (chintaCIContainer) chintaCIContainer.classList.add('checkbox-disabled');
-            if (chintaCILabel) chintaCILabel.textContent = "Add-on CI + Waiver (Tidak Ditawarkan)";
-        } else {
-            chintaCICheck.disabled = false;
-            if (chintaCIContainer) chintaCIContainer.classList.remove('checkbox-disabled');
-            if (chintaCILabel) chintaCILabel.textContent = "Add-on CI + Waiver";
-        }
-    }
-
-    const inspirasiPriceInfo = hibahPriceData.inspirasi.find(item => item.age == age);
-    let inspirasiPremium = null;
-    if (inspirasiPriceInfo) {
-        if (gender === 'perempuan') {
-            inspirasiPremium = smoker === 'ya' ? inspirasiPriceInfo.p_s : inspirasiPriceInfo.p_ns;
-        } else {
-            inspirasiPremium = smoker === 'ya' ? inspirasiPriceInfo.l_s : inspirasiPriceInfo.l_ns;
-        }
-    }
-    document.getElementById('inspirasiMonthly').textContent = inspirasiPremium ? inspirasiPremium.toFixed(2) : "N/A";
-    document.getElementById('selectInspirasiBtn').disabled = !inspirasiPremium;
-
-    let evo50Value = 0;
-    if (hibahPriceData.evo && hibahPriceData.evo.length > 0) {
-        const evoData = hibahPriceData.evo.find(item => item.age == age);
-        if (evoData) {
-            if (gender === 'perempuan') {
-                evo50Value = evoData.rm50_p;
-            } else {
-                evo50Value = smoker === 'ya' ? evoData.rm50_ls : evoData.rm50_lns;
-            }
-        }
-    }
-    document.getElementById('evo50Value').textContent = evo50Value.toLocaleString();
-
-    quotationData = {
+    // Initialize quotationData with base info
+    const calculatedPremiums = {
         name, dob, phone, occupation, gender, smoker, nextBirthdayAge: age,
-        novaPremium, novaWaiverPremium, novaCIPremium,
-        chintaPremium, chintaWaiverPremium, chintaCIPremium,
-        inspirasiPremium,
-        evo50Value,
         planType: 'hibah'
     };
 
-    renderSingleHibahBenefit('nova', 'nova');
-    renderSingleHibahBenefit('chinta', 'chinta');
-    renderSingleHibahBenefit('inspirasi', 'inspirasi');
+    // Loop through all plans defined in HIBAH_PLAN_CONFIG
+    Object.keys(HIBAH_PLAN_CONFIG).forEach(planKey => {
+        const config = HIBAH_PLAN_CONFIG[planKey];
 
+        // Determine effective age (apply minimum age if needed)
+        let effectiveAge = age;
+        if (config.minAge && age < config.minAge) {
+            effectiveAge = config.minAge;
+        }
 
+        // Check if age is within plan's eligible range
+        const isEligible = age <= config.maxAge;
+
+        // Get pricing data for this plan
+        const priceData = hibahPriceData[planKey] || [];
+        const priceInfo = priceData.find(item => item.age == effectiveAge);
+
+        // Calculate premium using appropriate function
+        let premium = null;
+        if (isEligible && priceInfo) {
+            if (config.customPricingFn && CUSTOM_PRICING_FNS[config.customPricingFn]) {
+                premium = CUSTOM_PRICING_FNS[config.customPricingFn](priceInfo, gender, smoker);
+            } else {
+                premium = getPremium(priceInfo, gender, smoker);
+            }
+        }
+
+        // Store premium in calculatedPremiums
+        calculatedPremiums[config.premiumKey] = premium;
+
+        // Update UI elements for this plan
+        const priceEl = document.getElementById(config.priceElementId);
+        const selectBtn = document.getElementById(config.selectBtnId);
+
+        if (priceEl) {
+            if (config.isValueNotPremium) {
+                // For Evo, show as formatted number
+                priceEl.textContent = (premium || 0).toLocaleString();
+            } else {
+                priceEl.textContent = premium ? premium.toFixed(2) : "N/A";
+            }
+        }
+        if (selectBtn) {
+            selectBtn.disabled = !premium;
+        }
+
+        // Handle variants (waiver, CI add-ons)
+        if (config.variants) {
+            Object.keys(config.variants).forEach(variantKey => {
+                const variant = config.variants[variantKey];
+                // Use the benefitsKey to look up pricing data (matches PRICING_KEY_MAP)
+                const variantDataKey = variant.benefitsKey;
+                const variantPriceData = hibahPriceData[variantDataKey] || [];
+                const variantPriceInfo = variantPriceData.find(item => item.age == effectiveAge);
+
+                let variantPremium = null;
+                if (isEligible && variantPriceInfo) {
+                    variantPremium = getPremium(variantPriceInfo, gender, smoker);
+                }
+
+                // Store variant premium using the benefitsKey to match expected naming (e.g., 'novaWaiverPremium', 'novaCIPremium')
+                const variantPremiumKey = variant.benefitsKey + 'Premium';
+                calculatedPremiums[variantPremiumKey] = variantPremium;
+
+                // Update variant UI elements
+                const checkbox = document.getElementById(variant.checkboxId);
+                const container = document.getElementById(variant.containerId);
+                const label = document.getElementById(variant.labelId);
+
+                if (checkbox) {
+                    checkbox.checked = false;
+                    if (!variantPremium) {
+                        checkbox.disabled = true;
+                        if (container) container.classList.add('checkbox-disabled');
+                        if (label) label.textContent = variant.disabledLabel;
+                    } else {
+                        checkbox.disabled = false;
+                        if (container) container.classList.remove('checkbox-disabled');
+                        if (label) label.textContent = variant.label;
+                    }
+                }
+            });
+        }
+
+        // Render benefits for plans that have a benefits container
+        if (config.benefitsContainerId) {
+            renderSingleHibahBenefit(planKey, planKey);
+        }
+    });
+
+    // Set global quotationData
+    quotationData = calculatedPremiums;
+
+    // Update result display
     document.getElementById('resultNameHibah').textContent = name;
     document.getElementById('resultAgeHibah').textContent = age;
     hibahResultDiv.classList.add('is-visible');
@@ -654,6 +833,33 @@ function updateNovaCard(e) {
     } else if (quotationData.novaPremium) {
         priceDisplay.textContent = quotationData.novaPremium.toFixed(2);
         renderSingleHibahBenefit('nova', 'nova');
+    }
+}
+
+// Nova 150 variant update handler
+function updateNova150Card(e) {
+    const isWaiver = document.getElementById('nova150WaiverCheck').checked;
+    const isCI = document.getElementById('nova150CICheck').checked;
+    const priceDisplay = document.getElementById('nova150Monthly');
+
+    if (e && e.target.id === 'nova150CICheck' && isCI) {
+        document.getElementById('nova150WaiverCheck').checked = false;
+    } else if (e && e.target.id === 'nova150WaiverCheck' && isWaiver) {
+        document.getElementById('nova150CICheck').checked = false;
+    }
+
+    const finalWaiver = document.getElementById('nova150WaiverCheck').checked;
+    const finalCI = document.getElementById('nova150CICheck').checked;
+
+    if (finalCI && quotationData.nova150CIPremium) {
+        priceDisplay.textContent = quotationData.nova150CIPremium.toFixed(2);
+        renderSingleHibahBenefit('nova150', 'nova150CI');
+    } else if (finalWaiver && quotationData.nova150WaiverPremium) {
+        priceDisplay.textContent = quotationData.nova150WaiverPremium.toFixed(2);
+        renderSingleHibahBenefit('nova150', 'nova150Waiver');
+    } else if (quotationData.nova150Premium) {
+        priceDisplay.textContent = quotationData.nova150Premium.toFixed(2);
+        renderSingleHibahBenefit('nova150', 'nova150');
     }
 }
 
@@ -787,7 +993,12 @@ function sendWhatsAppMessage(planName, premiumOrValue) {
             });
         } else if (data.planType === 'hibah') {
             let planKey;
-            if (planName === 'Hibah Nova') planKey = 'nova';
+            // Nova 150 plans
+            if (planName === 'Hibah Nova 150') planKey = 'nova150';
+            else if (planName === 'Hibah Nova 150 (Waiver)') planKey = 'nova150Waiver';
+            else if (planName === 'Hibah Nova 150 (Add-on CI + Waiver)') planKey = 'nova150CI';
+            // Nova plans
+            else if (planName === 'Hibah Nova') planKey = 'nova';
             else if (planName === 'Hibah Nova (Waiver)') planKey = 'novaWaiver';
             else if (planName === 'Hibah Nova (Add-on CI + Waiver)') planKey = 'novaCI';
             else if (planName === 'Hibah Chinta') planKey = 'chinta';
@@ -811,6 +1022,19 @@ function sendWhatsAppMessage(planName, premiumOrValue) {
     window.open(whatsappUrl, '_blank');
 }
 
+// Nova 150 button and checkbox handlers
+document.getElementById('selectNova150Btn').addEventListener('click', () => {
+    const isWaiver = document.getElementById('nova150WaiverCheck').checked;
+    const isCI = document.getElementById('nova150CICheck').checked;
+    if (isCI) sendWhatsAppMessage('Hibah Nova 150 (Add-on CI + Waiver)', quotationData.nova150CIPremium);
+    else if (isWaiver) sendWhatsAppMessage('Hibah Nova 150 (Waiver)', quotationData.nova150WaiverPremium);
+    else sendWhatsAppMessage('Hibah Nova 150', quotationData.nova150Premium);
+});
+
+document.getElementById('nova150WaiverCheck').addEventListener('change', updateNova150Card);
+document.getElementById('nova150CICheck').addEventListener('change', updateNova150Card);
+
+// Nova button handler
 document.getElementById('selectNovaBtn').addEventListener('click', () => {
     const isWaiver = document.getElementById('novaWaiverCheck').checked;
     const isCI = document.getElementById('novaCICheck').checked;
@@ -925,9 +1149,13 @@ function renderSingleHibahBenefit(containerKey, benefitsKey) {
 }
 
 function renderHibahBenefits() {
-    renderSingleHibahBenefit('inspirasi', 'inspirasi');
-    renderSingleHibahBenefit('nova', 'nova');
-    renderSingleHibahBenefit('chinta', 'chinta');
+    // Dynamically render benefits for all plans that have a benefits container
+    Object.keys(HIBAH_PLAN_CONFIG).forEach(planKey => {
+        const config = HIBAH_PLAN_CONFIG[planKey];
+        if (config.benefitsContainerId) {
+            renderSingleHibahBenefit(planKey, planKey);
+        }
+    });
 }
 
 renderAllMedicalBenefits();
