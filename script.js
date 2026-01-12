@@ -485,17 +485,15 @@ async function initializeApp() {
             if (cachedPricing) {
                 try {
                     const pricingData = JSON.parse(cachedPricing);
-                    const ageMs = Date.now() - (pricingData._ts || 0);
-                    if (ageMs < 1 * 60 * 1000) {
-                        pricingData._source = "Cache";
-                        processPricingData(pricingData);
-                    } else {
-                        localStorage.removeItem(CACHE_KEY_PRICING);
-                    }
-                } catch (e) { }
+                    pricingData._source = "Cache";
+                    processPricingData(pricingData);
+                } catch (e) {
+                    localStorage.removeItem(CACHE_KEY_PRICING);
+                }
             }
 
-            if (!isPricingLoaded && configData.hargaUrl) {
+            // ALWAYS fetch fresh data in background (stale-while-revalidate)
+            if (configData.hargaUrl) {
                 fetchPricingData(configData.hargaUrl);
             }
 
