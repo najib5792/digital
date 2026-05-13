@@ -8,16 +8,16 @@ app.use(express.json({ limit: '1mb' }));
 
 app.post('/analyze-chat', async (req, res) => {
   try {
-    const { messages } = req.body;
+    const { messages, tone = 'Friendly & Warm' } = req.body;
     if (!Array.isArray(messages) || !messages.length) {
       return res.status(400).json({ error: 'messages array required' });
     }
 
     const prompt = `You are an assistant for Malaysian Takaful sales conversations.
 Analyze ONLY the provided visible messages and output strict JSON with keys:
-lead_score, emotion, objection, summary, suggested_reply, follow_up.
+lead_score, emotion, objection, summary, suggested_reply, follow_up, next_action.
 
-Messages:\n${messages.map((m, i) => `${i + 1}. ${m}`).join('\n')}`;
+Suggested reply must follow this tone: ${tone}. The reply must be copy-paste ready for WhatsApp, natural Malaysian Malay, short, clear, and suitable for a Takaful sales conversation.\n\nMessages:\n${messages.map((m, i) => `${i + 1}. ${m}`).join('\n')}`;
 
     const response = await fetch('https://api.openai.com/v1/responses', {
       method: 'POST',

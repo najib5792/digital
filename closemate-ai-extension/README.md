@@ -18,6 +18,7 @@ The backend is expected to return JSON with:
 - `summary`
 - `suggested_reply`
 - `follow_up`
+- `next_action`
 
 ## Folder Structure
 
@@ -63,7 +64,8 @@ closemate-ai-extension/
 1. Click extension icon → popup opens.
 2. Set **Backend URL** (default: `http://localhost:8787`).
 3. Open `https://web.whatsapp.com` and select a conversation.
-4. Click floating **Analyze Chat** button.
+4. Choose a **Reply Tone** in the panel (default: Friendly & Warm).
+5. Click floating **Analyze Chat** button.
 
 ## How To Test (End-to-End)
 
@@ -76,7 +78,7 @@ curl -i http://localhost:8787/analyze-chat \
 ```
 Expected:
 - HTTP `200` (or an OpenAI error if API key/model is invalid)
-- JSON object with keys: `lead_score`, `emotion`, `objection`, `summary`, `suggested_reply`, `follow_up`
+- JSON object with keys: `lead_score`, `emotion`, `objection`, `summary`, `suggested_reply`, `follow_up`, `next_action`
 
 ### 2) Extension injection test on WhatsApp Web
 1. Open `https://web.whatsapp.com`.
