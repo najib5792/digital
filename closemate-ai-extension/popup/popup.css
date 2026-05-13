@@ -1,0 +1,8 @@
+body { margin: 0; font-family: Inter, system-ui, sans-serif; background: #10141b; color: #eff4fb; }
+main { width: 280px; padding: 16px; }
+h1 { margin: 0 0 8px; font-size: 18px; }
+p { margin: 0 0 12px; color: #aac0d9; font-size: 13px; }
+label { display: block; margin-bottom: 6px; font-size: 12px; color: #8edbb6; }
+input { width: 100%; border-radius: 10px; border: 1px solid #314052; background: #171d26; color: #eff4fb; padding: 8px; }
+button { margin-top: 10px; width: 100%; border: none; border-radius: 10px; padding: 10px; background: #1faa68; color: #fff; font-weight: 700; }
+small { display: block; margin-top: 10px; color: #7e92a8; }
