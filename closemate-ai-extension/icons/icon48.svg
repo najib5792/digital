@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48" role="img" aria-label="CloseMate AI icon 48">
+  <rect width="48" height="48" rx="12" fill="#0b141a"/>
+  <circle cx="24" cy="24" r="15" fill="#25d366"/>
+  <path d="M16.5 24h15M24 16.5v15" stroke="#0b141a" stroke-width="4" stroke-linecap="round"/>
+</svg>
