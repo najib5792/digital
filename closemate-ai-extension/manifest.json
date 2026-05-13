@@ -5,11 +5,13 @@
   "description": "Analyze visible WhatsApp Web chats for Malaysian Takaful agents.",
   "permissions": [
     "storage",
-    "activeTab"
+    "activeTab",
+    "scripting"
   ],
   "host_permissions": [
     "https://web.whatsapp.com/*",
-    "http://localhost:8787/*"
+    "http://localhost:8787/*",
+    "https://*/*"
   ],
   "action": {
     "default_title": "CloseMate AI",

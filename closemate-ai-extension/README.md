@@ -55,7 +55,7 @@ closemate-ai-extension/
    cd closemate-ai-extension/backend
    npm install
    cp .env.example .env
-   # set OPENAI_API_KEY in .env
+   # set  in .env
    npm start
    ```
 2. Backend runs on `http://localhost:8787` by default.
@@ -77,7 +77,7 @@ curl -i http://localhost:8787/analyze-chat \
   -d '{"messages":["[10:10 AM] Prospect: I need more details on takaful plan"]}'
 ```
 Expected:
-- HTTP `200` (or an OpenAI error if API key/model is invalid)
+- HTTP `200` (or an Gemini error if API key/model is invalid)
 - JSON object with keys: `lead_score`, `emotion`, `objection`, `summary`, `suggested_reply`, `follow_up`, `next_action`
 
 ### 2) Extension injection test on WhatsApp Web
@@ -137,3 +137,31 @@ Checklist:
    ```
 3. In extension popup, set **Backend URL** exactly to `http://localhost:8787` and click **Save**.
 4. Refresh `https://web.whatsapp.com` and click **Analyze Chat** again.
+
+
+## Sellable MVP Setup
+1. Install backend dependencies
+   ```bash
+   cd closemate-ai-extension/backend
+   npm install
+   cp .env.example .env
+   npm start
+   ```
+2. Load extension at `chrome://extensions` (Developer mode -> Load unpacked).
+3. Open `https://web.whatsapp.com`.
+4. In CloseMate panel, enter License Key and click **Save License Key**.
+5. Enter Gemini API Key and click **Save API Key**.
+6. Choose Reply Tone (saved locally).
+7. Click **Analyze Chat**.
+8. Use **Copy Reply** or **Copy Follow Up**.
+
+### Demo License Keys
+- `CLOSEMATE-DEMO-001`
+- `CLOSEMATE-DEMO-002`
+- `CLOSEMATE-DEMO-003`
+
+### Security Notes
+- Gemini API key is entered by user inside the extension panel.
+- API key is stored in `chrome.storage.local` only.
+- API key is not hardcoded in source code.
+- For production, deploy backend online and change `CLOSEMATE_API_URL` in `content.js`.
