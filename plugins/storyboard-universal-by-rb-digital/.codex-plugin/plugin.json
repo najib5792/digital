@@ -1,0 +1,22 @@
+{
+  "name": "storyboard-universal-by-rb-digital",
+  "version": "0.1.0",
+  "description": "Create viral short-form video storyboards, AI video prompts, and premium storyboard boards.",
+  "author": {
+    "name": "RB Digital"
+  },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Storyboard Universal by RB Digital",
+    "shortDescription": "Turn any idea into a viral short-video storyboard.",
+    "longDescription": "A creative-director workflow for TikTok, Reels, Shorts, and AI video generation: storyboard first, approved video prompts second, and storyboard images last.",
+    "developerName": "RB Digital",
+    "category": "Creative",
+    "capabilities": ["Storyboard Direction", "AI Video Prompts", "Storyboard Images"],
+    "defaultPrompt": [
+      "Buat storyboard viral untuk produk ini.",
+      "Tukar idea ini kepada video TikTok 10 saat.",
+      "Bina storyboard Reels daripada skrip ini."
+    ]
+  }
+}
