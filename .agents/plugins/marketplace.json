@@ -1,0 +1,32 @@
+{
+  "name": "rb-digital-plugins",
+  "interface": {
+    "displayName": "RB Digital Plugins"
+  },
+  "plugins": [
+    {
+      "name": "rb-storyboard",
+      "source": {
+        "source": "local",
+        "path": "./plugins/rb-storyboard"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_USE"
+      },
+      "category": "Creative"
+    },
+    {
+      "name": "storyboard-universal-by-rb-digital",
+      "source": {
+        "source": "local",
+        "path": "./plugins/storyboard-universal-by-rb-digital"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_USE"
+      },
+      "category": "Creative"
+    }
+  ]
+}
