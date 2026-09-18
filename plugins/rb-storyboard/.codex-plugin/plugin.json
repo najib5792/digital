@@ -1,0 +1,22 @@
+{
+  "name": "rb-storyboard",
+  "version": "0.1.0",
+  "description": "Turn creative briefs into production-ready storyboards and visual-generation prompts.",
+  "author": {
+    "name": "RB Digital"
+  },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "RB Storyboard",
+    "shortDescription": "Create shot-by-shot storyboards from any brief.",
+    "longDescription": "Transforms product, campaign, and narrative briefs into structured scenes, shot directions, dialogue, timing, and consistent prompts for image or video generation.",
+    "developerName": "RB Digital",
+    "category": "Creative",
+    "capabilities": ["Storyboard Planning", "Prompt Writing"],
+    "defaultPrompt": [
+      "Create a storyboard from my campaign brief.",
+      "Turn this script into a shot list.",
+      "Improve these scenes for a vertical video."
+    ]
+  }
+}
