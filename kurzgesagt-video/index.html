@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="ms">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lubang Hitam — Animasi</title>
+<style>
+  @font-face { font-family: 'Nunito'; src: url('fonts/Nunito.ttf') format('truetype'); font-weight: 800 900; }
+  html, body { margin: 0; height: 100%; background: #07081c; }
+  body { display: grid; place-items: center; }
+  canvas { width: min(100vw, 177.78vh); height: auto; display: block; }
+</style>
+</head>
+<body>
+<canvas id="c" width="1280" height="720"></canvas>
+<script>
+// Animasi gaya "flat vector" ala Kurzgesagt, dipacu masa (deterministik).
+// render(t) melukis satu bingkai pada saat t (saat). Buka fail ini dalam
+// pelayar untuk pratonton; render.mjs guna fungsi yang sama untuk eksport MP4.
+const W = 1280, H = 720, CX = W / 2, CY = H / 2;
+const DURATION = 26;
+const ctx = document.getElementById('c').getContext('2d');
+
+// ---------- utiliti ----------
+const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+const lerp = (a, b, k) => a + (b - a) * k;
+const seg = (t, a, b) => clamp((t - a) / (b - a));
+const easeInOut = k => k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
+const easeOut = k => 1 - Math.pow(1 - k, 3);
+const easeIn = k => k * k * k;
+const easeBack = k => { const c = 1.9; return 1 + (c + 1) * Math.pow(k - 1, 3) + c * Math.pow(k - 1, 2); };
+function rng(seed) { return () => (seed = (seed * 16807) % 2147483647) / 2147483647; }
+function mixHex(a, b, k) {
+  const pa = parseInt(a.slice(1), 16), pb = parseInt(b.slice(1), 16);
+  const ch = s => [(s >> 16) & 255, (s >> 8) & 255, s & 255];
+  const [r1, g1, b1] = ch(pa), [r2, g2, b2] = ch(pb);
+  return `rgb(${lerp(r1, r2, k) | 0},${lerp(g1, g2, k) | 0},${lerp(b1, b2, k) | 0})`;
+}
+function circle(x, y, r, fill) { ctx.beginPath(); ctx.arc(x, y, Math.max(0, r), 0, Math.PI * 2); ctx.fillStyle = fill; ctx.fill(); }
+
+// ---------- data statik ----------
+const R = rng(42);
+const stars = Array.from({ length: 260 }, () => ({
+  x: R() * W, y: R() * H, r: 0.6 + Math.pow(R(), 3) * 2.6, ph: R() * 6.28, sp: 0.8 + R() * 2,
+  depth: 0.2 + R() * 0.8, c: R() < 0.15 ? '#ffd9a8' : R() < 0.3 ? '#a9c8ff' : '#ffffff'
+}));
+const dust = Array.from({ length: 520 }, () => {
+  const r = 95 + Math.pow(R(), 0.8) * 230;
+  return { r, a: R() * 6.28, s: 1.2 + R() * 2.8, off: (R() - 0.5) * 10,
+    c: ['#ffcf4a', '#ff9a3c', '#ff6b5a', '#ffe7a3', '#ff7fb0'][(R() * 5) | 0] };
+});
+const debris = Array.from({ length: 40 }, () => ({ a: R() * 6.28, v: 250 + R() * 450, s: 3 + R() * 7 }));
+
+// ---------- latar ----------
+function background(t) {
+  const g = ctx.createRadialGradient(CX, CY, 50, CX, CY, 820);
+  g.addColorStop(0, '#232a6b'); g.addColorStop(0.55, '#141845'); g.addColorStop(1, '#07081c');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  for (const s of stars) {
+    const tw = 0.55 + 0.45 * Math.sin(t * s.sp + s.ph);
+    const x = (s.x - t * 6 * s.depth + W) % W;
+    ctx.globalAlpha = tw * s.depth;
+    circle(x, s.y, s.r, s.c);
+    if (s.r > 2.2) { // bintang terang berbentuk "+"
+      ctx.fillStyle = s.c; ctx.globalAlpha *= 0.6;
+      ctx.fillRect(x - s.r * 3, s.y - 0.6, s.r * 6, 1.2);
+      ctx.fillRect(x - 0.6, s.y - s.r * 3, 1.2, s.r * 6);
+    }
+  }
+  ctx.globalAlpha = 1;
+}
+
+// Sfera rata dengan bayang sabit + sorotan — ciri khas gaya flat.
+function flatSphere(x, y, r, base, shade, hi) {
+  circle(x, y, r, base);
+  ctx.save();
+  ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.clip();
+  ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2);
+  ctx.arc(x - r * 0.28, y - r * 0.28, r * 1.02, 0, Math.PI * 2, true);
+  ctx.fillStyle = shade; ctx.fill();
+  ctx.globalAlpha = 0.55;
+  ctx.beginPath(); ctx.ellipse(x - r * 0.42, y - r * 0.45, r * 0.22, r * 0.12, -0.7, 0, Math.PI * 2);
+  ctx.fillStyle = hi; ctx.fill();
+  ctx.restore();
+}
+
+function glow(x, y, r, color, layers = 4, spread = 0.35) {
+  for (let i = layers; i >= 1; i--) {
+    ctx.globalAlpha = 0.09;
+    circle(x, y, r * (1 + spread * i), color);
+  }
+  ctx.globalAlpha = 1;
+}
+
+// ---------- bintang (adegan 1–2) ----------
+function drawStar(t) {
+  if (t > 9.7) return;
+  const grow = easeInOut(seg(t, 6.2, 8.2));
+  const collapse = easeIn(seg(t, 8.4, 9.6));
+  const pulse = 1 + 0.025 * Math.sin(t * 2.4);
+  const intro = easeBack(seg(t, 0.2, 1.6));
+  let r = 135 * pulse * intro * lerp(1, 1.45, grow);
+  r = lerp(r, 6, collapse);
+  const base = mixHex('#ffc93c', '#ff5a4e', grow);
+  const shade = mixHex('#ff9a2e', '#d23a48', grow);
+  // korona berputar
+  ctx.save(); ctx.translate(CX, CY); ctx.rotate(t * 0.15);
+  ctx.fillStyle = mixHex('#ffe08a', '#ff8a6a', grow); ctx.globalAlpha = 0.18;
+  for (let i = 0; i < 12; i++) {
+    ctx.rotate(Math.PI / 6);
+    ctx.beginPath(); ctx.moveTo(-r * 0.25, 0); ctx.lineTo(0, -r * (1.55 + 0.1 * Math.sin(t * 3 + i))); ctx.lineTo(r * 0.25, 0); ctx.fill();
+  }
+  ctx.restore(); ctx.globalAlpha = 1;
+  glow(CX, CY, r, base, 4, 0.18);
+  flatSphere(CX, CY, r, base, shade, '#fff6d8');
+  // bintik/"granul" permukaan
+  ctx.save(); ctx.beginPath(); ctx.arc(CX, CY, r, 0, 6.28); ctx.clip(); ctx.globalAlpha = 0.25;
+  for (let i = 0; i < 7; i++) {
+    const a = i * 0.9 + t * 0.2, d = r * (0.3 + 0.08 * i % 0.6);
+    circle(CX + Math.cos(a) * d, CY + Math.sin(a) * d, r * 0.09, shade);
+  }
+  ctx.restore(); ctx.globalAlpha = 1;
+}
+
+function drawShockwave(t) {
+  const k = seg(t, 9.55, 12.5);
+  if (k <= 0 || k >= 1) return;
+  const e = easeOut(k);
+  ctx.lineWidth = lerp(26, 2, e);
+  ctx.strokeStyle = `rgba(255,220,170,${1 - k})`;
+  ctx.beginPath(); ctx.arc(CX, CY, lerp(10, 900, e), 0, 6.28); ctx.stroke();
+  ctx.lineWidth = lerp(12, 1, e);
+  ctx.strokeStyle = `rgba(140,200,255,${(1 - k) * 0.8})`;
+  ctx.beginPath(); ctx.arc(CX, CY, lerp(10, 650, e), 0, 6.28); ctx.stroke();
+  for (const d of debris) {
+    const dist = d.v * e * 1.6;
+    ctx.globalAlpha = 1 - k;
+    circle(CX + Math.cos(d.a) * dist, CY + Math.sin(d.a) * dist, d.s * (1 - k * 0.6), '#ffb56b');
+  }
+  ctx.globalAlpha = 1;
+}
+
+// ---------- lubang hitam (adegan 3–4) ----------
+function drawDisk(t, front, appear) {
+  for (const p of dust) {
+    const a = p.a + t * (38 / Math.pow(p.r, 1.0)) ;
+    const s = Math.sin(a);
+    if ((s > 0) !== front) continue;
+    const rr = p.r * appear;
+    const x = CX + Math.cos(a) * rr, y = CY + s * rr * 0.26 + p.off * 0.3;
+    ctx.globalAlpha = clamp(appear * (0.55 + 0.45 * (1 - (p.r - 95) / 230)));
+    circle(x, y, p.s * (front ? 1.1 : 0.85), p.c);
+  }
+  ctx.globalAlpha = 1;
+}
+function drawBlackHole(t) {
+  const appear = easeOut(seg(t, 10.2, 13.2));
+  if (appear <= 0) return;
+  const hr = 70 * easeBack(seg(t, 9.8, 11.4));
+  // cahaya latar cakera
+  ctx.globalAlpha = 0.22 * appear;
+  ctx.beginPath(); ctx.ellipse(CX, CY, 340 * appear, 95 * appear, 0, 0, 6.28); ctx.fillStyle = '#ff8a3d'; ctx.fill();
+  ctx.globalAlpha = 1;
+  drawDisk(t, false, appear);
+  // gelang foton (cahaya yang dibengkokkan)
+  glow(CX, CY, hr * 1.12, '#ffb04a', 3, 0.2);
+  ctx.lineWidth = 7; ctx.strokeStyle = '#ffe3a1';
+  ctx.beginPath(); ctx.arc(CX, CY, hr * 1.1, 0, 6.28); ctx.stroke();
+  // lengkung kanta graviti (cakera belakang terlihat di atas)
+  ctx.globalAlpha = 0.85 * appear; ctx.lineWidth = 14; ctx.strokeStyle = '#ff9d3a';
+  ctx.beginPath(); ctx.ellipse(CX, CY - 4, hr * 1.55, hr * 1.35, 0, Math.PI * 1.05, Math.PI * 1.95); ctx.stroke();
+  ctx.globalAlpha = 1;
+  circle(CX, CY, hr, '#020207');
+  drawDisk(t, true, appear);
+  // jalur depan cakera
+  ctx.globalAlpha = 0.9 * appear; ctx.lineWidth = 10; ctx.strokeStyle = '#ffc75a';
+  ctx.beginPath(); ctx.ellipse(CX, CY, hr * 1.9, hr * 0.42, 0, 0.05, Math.PI - 0.05); ctx.stroke();
+  ctx.globalAlpha = 1;
+}
+
+// ---------- burung comel (maskot) ----------
+function drawBird(x, y, s, t, opts = {}) {
+  const { stretch = 1, rot = 0, look = 0, alarm = 0 } = opts;
+  ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.scale(s * stretch, s / Math.sqrt(stretch));
+  const flap = Math.sin(t * (alarm ? 22 : 7)) * (0.35 + alarm * 0.4);
+  // ekor
+  ctx.fillStyle = '#2e8fd6';
+  ctx.beginPath(); ctx.moveTo(-34, 4); ctx.lineTo(-58, -8); ctx.lineTo(-54, 14); ctx.closePath(); ctx.fill();
+  // badan
+  ctx.beginPath(); ctx.ellipse(0, 0, 40, 36, 0, 0, 6.28); ctx.fillStyle = '#4fb3f2'; ctx.fill();
+  ctx.save(); ctx.clip();
+  ctx.beginPath(); ctx.ellipse(10, 22, 34, 22, 0, 0, 6.28); ctx.fillStyle = '#e8f6ff'; ctx.fill();
+  ctx.beginPath(); ctx.ellipse(18, 26, 60, 18, 0, 0, 6.28); ctx.fillStyle = 'rgba(20,60,120,0.18)'; ctx.fill();
+  ctx.restore();
+  // sayap
+  ctx.save(); ctx.translate(-6, 4); ctx.rotate(-0.3 + flap);
+  ctx.beginPath(); ctx.ellipse(-4, 0, 20, 11, 0.4, 0, 6.28); ctx.fillStyle = '#2e8fd6'; ctx.fill();
+  ctx.restore();
+  // paruh
+  ctx.fillStyle = '#ffab2e';
+  ctx.beginPath(); ctx.moveTo(34, -4); ctx.lineTo(54, 2 + alarm * 4); ctx.lineTo(34, 9); ctx.closePath(); ctx.fill();
+  if (alarm > 0.3) { ctx.beginPath(); ctx.moveTo(34, 9); ctx.lineTo(48, 14); ctx.lineTo(34, 14); ctx.fill(); }
+  // mata (berkelip)
+  const blink = (t % 3.3) < 0.12 && !alarm ? 0.1 : 1;
+  const er = 11 + alarm * 3;
+  ctx.beginPath(); ctx.ellipse(16, -12, er, er * blink, 0, 0, 6.28); ctx.fillStyle = '#fff'; ctx.fill();
+  if (blink > 0.5) {
+    circle(19 + look * 3, -11, 5.5 - alarm * 1.5, '#12132b');
+    circle(21 + look * 3, -13.5, 1.8, '#fff');
+  }
+  ctx.restore();
+}
+
+function birdState(t) {
+  const enter = easeOut(seg(t, 0.8, 2.6));
+  let x = lerp(-120, 250, enter), y = 500 + Math.sin(t * 1.6) * 10, s = 1, rot = 0, stretch = 1, alpha = 1;
+  const alarm = clamp(seg(t, 9.5, 9.9) - seg(t, 11.5, 12.5)) + seg(t, 18.6, 19.2);
+  // gegaran semasa letupan
+  if (t > 9.5 && t < 11.5) { x += Math.sin(t * 60) * 6 * (11.5 - t) / 2; }
+  // disedut ke dalam lubang hitam
+  const pull = easeIn(seg(t, 18.8, 22.4));
+  if (pull > 0) {
+    const a0 = Math.atan2(y - CY, x - CX), d0 = Math.hypot(x - CX, y - CY);
+    const a = a0 - pull * 5.5, d = lerp(d0, 10, pull);
+    x = CX + Math.cos(a) * d; y = CY + Math.sin(a) * d * 0.55;
+    s = lerp(1, 0.25, pull); stretch = 1 + pull * 3.2;
+    rot = a + Math.PI / 2;
+    alpha = 1 - seg(t, 21.9, 22.4);
+  }
+  return { x, y, s, rot, stretch, alpha, alarm, look: pull > 0 ? 0 : clamp((t - 2) / 2) };
+}
+
+// ---------- teks ----------
+const FONT = '"Nunito", "Liberation Sans", sans-serif';
+function caption(text, t, a, b) {
+  const k = Math.min(seg(t, a, a + 0.4), 1 - seg(t, b - 0.4, b));
+  if (k <= 0) return;
+  ctx.save(); ctx.globalAlpha = k;
+  ctx.font = `800 34px ${FONT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  const w = ctx.measureText(text).width + 56, y = 640 + (1 - easeOut(k)) * 14;
+  ctx.fillStyle = 'rgba(8,9,30,0.72)';
+  ctx.beginPath(); ctx.roundRect(CX - w / 2, y - 30, w, 60, 30); ctx.fill();
+  ctx.fillStyle = '#ffffff'; ctx.fillText(text, CX, y + 1);
+  ctx.restore();
+}
+function title(t) {
+  const k = Math.min(easeOut(seg(t, 1.2, 2.2)), 1 - seg(t, 5.2, 5.9));
+  if (k <= 0) return;
+  ctx.save(); ctx.globalAlpha = k; ctx.textAlign = 'center';
+  ctx.font = `900 72px ${FONT}`;
+  ctx.fillStyle = '#0b0c26'; ctx.fillText('Apa Itu Lubang Hitam?', CX + 4, 120 + 5 + (1 - k) * 20);
+  ctx.fillStyle = '#ffffff'; ctx.fillText('Apa Itu Lubang Hitam?', CX, 120 + (1 - k) * 20);
+  ctx.font = `800 26px ${FONT}`; ctx.fillStyle = '#ffd36b';
+  ctx.fillText('KISAH SEBUTIR BINTANG', CX, 165 + (1 - k) * 20);
+  ctx.restore();
+}
+function endCard(t) {
+  const k = seg(t, 22.8, 23.8);
+  if (k <= 0) return;
+  ctx.fillStyle = `rgba(7,8,28,${k * 0.85})`; ctx.fillRect(0, 0, W, H);
+  const k2 = easeOut(seg(t, 23.3, 24.3));
+  ctx.save(); ctx.globalAlpha = k2; ctx.textAlign = 'center';
+  ctx.font = `900 84px ${FONT}`; ctx.fillStyle = '#fff'; ctx.fillText('Tamat.', CX, CY - 10 + (1 - k2) * 20);
+  ctx.font = `800 26px ${FONT}`; ctx.fillStyle = '#9fb3ff';
+  ctx.fillText('RIP burung kecil 🐦', CX, CY + 50 + (1 - k2) * 20);
+  ctx.restore();
+}
+
+// ---------- kompositor ----------
+function render(t) {
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  // kamera: zum perlahan + gegar semasa keruntuhan
+  const shake = t > 9.5 && t < 11 ? (11 - t) * 5 : 0;
+  const zoom = 1 + 0.05 * easeInOut(seg(t, 0, 9)) + 0.08 * easeInOut(seg(t, 12, 22));
+  background(t);
+  ctx.save();
+  ctx.translate(CX + Math.sin(t * 70) * shake, CY + Math.cos(t * 83) * shake);
+  ctx.scale(zoom, zoom); ctx.translate(-CX, -CY);
+  drawStar(t);
+  drawShockwave(t);
+  drawBlackHole(t);
+  const b = birdState(t);
+  if (b.alpha > 0) {
+    ctx.globalAlpha = b.alpha;
+    drawBird(b.x, b.y, b.s, t, b);
+    ctx.globalAlpha = 1;
+  }
+  ctx.restore();
+  // kilat putih keruntuhan
+  const flash = seg(t, 9.45, 9.6) - seg(t, 9.6, 10.6);
+  if (flash > 0) { ctx.fillStyle = `rgba(255,248,230,${flash})`; ctx.fillRect(0, 0, W, H); }
+  // vignet
+  const v = ctx.createRadialGradient(CX, CY, 300, CX, CY, 800);
+  v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(0,0,10,0.55)');
+  ctx.fillStyle = v; ctx.fillRect(0, 0, W, H);
+  title(t);
+  caption('Bila bintang gergasi kehabisan bahan api…', t, 6.3, 9.3);
+  caption('…ia runtuh ke dalam dirinya sendiri.', t, 10.4, 12.2);
+  caption('Graviti jadi terlalu kuat — cahaya pun tak dapat lari.', t, 12.6, 18.2);
+  caption('Dan apa-apa yang terlalu dekat… tak akan kembali.', t, 18.6, 22.8);
+  endCard(t);
+}
+window.render = render;
+window.DURATION = DURATION;
+window.BOOMS = [9.5];
+window.ready = Promise.all(['900 72px Nunito', '800 34px Nunito'].map(f => document.fonts.load(f).catch(() => {})))
+  .then(() => document.fonts.ready);
+
+// Pratonton langsung dalam pelayar (dilangkau bila dieksport: ?capture)
+if (!location.search.includes('capture')) {
+  window.ready.then(() => {
+    const t0 = performance.now();
+    const loop = now => { render(((now - t0) / 1000) % DURATION); requestAnimationFrame(loop); };
+    requestAnimationFrame(loop);
+  });
+}
+</script>
+</body>
+</html>

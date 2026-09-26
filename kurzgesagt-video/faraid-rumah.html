@@ -1,0 +1,478 @@
+<!doctype html>
+<html lang="ms">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rumah Bersama & Faraid — Animasi</title>
+<style>
+  @font-face { font-family: 'Nunito'; src: url('fonts/Nunito.ttf') format('truetype'); font-weight: 800 900; }
+  html, body { margin: 0; height: 100%; background: #0f1638; }
+  body { display: grid; place-items: center; }
+  canvas { width: min(100vw, 177.78vh); height: auto; display: block; }
+</style>
+</head>
+<body>
+<canvas id="c" width="1280" height="720"></canvas>
+<script>
+// Penerangan: suami & isteri beli rumah bersama (50/50) — apa jadi pada
+// bahagian suami bila dia meninggal dunia (faraid). Gaya flat vector.
+// render(t) melukis satu bingkai pada saat t; render.mjs eksport ke MP4.
+const W = 1280, H = 720, CX = W / 2, CY = H / 2;
+const DURATION = 67;
+const BOOMS = [21.2];
+const ctx = document.getElementById('c').getContext('2d');
+
+// ---------- utiliti ----------
+const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+const lerp = (a, b, k) => a + (b - a) * k;
+const seg = (t, a, b) => clamp((t - a) / (b - a));
+const easeInOut = k => k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
+const easeOut = k => 1 - Math.pow(1 - k, 3);
+const easeBack = k => { const c = 1.9; return 1 + (c + 1) * Math.pow(k - 1, 3) + c * Math.pow(k - 1, 2); };
+const window_ = (t, a, b, f = 0.4) => Math.min(seg(t, a, a + f), 1 - seg(t, b - f, b));
+function rng(seed) { return () => (seed = (seed * 16807) % 2147483647) / 2147483647; }
+function circle(x, y, r, fill) { ctx.beginPath(); ctx.arc(x, y, Math.max(0, r), 0, Math.PI * 2); ctx.fillStyle = fill; ctx.fill(); }
+function rrect(x, y, w, h, r, fill) { ctx.beginPath(); ctx.roundRect(x, y, w, h, r); ctx.fillStyle = fill; ctx.fill(); }
+const FONT = '"Nunito", "Liberation Sans", sans-serif';
+function text(s, x, y, size, color, align = 'center', weight = 800) {
+  ctx.font = `${weight} ${size}px ${FONT}`; ctx.textAlign = align; ctx.textBaseline = 'middle';
+  ctx.fillStyle = color; ctx.fillText(s, x, y);
+}
+
+// ---------- warna ----------
+const C = {
+  suami: '#5b8def', isteri: '#ff6b9a', ayah: '#ff9a3c', ibu: '#ffd84d',
+  anakL: '#39c5d6', anakP: '#7ee0a1', pusaka: '#ffc23d', red: '#ff4d5e', teal: '#2ec4b6',
+};
+const HEIRS = [
+  { key: 'ayah', name: 'Ayah', n: 12, rule: '1/6', kind: 'ayah' },
+  { key: 'ibu', name: 'Ibu', n: 12, rule: '1/6', kind: 'ibu' },
+  { key: 'isteri', name: 'Isteri', n: 9, rule: '1/8', kind: 'isteri' },
+  { key: 'anakL', name: 'Anak Lelaki', n: 26, rule: 'Baki × 2', kind: 'anakL' },
+  { key: 'anakP', name: 'Anak Perempuan', n: 13, rule: 'Baki × 1', kind: 'anakP' },
+];
+
+// ---------- latar: heksagon terapung (mengikut infografik asal) ----------
+const R = rng(7);
+const hexes = Array.from({ length: 26 }, () => ({ x: R() * W, y: R() * H, r: 30 + R() * 90, sp: 4 + R() * 10, a: 0.025 + R() * 0.04 }));
+function hexPath(x, y, r) {
+  ctx.beginPath();
+  for (let i = 0; i < 6; i++) { const a = Math.PI / 3 * i + Math.PI / 6; ctx[i ? 'lineTo' : 'moveTo'](x + Math.cos(a) * r, y + Math.sin(a) * r); }
+  ctx.closePath();
+}
+function background(t) {
+  const g = ctx.createRadialGradient(CX, CY - 60, 60, CX, CY, 820);
+  g.addColorStop(0, '#26356e'); g.addColorStop(0.6, '#18214d'); g.addColorStop(1, '#0c1130');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  for (const h of hexes) {
+    const y = ((h.y - t * h.sp) % (H + 200) + H + 200) % (H + 200) - 100;
+    ctx.globalAlpha = h.a; hexPath(h.x, y, h.r); ctx.fillStyle = '#ffffff'; ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+}
+
+// ---------- rumah ----------
+function housePath(cx, gy, s) {
+  ctx.beginPath();
+  ctx.moveTo(cx - 180 * s, gy); ctx.lineTo(cx - 180 * s, gy - 165 * s);
+  ctx.lineTo(cx - 215 * s, gy - 165 * s); ctx.lineTo(cx, gy - 300 * s); ctx.lineTo(cx + 215 * s, gy - 165 * s);
+  ctx.lineTo(cx + 180 * s, gy - 165 * s); ctx.lineTo(cx + 180 * s, gy); ctx.closePath();
+}
+function drawHouse(cx, gy, s, tints = []) {
+  // bayang tanah + pokok renek
+  ctx.globalAlpha *= 1; const a0 = ctx.globalAlpha;
+  ctx.globalAlpha = a0 * 0.35; ctx.beginPath(); ctx.ellipse(cx, gy + 6 * s, 290 * s, 22 * s, 0, 0, 6.28); ctx.fillStyle = '#050818'; ctx.fill();
+  ctx.globalAlpha = a0;
+  for (const [dx, r, c] of [[-215, 38, '#2f9e6b'], [-185, 28, '#3cb87d'], [210, 34, '#2f9e6b'], [238, 24, '#3cb87d']]) circle(cx + dx * s, gy - r * 0.7 * s, r * s, c);
+  // cerobong
+  rrect(cx + 80 * s, gy - 290 * s, 36 * s, 80 * s, 4 * s, '#b9573f');
+  // badan
+  rrect(cx - 180 * s, gy - 170 * s, 360 * s, 170 * s, 4 * s, '#f4efe6');
+  rrect(cx + 60 * s, gy - 170 * s, 120 * s, 170 * s, 0, '#e3dccd');
+  rrect(cx - 180 * s, gy - 18 * s, 360 * s, 18 * s, 0, '#cfc6b4');
+  // bumbung
+  ctx.beginPath(); ctx.moveTo(cx - 222 * s, gy - 160 * s); ctx.lineTo(cx, gy - 305 * s); ctx.lineTo(cx + 222 * s, gy - 160 * s); ctx.closePath();
+  ctx.fillStyle = '#2b3a67'; ctx.fill();
+  ctx.beginPath(); ctx.moveTo(cx - 150 * s, gy - 170 * s); ctx.lineTo(cx, gy - 268 * s); ctx.lineTo(cx + 150 * s, gy - 170 * s); ctx.closePath();
+  ctx.fillStyle = '#f4efe6'; ctx.fill();
+  circle(cx, gy - 205 * s, 22 * s, '#2b3a67'); circle(cx, gy - 205 * s, 16 * s, '#bfe3ff');
+  // pintu & tingkap
+  rrect(cx - 30 * s, gy - 105 * s, 60 * s, 105 * s, 6 * s, '#2f9e6b');
+  circle(cx + 17 * s, gy - 52 * s, 4 * s, '#ffd84d');
+  for (const dx of [-120, 120]) {
+    rrect(cx + (dx - 40) * s, gy - 135 * s, 80 * s, 64 * s, 5 * s, '#2b3a67');
+    rrect(cx + (dx - 34) * s, gy - 129 * s, 32 * s, 52 * s, 3 * s, '#bfe3ff');
+    rrect(cx + (dx + 2) * s, gy - 129 * s, 32 * s, 52 * s, 3 * s, '#bfe3ff');
+  }
+  // lapisan warna pemilikan (jalur ikut peratus)
+  if (tints.length) {
+    ctx.save(); housePath(cx, gy, s); ctx.clip();
+    let x = cx - 222 * s; const full = 444 * s;
+    for (const tn of tints) {
+      ctx.globalAlpha = a0 * (tn.alpha ?? 0.45);
+      ctx.fillStyle = tn.color; ctx.fillRect(x, gy - 310 * s, full * tn.frac + 0.5, 320 * s);
+      x += full * tn.frac;
+    }
+    ctx.restore(); ctx.globalAlpha = a0;
+  }
+}
+
+// ---------- watak ----------
+const KINDS = {
+  suami: { body: '#e9f1ff', head: 'kopiah', s: 1 },
+  isteri: { body: '#8e5bd6', head: 'hijab', hijab: '#3b2a63', s: 1 },
+  ayah: { body: '#d9c7a3', head: 'kopiah', beard: true, s: 1 },
+  ibu: { body: '#e37aa7', head: 'hijab', hijab: '#6a2f4f', s: 1 },
+  anakL: { body: '#39c5d6', head: 'hair', s: 0.8 },
+  anakP: { body: '#7ee0a1', head: 'hijab', hijab: '#2f7d5a', s: 0.8 },
+};
+function person(x, y, s, kind, t, opts = {}) {
+  const k = KINDS[kind]; s *= k.s;
+  const { ph = 0, grey = 0, wave = 0 } = opts;
+  const bob = Math.sin(t * 2.2 + ph) * 3;
+  ctx.save(); ctx.translate(x, y + bob * s); ctx.scale(s, s);
+  const skin = grey ? '#b8b8c8' : '#f2c7a0';
+  // badan
+  ctx.beginPath(); ctx.moveTo(-38, 0); ctx.quadraticCurveTo(-40, -62, 0, -64); ctx.quadraticCurveTo(40, -62, 38, 0); ctx.closePath();
+  ctx.fillStyle = grey ? '#8f93b0' : k.body; ctx.fill();
+  if (wave) { // lambai tangan
+    ctx.save(); ctx.translate(30, -42); ctx.rotate(-0.9 + Math.sin(t * 9 + ph) * 0.35);
+    rrect(-7, -34, 14, 36, 7, grey ? '#8f93b0' : k.body); circle(0, -36, 8, skin); ctx.restore();
+  }
+  const hy = -92;
+  if (k.head === 'hijab') {
+    const hc = grey ? '#6d7090' : k.hijab;
+    ctx.beginPath(); ctx.ellipse(0, -58, 34, 16, 0, 0, 6.28); ctx.fillStyle = hc; ctx.fill();
+    circle(0, hy, 36, hc);
+    ctx.beginPath(); ctx.ellipse(0, hy + 4, 21, 24, 0, 0, 6.28); ctx.fillStyle = skin; ctx.fill();
+  } else {
+    circle(0, hy, 30, skin);
+    if (k.head === 'kopiah') rrect(-24, hy - 34, 48, 18, 7, grey ? '#d7d8e4' : '#ffffff');
+    if (k.head === 'hair') { ctx.beginPath(); ctx.arc(0, hy - 2, 31, Math.PI * 1.05, Math.PI * 1.95); ctx.lineTo(0, hy - 18); ctx.fillStyle = '#3a2a24'; ctx.fill(); }
+    if (k.beard) { ctx.beginPath(); ctx.arc(0, hy + 6, 26, 0.15, Math.PI - 0.15); ctx.fillStyle = '#e6e6ee'; ctx.fill(); }
+  }
+  // muka
+  const blink = ((t + ph * 1.3) % 3.7) < 0.12 ? 0.15 : 1;
+  ctx.fillStyle = '#23213a';
+  ctx.beginPath(); ctx.ellipse(-9, hy + 2, 3.4, 3.8 * blink, 0, 0, 6.28); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(9, hy + 2, 3.4, 3.8 * blink, 0, 0, 6.28); ctx.fill();
+  ctx.strokeStyle = '#23213a'; ctx.lineWidth = 2.6; ctx.lineCap = 'round';
+  ctx.beginPath(); if (grey) ctx.arc(0, hy + 20, 6, Math.PI * 1.2, Math.PI * 1.8); else ctx.arc(0, hy + 10, 7, 0.3, Math.PI - 0.3); ctx.stroke();
+  if (!grey) { ctx.globalAlpha *= 0.35; circle(-16, hy + 11, 5, '#ff7f8a'); circle(16, hy + 11, 5, '#ff7f8a'); }
+  ctx.restore();
+}
+
+// ---------- komponen UI ----------
+function chip(label, color, t, a, b) {
+  const k = window_(t, a, b, 0.5); if (k <= 0) return;
+  ctx.save(); ctx.globalAlpha = k;
+  ctx.font = `900 30px ${FONT}`; const w = ctx.measureText(label).width + 50;
+  const y = 58 - (1 - easeOut(k)) * 20;
+  ctx.translate(CX, y); ctx.rotate(-0.03);
+  rrect(-w / 2 + 5, -24 + 6, w, 50, 12, 'rgba(0,0,0,0.3)');
+  rrect(-w / 2, -24, w, 50, 12, color);
+  text(label, 0, 2, 30, '#fff', 'center', 900);
+  ctx.restore();
+}
+function caption(s, t, a, b, size = 32) {
+  const k = window_(t, a, b); if (k <= 0) return;
+  ctx.save(); ctx.globalAlpha = k;
+  ctx.font = `800 ${size}px ${FONT}`;
+  const w = ctx.measureText(s).width + 56, y = 668 + (1 - easeOut(k)) * 14;
+  rrect(CX - w / 2, y - 29, w, 58, 29, 'rgba(8,10,32,0.78)');
+  text(s, CX, y + 1, size, '#fff');
+  ctx.restore();
+}
+function label(name, pct, x, y, color, alpha = 1, strike = 0) {
+  if (alpha <= 0) return;
+  ctx.save(); ctx.globalAlpha = alpha;
+  text(name, x, y, 24, '#ffffff', 'center', 900);
+  text(pct, x, y + 36, 40, color, 'center', 900);
+  if (strike > 0) {
+    ctx.font = `900 40px ${FONT}`; const w = ctx.measureText(pct).width + 16;
+    ctx.strokeStyle = C.red; ctx.lineWidth = 6; ctx.beginPath();
+    ctx.moveTo(x - w / 2, y + 44); ctx.lineTo(x - w / 2 + w * strike, y + 30); ctx.stroke();
+  }
+  ctx.restore();
+}
+function dashedLine(x, y1, y2, alpha) {
+  if (alpha <= 0) return;
+  ctx.save(); ctx.globalAlpha = alpha; ctx.setLineDash([10, 9]); ctx.lineWidth = 4; ctx.strokeStyle = C.red;
+  ctx.beginPath(); ctx.moveTo(x, y1); ctx.lineTo(x, y2); ctx.stroke(); ctx.restore();
+}
+
+// ---------- ikon kad penyelesaian ----------
+function iconGift(x, y) {
+  rrect(x - 36, y - 18, 72, 50, 6, C.isteri); rrect(x - 42, y - 32, 84, 18, 5, '#ff8fb3');
+  ctx.fillStyle = C.pusaka; ctx.fillRect(x - 7, y - 32, 14, 64);
+  ctx.beginPath(); ctx.ellipse(x - 14, y - 40, 14, 8, 0.5, 0, 6.28); ctx.ellipse(x + 14, y - 40, 14, 8, -0.5, 0, 6.28); ctx.fill();
+}
+function iconScale(x, y) {
+  ctx.fillStyle = C.pusaka; ctx.fillRect(x - 4, y - 36, 8, 64); rrect(x - 30, y + 24, 60, 10, 4, C.pusaka);
+  ctx.fillRect(x - 46, y - 36, 92, 7);
+  for (const dx of [-40, 40]) {
+    ctx.strokeStyle = C.pusaka; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(x + dx, y - 32); ctx.lineTo(x + dx - 14, y); ctx.moveTo(x + dx, y - 32); ctx.lineTo(x + dx + 14, y); ctx.stroke();
+    ctx.beginPath(); ctx.arc(x + dx, y, 17, 0, Math.PI); ctx.fillStyle = dx < 0 ? C.suami : C.isteri; ctx.fill();
+  }
+}
+function iconDoc(x, y) {
+  rrect(x - 30, y - 40, 60, 78, 6, '#f4efe6');
+  for (let i = 0; i < 3; i++) rrect(x - 20, y - 28 + i * 14, 40 - i * 8, 6, 3, '#b8c2e0');
+  circle(x + 22, y + 26, 18, C.anakP);
+  ctx.strokeStyle = '#fff'; ctx.lineWidth = 5; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  ctx.beginPath(); ctx.moveTo(x + 13, y + 26); ctx.lineTo(x + 20, y + 33); ctx.lineTo(x + 31, y + 19); ctx.stroke();
+}
+function card(i, x, y, t, a, icon, title, l1, l2, color) {
+  const k = easeBack(seg(t, a, a + 0.7)); if (k <= 0) return;
+  ctx.save(); ctx.translate(x, y); ctx.scale(k, k);
+  rrect(-165 + 6, -135 + 8, 330, 270, 22, 'rgba(0,0,0,0.25)');
+  rrect(-165, -135, 330, 270, 22, '#1f2b5e');
+  rrect(-165, -135, 330, 10, 5, color);
+  circle(0, -62, 52, 'rgba(255,255,255,0.07)');
+  icon(0, -62);
+  text(title, 0, 20, 30, '#fff', 'center', 900);
+  text(l1, 0, 62, 20, '#c7d0f0');
+  text(l2, 0, 90, 20, '#c7d0f0');
+  ctx.restore();
+}
+
+// ---------- kedudukan rumah mengikut masa ----------
+function houseState(t) {
+  let x = 640, gy = 450, s = 1, alpha = easeOut(seg(t, 5.6, 7));
+  const toLeft = easeInOut(seg(t, 27, 28.6));
+  x = lerp(x, 330, toLeft); gy = lerp(gy, 470, toLeft); s = lerp(s, 0.72, toLeft);
+  alpha *= 1 - seg(t, 34.6, 35.4);
+  const back = easeInOut(seg(t, 45.4, 47));
+  if (t > 45.4) { x = 640; gy = lerp(470, 395, back); s = lerp(0.72, 0.85, back); alpha = back; }
+  alpha *= 1 - seg(t, 55.2, 56);
+  return { x, gy, s, alpha };
+}
+
+// ---------- adegan ----------
+function sceneTitle(t) {
+  const k = window_(t, 0.4, 5.8, 0.8); if (k <= 0) return;
+  ctx.save(); ctx.globalAlpha = k;
+  const e = easeOut(seg(t, 0.4, 1.4)), dy = (1 - e) * 24;
+  // rumah kecil ikon + tanda soal
+  drawHouse(CX, 340 + dy, 0.55);
+  text('Beli Rumah Bersama Pasangan', CX + 3, 420 + dy + 4, 58, '#0a0f2a', 'center', 900);
+  text('Beli Rumah Bersama Pasangan', CX, 420 + dy, 58, '#ffffff', 'center', 900);
+  ctx.globalAlpha = k * easeOut(seg(t, 1.3, 2.3));
+  text('Persepsi', CX - 120, 492, 40, C.red, 'center', 900);
+  text('vs', CX, 492, 30, '#9fb0e8', 'center', 900);
+  text('Realiti', CX + 115, 492, 40, C.teal, 'center', 900);
+  ctx.restore();
+}
+
+function sceneHouse(t) {
+  const h = houseState(t); if (h.alpha <= 0) return;
+  // pewarnaan pemilikan
+  const pers = easeInOut(seg(t, 17.5, 19.5)) * (1 - seg(t, 25, 25.8));   // isteri 100% (persepsi)
+  const pusaka = easeOut(seg(t, 26, 27));                                 // separuh kiri jadi pusaka
+  const split = easeOut(seg(t, 7.5, 8.6));
+  let tints = [];
+  if (t < 25.8) tints = [
+    { frac: lerp(0.5, 0, pers), color: C.suami, alpha: 0.5 * split },
+    { frac: lerp(0.5, 1, pers), color: C.isteri, alpha: 0.5 * split },
+  ];
+  else if (t < 45.4) tints = [{ frac: 0.5, color: C.pusaka, alpha: 0.35 + 0.25 * pusaka + 0.1 * Math.sin(t * 4) * pusaka }, { frac: 0.5, color: C.isteri, alpha: 0.5 }];
+  else {
+    const g = easeOut(seg(t, 47.2, 49));
+    const fin = [[56.25, C.isteri], [26 / 72 * 50, C.anakL], [13 / 72 * 50, C.anakP], [12 / 72 * 50, C.ayah], [12 / 72 * 50, C.ibu]];
+    tints = fin.map(([p, c], i) => ({ frac: i === 0 ? lerp(1, p / 100, g) : p / 100 * g, color: c, alpha: 0.55 }));
+  }
+  ctx.save(); ctx.globalAlpha = h.alpha;
+  drawHouse(h.x, h.gy, h.s, tints);
+  ctx.restore();
+  // garis pembahagi
+  const dl = (seg(t, 7.2, 8) - seg(t, 17.5, 18.2)) + (seg(t, 25.4, 26) - seg(t, 44.8, 45.4));
+  dashedLine(h.x, h.gy - 320 * h.s, h.gy + 30 * h.s, dl * h.alpha);
+  // label "PUSAKA SUAMI" pada separuh kiri
+  const pl = pusaka * h.alpha * (1 - seg(t, 44.8, 45.4));
+  if (pl > 0) {
+    ctx.save(); ctx.globalAlpha = pl;
+    const lx = h.x - 110 * h.s, ly = h.gy - 360 * h.s;
+    rrect(lx - 105, ly - 22, 210, 44, 22, C.pusaka);
+    text('PUSAKA SUAMI', lx, ly + 1, 22, '#2b1d00', 'center', 900);
+    ctx.beginPath(); ctx.moveTo(lx - 10, ly + 22); ctx.lineTo(lx + 10, ly + 22); ctx.lineTo(lx, ly + 36); ctx.fillStyle = C.pusaka; ctx.fill();
+    ctx.restore();
+  }
+}
+
+function sceneCouple(t) {
+  // suami & isteri di sisi rumah (adegan 2–3)
+  const inA = easeBack(seg(t, 7.6, 8.6)), outA = 1 - seg(t, 25, 25.8);
+  if (inA <= 0 || outA <= 0) return;
+  const dead = easeInOut(seg(t, 15.6, 17));
+  ctx.save(); ctx.globalAlpha = outA * lerp(1, 0.45, dead);
+  person(250, 470 - dead * 10, inA, 'suami', t, { grey: dead > 0.5 });
+  ctx.restore();
+  ctx.save(); ctx.globalAlpha = outA;
+  person(1030, 470, inA, 'isteri', t, { ph: 1.3 });
+  ctx.restore();
+  const la = outA * seg(t, 8.2, 8.9);
+  label('SUAMI', dead > 0.5 ? 'Meninggal' : '50%', 250, 505, dead > 0.5 ? '#9aa3c7' : C.suami, la);
+  const pct = Math.round(lerp(50, 100, easeInOut(seg(t, 17.5, 19.5))));
+  label('ISTERI', pct + '%', 1030, 505, C.isteri, la, easeOut(seg(t, 21.4, 22)) * (1 - seg(t, 25, 25.8)));
+}
+
+function sceneStamp(t) {
+  const k = seg(t, 21.2, 21.5); if (k <= 0 || t > 25.2) return;
+  const a = 1 - seg(t, 24.6, 25.2);
+  const sc = lerp(2.2, 1, easeOut(k));
+  ctx.save(); ctx.globalAlpha = a * k; ctx.translate(640, 300); ctx.rotate(-0.12); ctx.scale(sc, sc);
+  ctx.strokeStyle = C.red; ctx.lineWidth = 34; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(-130, -130); ctx.lineTo(130, 130); ctx.moveTo(130, -130); ctx.lineTo(-130, 130); ctx.stroke();
+  rrect(-120, 150, 240, 70, 14, C.red);
+  text('SALAH!', 0, 187, 46, '#fff', 'center', 900);
+  ctx.restore();
+}
+
+function heirRows(t) {
+  const out = 1 - seg(t, 44.8, 45.6); if (out <= 0) return;
+  // baris yang sedang diisi dalam grid (untuk sorotan)
+  const filled = fillCount(t), fillK = filled / 72;
+  let acc = 0, active = -1;
+  HEIRS.forEach((h, i) => { if (filled > acc && filled <= acc + h.n + (i === 4 ? 1 : 0) && fillK < 1) active = i; acc += h.n; });
+  HEIRS.forEach((h, i) => {
+    const k = easeOut(seg(t, 28.8 + i * 0.6, 29.6 + i * 0.6)); if (k <= 0) return;
+    const y = 150 + i * 92, x = 612 + (1 - k) * 80;
+    ctx.save(); ctx.globalAlpha = k * out;
+    rrect(x, y, 610, 78, 18, i === active ? 'rgba(255,255,255,0.16)' : 'rgba(255,255,255,0.07)');
+    rrect(x, y, 10, 78, 5, C[h.key]);
+    ctx.save(); ctx.beginPath(); ctx.roundRect(x + 14, y, 80, 78, 0); ctx.clip();
+    person(x + 56, y + 80, 0.55, h.kind, t, { ph: i });
+    ctx.restore();
+    text(h.name, x + 108, y + 40, 26, '#fff', 'left', 900);
+    rrect(x + 380, y + 17, 112, 44, 12, C[h.key]);
+    text(`${h.n}/72`, x + 436, y + 40, 26, '#10163a', 'center', 900);
+    const rk = easeOut(seg(t, 35.8 + (i > 2 ? 2.8 : i * 0.5), 36.6 + (i > 2 ? 2.8 : i * 0.5)));
+    ctx.globalAlpha = k * out * rk;
+    text(h.rule, x + 555, y + 40, 22, '#c7d0f0', 'center', 900);
+    ctx.restore();
+  });
+}
+
+// ayah+ibu+isteri (33) semasa sari kata pertama, anak (39) semasa kedua
+const fillCount = t => Math.floor(33 * seg(t, 36.2, 38.4) + 39 * seg(t, 39.4, 43.4) + 1e-6);
+function grid(t) {
+  const a = seg(t, 35.2, 36.2) * (1 - seg(t, 44.8, 45.6)); if (a <= 0) return;
+  ctx.save(); ctx.globalAlpha = a;
+  text('Pusaka suami (50%) ÷ 72 bahagian', 320, 196, 26, C.pusaka, 'center', 900);
+  const colors = []; HEIRS.forEach(h => { for (let j = 0; j < h.n; j++) colors.push(C[h.key]); });
+  const filled = fillCount(t);
+  for (let i = 0; i < 72; i++) {
+    const cx = 86 + (i % 12) * 40, cy = 240 + Math.floor(i / 12) * 40;
+    const pop = i < filled ? 1 : 0;
+    rrect(cx, cy, 32, 32, 7, pop ? colors[i] : 'rgba(255,255,255,0.1)');
+  }
+  text(`${filled}/72`, 320, 510, 30, '#fff', 'center', 900);
+  ctx.restore();
+}
+
+function finalBar(t) {
+  const a = easeOut(seg(t, 47.2, 48.4)) * (1 - seg(t, 55.2, 56)); if (a <= 0) return;
+  const fin = [
+    ['Isteri', 56.25, C.isteri, 'isteri'], ['Anak L', 26 / 72 * 50, C.anakL, 'anakL'], ['Anak P', 13 / 72 * 50, C.anakP, 'anakP'],
+    ['Ayah', 12 / 72 * 50, C.ayah, 'ayah'], ['Ibu', 12 / 72 * 50, C.ibu, 'ibu'],
+  ];
+  ctx.save(); ctx.globalAlpha = a;
+  const bx = 230, bw = 820, by = 425;
+  ctx.save(); ctx.beginPath(); ctx.roundRect(bx, by, bw, 50, 14); ctx.clip();
+  let x = bx;
+  fin.forEach(([n, p, c], i) => {
+    const w = bw * p / 100 * easeOut(seg(t, 47.4 + i * 0.25, 48.6 + i * 0.25));
+    ctx.fillStyle = c; ctx.fillRect(x, by, w + 1, 50);
+    if (w > 40) text(p.toFixed(p % 1 ? (i === 0 ? 2 : 1) : 0) + '%', x + w / 2, by + 26, 20, '#10163a', 'center', 900);
+    // pemisah bahagian asal isteri (50%) vs dari pusaka (6.25%)
+    if (i === 0) { ctx.fillStyle = 'rgba(16,22,58,0.35)'; ctx.fillRect(x + bw * 0.5, by, 3, 50); }
+    x += bw * p / 100;
+  });
+  ctx.restore();
+  // ikon & nama di bawah bar (luar klip)
+  x = bx;
+  fin.forEach(([n, p, c, kind], i) => {
+    const mx = x + bw * p / 200, ik = easeBack(seg(t, 48.8 + i * 0.25, 49.6 + i * 0.25));
+    if (ik > 0) { person(mx, 560, 0.42 * ik, kind, t, { ph: i }); text(n, mx, 588, 18, '#fff', 'center', 900); }
+    x += bw * p / 100;
+  });
+  ctx.globalAlpha = a * easeOut(seg(t, 49.4, 50));
+  text('50% asal + 6.25% pusaka', bx + bw * 0.28, by - 22, 18, '#ffc2d6', 'center', 900);
+  ctx.restore();
+}
+
+function sceneSolutions(t) {
+  const a = 1 - seg(t, 62.2, 63); if (t < 56 || a <= 0) return;
+  ctx.save(); ctx.globalAlpha = a;
+  card(0, 280, 330, t, 56.4, iconGift, 'Hibah', 'Beri hak milik semasa hidup,', 'cth. hibah rumah / takaful.', C.isteri);
+  card(1, 640, 330, t, 57.0, iconScale, 'Harta Sepencarian', 'Tuntut sumbangan pasangan', 'sebelum faraid dibahagi.', C.pusaka);
+  card(2, 1000, 330, t, 57.6, iconDoc, 'Rancang Awal', 'Dapatkan nasihat perunding', 'pusaka / peguam syarie.', C.anakP);
+  ctx.restore();
+}
+
+function endCard(t) {
+  const k = seg(t, 62.4, 63.4); if (k <= 0) return;
+  ctx.fillStyle = `rgba(12,17,48,${k * 0.92})`; ctx.fillRect(0, 0, W, H);
+  const k2 = easeOut(seg(t, 62.9, 64));
+  ctx.save(); ctx.globalAlpha = k2;
+  drawHouse(CX, 300 - (1 - k2) * 20, 0.5, [{ frac: 1, color: C.teal, alpha: 0.25 }]);
+  text('Rancang hari ini,', CX, 370 + (1 - k2) * 20, 56, '#fff', 'center', 900);
+  text('keluarga tenang esok.', CX, 432 + (1 - k2) * 20, 56, C.teal, 'center', 900);
+  text('Contoh ini: waris = ayah, ibu, isteri, 1 anak lelaki & 1 anak perempuan.', CX, 530, 20, '#9fb0e8');
+  text('Bahagian sebenar bergantung pada waris yang ada. Ini info umum, bukan nasihat undang-undang.', CX, 560, 20, '#9fb0e8');
+  ctx.restore();
+}
+
+// ---------- kompositor ----------
+function render(t) {
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.globalAlpha = 1;
+  background(t);
+  const shake = t > 21.2 && t < 21.8 ? (21.8 - t) * 14 : 0;
+  ctx.save(); ctx.translate(Math.sin(t * 70) * shake, Math.cos(t * 83) * shake);
+  sceneTitle(t);
+  chip('SEMASA HIDUP', '#2f86c9', t, 6.4, 15.4);
+  chip('PERSEPSI', C.red, t, 15.6, 25.2);
+  chip('REALITI', C.teal, t, 25.4, 55.4);
+  chip('APA BOLEH DIBUAT?', '#8e5bd6', t, 55.8, 62.6);
+  sceneHouse(t);
+  sceneCouple(t);
+  sceneStamp(t);
+  heirRows(t);
+  grid(t);
+  finalBar(t);
+  sceneSolutions(t);
+  ctx.restore();
+  const v = ctx.createRadialGradient(CX, CY, 320, CX, CY, 820);
+  v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(0,0,12,0.45)');
+  ctx.fillStyle = v; ctx.fillRect(0, 0, W, H);
+
+  caption('Suami isteri beli rumah bersama — setiap seorang 50%.', t, 8.6, 15.2);
+  caption('Ramai sangka: bila suami meninggal dunia…', t, 15.8, 18.4);
+  caption('…rumah itu terus jadi milik isteri 100%.', t, 18.6, 21.2);
+  caption('Hakikatnya, tidak begitu.', t, 21.6, 25);
+  caption('Bahagian 50% suami menjadi harta pusaka.', t, 25.8, 30.4);
+  caption('Ia dibahagi kepada waris mengikut hukum faraid.', t, 30.6, 35.2);
+  caption('Ayah & ibu: 1/6 seorang. Isteri: 1/8 (sebab ada anak).', t, 35.6, 38.8, 30);
+  caption('Baki untuk anak — lelaki 2 bahagian, perempuan 1.', t, 39, 44.6, 30);
+  caption('Akhirnya isteri memiliki 56.25% — bukan 100%.', t, 47.2, 51.2);
+  caption('Rumah itu kini dikongsi bersama 5 orang waris.', t, 51.4, 55.4);
+  caption('Ada cara untuk merancang lebih awal.', t, 58.2, 62.2);
+  endCard(t);
+}
+window.render = render;
+window.DURATION = DURATION;
+window.BOOMS = BOOMS;
+window.ready = Promise.all(['900 72px Nunito', '800 34px Nunito'].map(f => document.fonts.load(f).catch(() => {})))
+  .then(() => document.fonts.ready);
+
+if (!location.search.includes('capture')) {
+  window.ready.then(() => {
+    const t0 = performance.now();
+    const loop = now => { render(((now - t0) / 1000) % DURATION); requestAnimationFrame(loop); };
+    requestAnimationFrame(loop);
+  });
+}
+</script>
+</body>
+</html>
