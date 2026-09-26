@@ -19,7 +19,7 @@ rng = np.random.default_rng(7)
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 # scene starts — keep in sync with film.js SCENES durations
-DURS = [5.0, 4.5, 5.5, 4.5, 5.0, 5.5, 4.0, 5.0, 4.5, 4.5, 5.5, 6.5]
+DURS = [5.0, 4.8, 5.5, 4.5, 5.0, 5.5, 4.0, 4.2, 4.5, 4.2, 5.5, 7.3]
 ST = np.concatenate([[0], np.cumsum(DURS)])
 S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12, END = ST
 
@@ -239,7 +239,7 @@ add(music, S10, sw, 0.35)
 # pharaoh rises — deep hit; signs montage hits on each panel
 add(music, S7 + 0.4, boom(0.55), 1)
 for k in range(4):
-    add(music, S8 + k * 1.25, boom(0.35, 1.2, 60), 1)
+    add(music, S8 + k * (S9 - S8) / 4, boom(0.35, 1.2, 60), 1)
 
 # CLIMAX: the sea parts
 climax = pad([mtof(D3), mtof(A3), mtof(D4), mtof(66), mtof(69), mtof(74)], S12 - S11 + 1.0, bright=2400, detune=0.006)
@@ -272,7 +272,7 @@ white = rng.normal(0, 1, N)
 # desert wind: always present, swells in scenes 4 and 11
 wind = bp(white, 180, 1400) * (0.4 + 0.6 * smooth_noise(N, 0.6))
 wind_env = env_curve([(0, 0.05), (S2, 0.06), (S3, 0.03), (S4, 0.11), (S5, 0.05), (S6, 0.01), (S8, 0.01),
-                      (S8 + 3.75, 0.08), (S9, 0.06), (S10, 0.06), (S11, 0.08), (S11 + 0.8, 0.26), (S11 + 3, 0.22),
+                      (S8 + 0.75 * (S9 - S8), 0.08), (S9, 0.06), (S10, 0.06), (S11, 0.08), (S11 + 0.8, 0.26), (S11 + 3, 0.22),
                       (S12, 0.06), (END - 1, 0.04), (END, 0)])
 w2 = bp(rng.normal(0, 1, N), 180, 1400) * (0.4 + 0.6 * smooth_noise(N, 0.5))
 sfx[:, 0] += wind * wind_env
@@ -281,7 +281,7 @@ sfx[:, 1] += w2 * wind_env
 # Nile water (scenes 1 & 3, a little in the frog panel)
 bubbles = bp(rng.normal(0, 1, N), 350, 2600) * (smooth_noise(N, 9) ** 2)
 water_env = env_curve([(0, 0.05), (S2 - 0.3, 0.05), (S2 + 0.3, 0), (S3 - 0.3, 0), (S3 + 0.3, 0.14), (S4 - 0.3, 0.12),
-                       (S4 + 0.3, 0), (S8, 0.05), (S8 + 1.25, 0), (END, 0)])
+                       (S4 + 0.3, 0), (S8, 0.05), (S8 + 0.25 * (S9 - S8), 0), (END, 0)])
 add(sfx, 0, bubbles * water_env, 1, pan=-0.2)
 
 # crowd murmur (babble) — Egypt, labour, exodus, arrival
@@ -309,7 +309,7 @@ for k, tt in enumerate([S7 + 0.85, S7 + 0.95, S7 + 1.05]):
 
 # signs: frogs, locusts, thunder, dry wind
 for k in range(14):
-    tt = S8 + 0.1 + rng.random() * 1.1
+    tt = S8 + 0.05 + rng.random() * 0.25 * (S9 - S8)
     n = int(0.22 * SR)
     ts = np.arange(n) / SR
     f = 180 + rng.random() * 160
@@ -318,8 +318,8 @@ for k in range(14):
 n = int(1.3 * SR)
 buzz = bp(rng.normal(0, 1, n), 1800, 6000) * (0.6 + 0.4 * np.sin(2 * np.pi * 42 * np.arange(n) / SR))
 buzz *= np.interp(np.arange(n) / SR, [0, 0.3, 1.0, 1.3], [0, 1, 1, 0])
-add(sfx, S8 + 1.2, buzz, 0.12, pan=-0.3)
-add(sfx, S8 + 3.3, lp(rng.normal(0, 1, int(2.2 * SR)), 160) * np.exp(-np.arange(int(2.2 * SR)) / SR * 1.6), 0.5)
+add(sfx, S8 + 0.25 * (S9 - S8), buzz, 0.12, pan=-0.3)
+add(sfx, S8 + 0.64 * (S9 - S8), lp(rng.normal(0, 1, int(2.2 * SR)), 160) * np.exp(-np.arange(int(2.2 * SR)) / SR * 1.6), 0.5)
 
 # chase: galloping hooves + chariot wheels
 stride = 0.42
@@ -366,23 +366,71 @@ for k in range(6):
     f = 2600 + 900 * np.sin(np.pi * ts / ts[-1])
     add(sfx, tt, np.sin(2 * np.pi * np.cumsum(f) / SR) * np.sin(np.pi * ts / ts[-1]), 0.03, pan=0.5)
 
+# ------------------------------------------------------------------ NARRATION
+# narration/NN.wav from tools/make_narration.mjs. Each line is slowed with
+# ffmpeg's pitch-preserving atempo (to at most 1.22x) to fill its scene,
+# starting 0.25 s in and ending >= 0.3 s before the next scene.
+LEAD, TAIL, MAX_STRETCH = 0.25, 0.3, 1.22
+narr = np.zeros(N)
+cues = []
+ff = os.environ.get('FFMPEG') or shutil.which('ffmpeg')
+ndir = os.path.join(HERE, '..', 'narration')
+for i in range(12):
+    src = os.path.join(ndir, f'{i + 1:02d}.wav')
+    if not os.path.exists(src) or not ff:
+        continue
+    with wave.open(src) as w:
+        sr0 = w.getframerate()
+        raw_len = w.getnframes() / sr0
+    slot = DURS[i] - LEAD - TAIL
+    stretch = min(MAX_STRETCH, max(1.0, slot / raw_len))
+    pcm = subprocess.run([ff, '-loglevel', 'error', '-i', src, '-af', f'atempo={1 / stretch:.4f}',
+                          '-ar', str(SR), '-ac', '1', '-f', 's16le', '-'], capture_output=True, check=True).stdout
+    x = np.frombuffer(pcm, '<i2') / 32768.0
+    x = hp(x, 90)
+    x = x + 0.35 * bp(x, 2000, 5000)            # a little presence
+    x = x / (np.max(np.abs(x)) + 1e-9) * 0.9
+    t0 = ST[i] + LEAD
+    j0 = idx(t0)
+    j1 = min(N, j0 + len(x))
+    narr[j0:j1] += x[: j1 - j0]
+    cues.append((t0, t0 + len(x) / SR, stretch))
+    print(f'line {i + 1:2d}: {t0:5.2f}-{t0 + len(x) / SR:5.2f}s  x{stretch:.2f}')
+
+# duck music + sfx under the voice (smooth 0.25 s ramps)
+duck = np.ones(N)
+for a0, a1, _ in cues:
+    duck[idx(a0 - 0.1):idx(a1 + 0.15)] = 0.42
+k = int(0.25 * SR)
+duck = np.convolve(duck, np.ones(k) / k, mode='same')
+narr_st = np.stack([narr, narr], 1)
+narr_st = reverb(narr_st, 0.8, 7.0, 0.12)
+
 # ------------------------------------------------------------------ mix
-mix = music * 0.9 + sfx * 0.85
+mix = (music * 0.9 + sfx * 0.85) * duck[:, None]
 fade = np.ones(N)
 fade[: int(0.5 * SR)] = np.linspace(0, 1, int(0.5 * SR))
 fade[-int(1.2 * SR):] *= np.linspace(1, 0, int(1.2 * SR)) ** 1.5
 mix *= fade[:, None]
 mix = hp(mix.T, 30).T
-peak = np.max(np.abs(mix))
-mix = np.tanh(mix / peak * 1.4) / np.tanh(1.4) * 0.89
-
+mix = mix / np.max(np.abs(mix)) * 0.85            # music + sfx bed
+mix += narr_st / (np.max(np.abs(narr_st)) + 1e-9) * 0.85
+mix = np.tanh(mix * 1.1) / np.tanh(1.1) * 0.89     # gentle soft-limit
 out = os.path.join(HERE, '..', 'soundtrack.wav')
 with wave.open(out, 'wb') as w:
     w.setnchannels(2); w.setsampwidth(2); w.setframerate(SR)
     w.writeframes((mix * 32767).astype('<i2').tobytes())
 print('wrote', out)
 
-ff = os.environ.get('FFMPEG') or shutil.which('ffmpeg')
+texts = [l.split("text: '")[1].split("'")[0] for l in open(os.path.join(HERE, '..', 'film.js'), encoding='utf-8')
+         if "{ id: '" in l]
+def srt_t(x):
+    ms = int(round(x * 1000))
+    return f'{ms // 3600000:02}:{ms // 60000 % 60:02}:{ms // 1000 % 60:02},{ms % 1000:03}'
+if cues:
+    with open(os.path.join(HERE, '..', 'narration_ms.srt'), 'w', encoding='utf-8') as f:
+        f.write('\n'.join(f'{n + 1}\n{srt_t(a0)} --> {srt_t(a1)}\n{texts[n]}\n' for n, (a0, a1, _) in enumerate(cues)))
+
 if ff:
     subprocess.run([ff, '-y', '-loglevel', 'error', '-i', out, '-c:a', 'aac', '-b:a', '192k',
                     os.path.join(HERE, '..', 'soundtrack.m4a')], check=True)

@@ -6,10 +6,11 @@ individual sprites and animated with parallax layers and camera moves.
 
 | File | What it is |
 | --- | --- |
-| `index.html` + `film.js` | Player. It renders the film live on a canvas and speaks the Malay narration with the browser's voice (`ms-MY`, falling back to `id-ID`). |
-| `video/kisah-nabi-musa-firaun.mp4` | 1920×1080, 30 fps render with the music and sound effects. It has **no voice-over** (see below). |
-| `soundtrack.m4a` | Synthesized score and sound effects, locked to the scene timings. |
-| `narration_ms.srt` | Timed Malay narration script, used as a voice-over guide. It is not burned into the video, so there are no subtitles. |
+| `index.html` + `film.js` | Player. It renders the film live on a canvas, in sync with `soundtrack.m4a`. |
+| `video/kisah-nabi-musa-firaun.mp4` | 1920×1080, 30 fps render with the Malay voice-over, music and sound effects. |
+| `soundtrack.m4a` | Voice-over, score and sound effects, locked to the scene timings. |
+| `narration/` | The 12 raw voice-over lines (`01.wav` to `12.wav`). |
+| `narration_ms.srt` | Exact timing of each voice-over line. It is not burned into the video, so there are no subtitles. |
 | `assets/` | Individual transparent stickers cut from the sheet. |
 | `tools/` | Scripts that rebuild everything above. |
 
@@ -26,28 +27,30 @@ individual sprites and animated with parallax layers and camera moves.
 - No text, logos or watermarks appear in the frames. The palace friezes use patterns only.
 
 ## Scenes (seconds)
-1 Mesir 0–5 · 2 Penindasan 5–9.5 · 3 Bayi Musa 9.5–15 · 4 Musa dewasa 15–19.5 ·
-5 Semak terbakar 19.5–24.5 · 6 Di hadapan Firaun 24.5–30 · 7 Firaun menolak 30–34 ·
-8 Tanda-tanda 34–39 · 9 Keluar dari Mesir 39–43.5 · 10 Dikejar 43.5–48 ·
-11 Laut terbelah 48–53.5 · 12 Terselamat, matahari terbit 53.5–60
+1 Mesir 0–5 · 2 Penindasan 5–9.8 · 3 Bayi Musa 9.8–15.3 · 4 Musa dewasa 15.3–19.8 ·
+5 Semak terbakar 19.8–24.8 · 6 Di hadapan Firaun 24.8–30.3 · 7 Firaun menolak 30.3–34.3 ·
+8 Tanda-tanda 34.3–38.5 · 9 Keluar dari Mesir 38.5–43 · 10 Dikejar 43–47.2 ·
+11 Laut terbelah 47.2–52.7 · 12 Terselamat, matahari terbit 52.7–60
 
 ## Voice-over
-The sandbox that built this had no access to a Malay text-to-speech service,
-so the MP4 carries only music and sound effects. To add the narration, record
-or generate each line of `narration_ms.srt` at its timestamp and mix it over
-the MP4. For example:
+The voice-over uses the `paan` voice from
+[`@revolab/revolab-edge`](https://www.npmjs.com/package/@revolab/revolab-edge),
+an on-device Malay text-to-speech package. `tools/make_narration.mjs` writes
+`narration/NN.wav`. `tools/make_audio.py` then slows each line with ffmpeg's
+pitch-preserving `atempo` (by up to 1.22x) so it fills its scene, lowers the
+music and effects under the voice, and writes `narration_ms.srt`.
 
-```sh
-ffmpeg -i video/kisah-nabi-musa-firaun.mp4 -i narration.wav \
-  -filter_complex "[0:a]volume=0.55[m];[m][1:a]amix=inputs=2:duration=first[a]" \
-  -map 0:v -map "[a]" -c:v copy -c:a aac kisah-nabi-musa-firaun-narasi.mp4
-```
+**Licence:** revolab-edge is proprietary ("UNLICENSED, © Revolab"). Check its
+terms before publishing the video, or replace `narration/*.wav` with your own
+recording (same file names) and rerun `make_audio.py`.
 
 ## Rebuild
 ```sh
 pip install pillow numpy scipy imageio-ffmpeg
 python3 tools/extract_assets.py          # sheet -> assets/*.png
-python3 tools/make_audio.py              # -> soundtrack.wav / .m4a  (needs ffmpeg on PATH or $FFMPEG)
+npm pack @revolab/revolab-edge && tar xzf revolab-edge-*.tgz
+REVOLAB_EDGE_DIR=./package node tools/make_narration.mjs   # -> narration/*.wav
+python3 tools/make_audio.py              # -> soundtrack.wav / .m4a + narration_ms.srt  (needs ffmpeg on PATH or $FFMPEG)
 node tools/render.mjs video 30           # -> out/video_silent.mp4    (needs playwright + ffmpeg)
 ffmpeg -i out/video_silent.mp4 -i soundtrack.m4a -c copy -shortest video/kisah-nabi-musa-firaun.mp4
 ```

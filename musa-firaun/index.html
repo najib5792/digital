@@ -33,7 +33,6 @@
   <button id="restart">⟲</button>
   <input id="seek" type="range" min="0" max="60" step="0.01" value="0" aria-label="Kedudukan">
   <span class="time" id="time">0:00 / 1:00</span>
-  <label><input type="checkbox" id="narr" checked> Narasi (suara pelayar)</label>
 </div>
 <audio id="music" src="soundtrack.m4a" preload="auto"></audio>
 <script src="film.js"></script>
@@ -57,27 +56,9 @@
   const playBtn = document.getElementById('play');
   const seek = document.getElementById('seek');
   const timeEl = document.getElementById('time');
-  const narrBox = document.getElementById('narr');
   seek.max = F.DURATION;
 
-  // --- narration: Malay browser voice (fallback: Indonesian, then default)
-  let voice = null;
-  function pickVoice() {
-    const vs = speechSynthesis.getVoices();
-    voice = vs.find(v => /^ms/i.test(v.lang)) || vs.find(v => /^id/i.test(v.lang)) || null;
-  }
-  if ('speechSynthesis' in window) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
-  let spoken = -1;
-  function speak(i) {
-    if (!narrBox.checked || !('speechSynthesis' in window)) return;
-    speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(F.SCENES[i].text);
-    u.lang = voice ? voice.lang : 'ms-MY';
-    if (voice) u.voice = voice;
-    u.rate = F.SCENES[i].text.length > 90 ? 1.08 : 0.98;
-    u.pitch = 0.95;
-    speechSynthesis.speak(u);
-  }
+  // Narration, music and SFX are all in soundtrack.m4a.
 
   // --- clock: follow the soundtrack when it is available
   let playing = false, clock = 0, last = 0, hasAudio = true;
@@ -91,18 +72,15 @@
     if (p) {
       if (clock >= F.DURATION - 0.05) clock = 0;
       if (hasAudio) { music.currentTime = clock; music.play().catch(() => { hasAudio = false; }); }
-      spoken = -1;
       last = performance.now();
     } else {
       clock = now();
       music.pause();
-      if ('speechSynthesis' in window) speechSynthesis.cancel();
     }
   }
   function seekTo(t) {
-    clock = t; spoken = F.sceneAt(t) - (t - F.SCENES[F.sceneAt(t)].start < 0.4 ? 1 : 0);
+    clock = t;
     if (hasAudio) music.currentTime = t;
-    if ('speechSynthesis' in window) speechSynthesis.cancel();
   }
 
   function fmt(s) { s = Math.max(0, s); return Math.floor(s / 60) + ':' + String(Math.floor(s % 60)).padStart(2, '0'); }
@@ -112,10 +90,8 @@
       else clock = music.currentTime;
       last = ts;
       if (clock >= F.DURATION) { clock = F.DURATION; setPlaying(false); }
-      const i = F.sceneAt(clock);
-      if (i !== spoken && clock - F.SCENES[i].start >= 0.25) { spoken = i; speak(i); }
     }
-    const t = playing ? clock : clock;
+    const t = clock;
     F.render(ctx, t);
     seek.value = t;
     timeEl.textContent = fmt(t) + ' / ' + fmt(F.DURATION);
@@ -125,7 +101,6 @@
   document.getElementById('start').onclick = () => setPlaying(true);
   document.getElementById('restart').onclick = () => { seekTo(0); setPlaying(true); };
   seek.oninput = () => seekTo(parseFloat(seek.value));
-  narrBox.onchange = () => { if (!narrBox.checked && 'speechSynthesis' in window) speechSynthesis.cancel(); };
   if (params.has('t')) clock = parseFloat(params.get('t'));
   requestAnimationFrame(frame);
 })();

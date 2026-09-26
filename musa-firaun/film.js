@@ -18,17 +18,17 @@
   // Durations (seconds) sum to 60. Keep in sync with tools/make_audio.py.
   const SCENES = [
     { id: 'mesir',      dur: 5.0, text: 'Pada zaman dahulu, Mesir diperintah oleh seorang Firaun yang sangat zalim.' },
-    { id: 'penindasan', dur: 4.5, text: 'Bani Israel hidup dalam penindasan dan ketakutan di bawah pemerintahannya.' },
+    { id: 'penindasan', dur: 4.8, text: 'Bani Israel hidup dalam penindasan dan ketakutan di bawah pemerintahannya.' },
     { id: 'bayi',       dur: 5.5, text: 'Ketika Nabi Musa masih bayi, ibunya menghanyutkannya di Sungai Nil demi menyelamatkannya.' },
     { id: 'dewasa',     dur: 4.5, text: 'Musa membesar, dan kemudian Allah memilih baginda sebagai seorang nabi.', trans: 'glow' },
     { id: 'semak',      dur: 5.0, text: 'Allah memerintahkan Nabi Musa untuk menyampaikan kebenaran kepada Firaun.', trans: 'dip' },
     { id: 'istana',     dur: 5.5, text: 'Nabi Musa datang menghadap Firaun dan menyerunya supaya meninggalkan kesombongan dan kezaliman.' },
     { id: 'menolak',    dur: 4.0, text: 'Namun Firaun tetap angkuh dan menolak seruan Nabi Musa.', trans: 'cut' },
-    { id: 'tanda',      dur: 5.0, text: 'Pelbagai tanda diperlihatkan, tetapi Firaun masih enggan tunduk.' },
+    { id: 'tanda',      dur: 4.2, text: 'Pelbagai tanda diperlihatkan, tetapi Firaun masih enggan tunduk.' },
     { id: 'keluar',     dur: 4.5, text: 'Akhirnya, Nabi Musa membawa Bani Israel keluar meninggalkan Mesir.', trans: 'dip' },
-    { id: 'kejar',      dur: 4.5, text: 'Firaun dan tenteranya mengejar mereka sehingga ke tepi laut.' },
+    { id: 'kejar',      dur: 4.2, text: 'Firaun dan tenteranya mengejar mereka sehingga ke tepi laut.' },
     { id: 'laut',       dur: 5.5, text: 'Dengan izin Allah, laut terbelah dan terbukalah jalan untuk Nabi Musa dan pengikutnya.' },
-    { id: 'akhir',      dur: 6.5, text: 'Nabi Musa dan Bani Israel terselamat. Kisah ini mengingatkan kita bahawa kesombongan dan kezaliman tidak akan kekal selamanya.' },
+    { id: 'akhir',      dur: 7.3, text: 'Nabi Musa dan Bani Israel terselamat. Kisah ini mengingatkan kita bahawa kesombongan dan kezaliman tidak akan kekal selamanya.' },
   ];
   let acc = 0;
   for (const s of SCENES) { s.start = acc; acc += s.dur; }
