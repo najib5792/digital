@@ -1,29 +1,37 @@
 # Proses Kejadian Rama-Rama: video stop motion
 
-Video 10 saat, 9:16 (1080×1920), 12 fps, dibina daripada `storyboard.png`.
+Video 10 saat, 9:16 (1080×1920), 12 fps, animasi **cut-out puppet** berdasarkan
+`storyboard.png`. Senarai asset dan prompt ada dalam `ASSETS.md`.
 
 ## Cara guna
 
 ```bash
-pip install pillow numpy imageio-ffmpeg
+pip install pillow numpy scipy imageio-ffmpeg
 
-# 1. Jana 40 keyframe (10 babak × 4 pose) melalui OpenRouter
-OPENROUTER_API_KEY=sk-or-... python3 generate_frames.py
-#    jana semula babak tertentu:   --scenes 3,7 --force
-
-# 2. Bina video
-python3 build_video.py            # -> out/rama-rama-stop-motion.mp4
+python3 extract_assets.py   # potong 16 asset daripada assets/_ref/asset_sheet_v2.png
+python3 build_video.py      # -> out/rama-rama-stop-motion.mp4
+#   --sheet          simpan contact sheet untuk semakan
+#   --scenes 2,9     render babak tertentu sahaja (tanpa audio)
 ```
 
-Kalau ada keyframe yang belum dijana, `build_video.py` guna panel storyboard sebagai
-ganti (mod preview), supaya pipeline boleh diuji dahulu.
+Kalau ada asset baru dengan resolusi lebih tinggi, simpan terus dalam `assets/`
+dengan nama yang sama. Kalau tukar asset, kemas kini juga koordinat dalam
+`build_video.py` (`TWIG_UNDERSIDE_Y`, `FLOWER_CENTRE`, `BUTTERFLY_BODY_X`, ...).
 
-## Fail
+## Apa yang digerakkan dengan kod
 
-| Fail | Fungsi |
+| Babak | Gerakan |
 |---|---|
-| `scenes.json` | Kapsyen, gaya gerakan kamera dan prompt 4 pose untuk setiap babak |
-| `generate_frames.py` | Jana keyframe; pose 1 guna panel storyboard sebagai rujukan, pose 2 hingga 4 guna pose sebelumnya |
-| `build_video.py` | Jitter, light flicker, grain, vignette, kapsyen, tajuk akhir, muzik music-box dan bunyi klik, dan encode MP4 |
-| `storyboard.py` | Potong panel 1 hingga 10 daripada storyboard |
-| `generate_image.py` | Klien OpenRouter (stdlib sahaja) |
+| 1 | Telur muncul satu demi satu (squash & settle) dengan kilauan |
+| 2 | Telur bergoyang, retak, penutup tercampak, ulat menjenguk lalu merayap keluar |
+| 3 | Ulat merayap (gelombang badan), kepala mengunyah, lubang daun bertambah, serpihan daun |
+| 4 | Ulat kecil morph jadi ulat berjalur sambil membesar |
+| 5 | Ulat merayap bawah ranting, lalu tergantung bentuk J dan berayun |
+| 6 | Ulat J mengecut, bertukar jadi kepompong hijau |
+| 7 | Kepompong jadi lutsinar, corak sayap kelihatan |
+| 8 | Kepompong bergegar, rama-rama keluar sedikit demi sedikit |
+| 9 | Sayap berkedut mengembang, lalu terbuka penuh (sayap kiri & kanan layer berasingan) |
+| 10 | Rama-rama terbang ikut laluan melengkung sambil mengibas sayap, lalu hinggap di bunga |
+
+Setiap frame juga dapat jitter puppet, gegaran kamera, light flicker, grain dan vignette,
+dengan muzik music-box, bunyi klik shutter dan kilauan bunyi.
