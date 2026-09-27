@@ -1,0 +1,423 @@
+<!doctype html>
+<html lang="ms">
+<head>
+<meta charset="utf-8">
+<title>GPT Storyboard Infographic</title>
+<style>
+@font-face{font-family:PJS;font-weight:400;src:url(vendor/pjs-400.woff2) format('woff2')}
+@font-face{font-family:PJS;font-weight:600;src:url(vendor/pjs-600.woff2) format('woff2')}
+@font-face{font-family:PJS;font-weight:700;src:url(vendor/pjs-700.woff2) format('woff2')}
+@font-face{font-family:PJS;font-weight:800;src:url(vendor/pjs-800.woff2) format('woff2')}
+:root{
+  --page:#f1f1f3; --poster:#ffffff; --ink:#18181b; --muted:#52525b; --soft:#a1a1aa;
+  --red:#dc2626; --red-soft:#fee2e2; --red-tint:#fef2f2; --amber:#fbbf24; --black:#0a0a0a;
+  --green:#16a34a; --line:#d4d4d8;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1080px;height:1920px;overflow:hidden;background:var(--page)}
+body{font-family:PJS,sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased}
+#stage{position:relative;width:1080px;height:1920px;overflow:hidden;background:var(--page)}
+#poster{position:absolute;left:0;top:0;width:2240px;height:2900px;background:var(--poster);
+  border-radius:72px;transform-origin:0 0;box-shadow:0 30px 80px rgba(24,24,27,.10)}
+.sec{position:absolute}
+.guide{position:absolute;border:0 dotted var(--line)}
+.pill{display:inline-block;border-radius:999px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
+.pop{will-change:transform}
+
+/* A: title */
+#A{left:60px;top:60px;width:1040px;height:1840px;background:var(--black);border-radius:56px;overflow:hidden}
+#A .pill{position:absolute;left:80px;top:96px;padding:18px 34px;font-size:30px;color:#f87171;
+  background:rgba(127,29,29,.45);border:3px solid #7f1d1d}
+#A h1{position:absolute;left:80px;top:210px;width:900px;font-weight:800;font-size:100px;line-height:1.06;color:#fff;letter-spacing:-.02em}
+#A h1 .ln{display:block;transform-origin:0 70%}
+#A h1 .red{color:#f43f5e;color:var(--red);}
+#A .sub{position:absolute;left:80px;top:790px;font-size:38px;color:#d4d4d8;font-weight:400;width:880px;line-height:1.35}
+#A svg{position:absolute;left:0;top:930px}
+
+/* B: steps */
+#B{left:1140px;top:60px;width:1040px;height:1840px}
+.eyebrow{font-weight:800;font-size:30px;letter-spacing:.16em;color:var(--red);text-transform:uppercase}
+.h2{font-weight:800;font-size:78px;line-height:1.05;letter-spacing:-.02em;color:var(--ink)}
+#B .eyebrow{position:absolute;left:70px;top:90px}
+#B .h2{position:absolute;left:70px;top:140px}
+.step{position:absolute;left:0;width:1040px;height:210px}
+.tile{position:absolute;left:70px;top:0;width:210px;height:210px;border-radius:56px;background:var(--red-soft)}
+.tile svg{position:absolute;left:0;top:0}
+.badge{position:absolute;left:44px;top:-26px;width:92px;height:92px;border-radius:50%;background:var(--amber);
+  border:7px solid #fff;font-weight:800;font-size:46px;line-height:78px;text-align:center;color:var(--ink)}
+.stext{position:absolute;left:330px;top:34px;width:660px}
+.slabel{font-weight:800;font-size:54px;line-height:1.1;color:var(--ink)}
+.sdet{font-weight:400;font-size:36px;line-height:1.3;color:var(--muted);margin-top:14px}
+#arrows{position:absolute;left:0;top:0;overflow:visible}
+
+/* C: fact */
+#C{left:60px;top:1960px;width:1040px;height:880px;background:#fafafa;border-radius:56px;border:3px solid #ececef}
+#C .pill{position:absolute;left:70px;top:70px;padding:16px 30px;font-size:28px;background:var(--amber);color:var(--ink)}
+#C .big{position:absolute;left:62px;top:140px;font-weight:800;font-size:300px;line-height:1;color:var(--red);letter-spacing:-.04em;transform-origin:30% 70%}
+#C .bigtxt{position:absolute;left:470px;top:218px;width:520px}
+#C .bigtxt b{display:block;font-weight:800;font-size:66px;line-height:1.05}
+#C .bigtxt span{display:block;font-weight:400;font-size:42px;color:var(--muted);margin-top:12px}
+#bots{position:absolute;left:70px;top:520px;overflow:visible}
+#C .note{position:absolute;left:70px;top:690px;width:900px;font-size:32px;color:var(--muted);line-height:1.4}
+
+/* D: compare */
+#D{left:1140px;top:1960px;width:1040px;height:880px}
+#D .eyebrow{position:absolute;left:70px;top:60px}
+.card{position:absolute;top:130px;width:430px;height:690px;border-radius:48px;padding:0 40px}
+#old{left:70px;background:#f4f4f5}
+#new{left:540px;background:var(--red-tint);border:4px solid var(--red)}
+.mark{position:absolute;left:40px;top:44px;overflow:visible}
+.ctitle{position:absolute;left:40px;top:190px;font-weight:800;font-size:46px;line-height:1.1;width:360px}
+.cline{position:absolute;left:40px;top:320px;font-weight:400;font-size:34px;line-height:1.3;color:var(--muted);width:360px}
+.cval{position:absolute;left:40px;bottom:50px;font-weight:800;font-size:64px;line-height:1.02;letter-spacing:-.02em;width:370px;transform-origin:0 100%}
+#old .cval{color:#71717a}
+#new .cval{color:var(--red)}
+
+/* end overlay */
+#end{position:absolute;left:0;top:0;width:1080px;height:1920px;pointer-events:none}
+#logo{position:absolute;left:140px;top:1466px;width:800px;height:140px;background:#fff;border-radius:40px;
+  box-shadow:0 20px 50px rgba(24,24,27,.14);display:flex;align-items:center;padding:0 40px;gap:28px}
+#logo .mk{width:88px;height:88px;border-radius:26px;background:var(--red);color:#fff;font-weight:800;font-size:42px;
+  display:flex;align-items:center;justify-content:center;letter-spacing:-.02em}
+#logo .nm{font-weight:800;font-size:54px;letter-spacing:-.02em}
+#logo .tg{font-weight:400;font-size:28px;color:var(--muted);margin-left:auto}
+#save{position:absolute;left:140px;top:1640px;width:800px;height:128px;border-radius:999px;background:var(--red);
+  color:#fff;font-weight:800;font-size:48px;display:flex;align-items:center;justify-content:center;gap:22px;
+  box-shadow:0 20px 44px rgba(220,38,38,.35)}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="poster">
+    <!-- thin dotted guide lines -->
+    <div class="guide" style="left:1119px;top:120px;height:2680px;border-left-width:4px"></div>
+    <div class="guide" style="left:120px;top:1929px;width:2000px;border-top-width:4px"></div>
+
+    <section class="sec" id="A">
+      <div class="pill pop" id="a-pill">10 GPT Storyboard Premium</div>
+      <h1>
+        <span class="ln pop">Siapkan Skrip,</span>
+        <span class="ln pop">Babak &amp; Prompt</span>
+        <span class="ln pop">Visual</span>
+        <span class="ln pop red">Dalam Beberapa Minit</span>
+      </h1>
+      <p class="sub pop" id="a-sub">Untuk TikTok, Reels, Shorts, podcast dan ASMR.</p>
+      <svg width="1040" height="910" viewBox="0 0 1040 910" id="illo"></svg>
+    </section>
+
+    <section class="sec" id="B">
+      <div class="eyebrow pop" id="b-eye">Flow proses</div>
+      <div class="h2 pop" id="b-h2">Cara Guna Sangat Mudah</div>
+      <svg id="arrows" width="1040" height="1840"></svg>
+    </section>
+
+    <section class="sec" id="C">
+      <div class="pill pop" id="c-pill">Tahukah anda?</div>
+      <div class="big pop" id="c-big">10</div>
+      <div class="bigtxt pop" id="c-txt"><b>GPT Premium</b><span>dalam 1 harga</span></div>
+      <svg id="bots" width="900" height="120"></svg>
+      <p class="note pop" id="c-note">Universal, Talking Head, Pix Story, Podcast, ASMR dan banyak lagi.</p>
+    </section>
+
+    <section class="sec" id="D">
+      <div class="eyebrow pop" id="d-eye">Sebelum vs selepas</div>
+      <div class="card pop" id="old">
+        <svg class="mark" width="120" height="120" id="cross"></svg>
+        <div class="ctitle">Cara lama</div>
+        <div class="cline">Draf storyboard bermula dari kosong</div>
+        <div class="cval pop">Berjam-jam</div>
+      </div>
+      <div class="card pop" id="new">
+        <svg class="mark" width="120" height="120" id="tick"></svg>
+        <div class="ctitle">GPT Storyboard</div>
+        <div class="cline">Skrip, babak &amp; prompt visual siap</div>
+        <div class="cval pop">Beberapa minit</div>
+      </div>
+    </section>
+  </div>
+
+  <div id="end">
+    <div id="logo"><div class="mk">RB</div><div class="nm">RB Digital</div><div class="tg">GPT Storyboard</div></div>
+    <div id="save">
+      <svg width="46" height="56" viewBox="0 0 46 56"><path d="M6 4h34a2 2 0 0 1 2 2v46l-19-12L4 52V6a2 2 0 0 1 2-2z" fill="#fff"/></svg>
+      Simpan Post Ini
+    </div>
+  </div>
+</div>
+
+<script src="vendor/gsap.min.js"></script>
+<script>
+const NS = 'http://www.w3.org/2000/svg';
+const RED = '#dc2626', REDS = '#fee2e2', AMBER = '#fbbf24', INK = '#18181b', BLACK = '#0a0a0a';
+function svgEl(parent, tag, attrs) {
+  const e = document.createElementNS(NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  parent.appendChild(e);
+  return e;
+}
+function g(parent, attrs = {}) { return svgEl(parent, 'g', attrs); }
+
+/* ---------- Title illustration: flat storyboard board ---------- */
+const illo = document.getElementById('illo');
+const illoParts = [];
+{
+  // board
+  const board = g(illo); illoParts.push(board);
+  svgEl(board, 'rect', { x: 80, y: 60, width: 760, height: 620, rx: 44, fill: '#ffffff' });
+  svgEl(board, 'rect', { x: 80, y: 60, width: 760, height: 70, rx: 44, fill: '#f4f4f5' });
+  svgEl(board, 'rect', { x: 80, y: 100, width: 760, height: 30, fill: '#f4f4f5' });
+  [[130, RED], [166, AMBER], [202, '#22c55e']].forEach(([x, c]) => svgEl(board, 'circle', { cx: x, cy: 95, r: 11, fill: c }));
+
+  // frame 1: sun + hills
+  const defs = svgEl(illo, 'defs', {});
+  const cp = svgEl(defs, 'clipPath', { id: 'f1clip' });
+  svgEl(cp, 'rect', { x: 120, y: 160, width: 330, height: 220, rx: 26 });
+  const f1 = g(g(illo, { 'clip-path': 'url(#f1clip)' })); illoParts.push(f1);
+  svgEl(f1, 'rect', { x: 120, y: 160, width: 330, height: 220, rx: 26, fill: REDS });
+  svgEl(f1, 'circle', { cx: 380, cy: 215, r: 30, fill: AMBER });
+  svgEl(f1, 'path', { d: 'M120 350 L215 262 L290 330 L340 290 L460 390 L110 390 Z', fill: RED });
+  // frame 2: character
+  const f2 = g(illo); illoParts.push(f2);
+  svgEl(f2, 'rect', { x: 470, y: 160, width: 330, height: 220, rx: 26, fill: '#f4f4f5' });
+  svgEl(f2, 'circle', { cx: 635, cy: 240, r: 42, fill: INK });
+  svgEl(f2, 'path', { d: 'M555 380 Q560 300 635 298 Q710 300 715 380 Z', fill: RED });
+  svgEl(f2, 'rect', { x: 700, y: 190, width: 76, height: 46, rx: 16, fill: '#ffffff' });
+  svgEl(f2, 'path', { d: 'M712 234 l-8 18 l22 -16 z', fill: '#ffffff' });
+  // frame 3: wide with play button
+  const f3 = g(illo); illoParts.push(f3);
+  svgEl(f3, 'rect', { x: 120, y: 400, width: 680, height: 240, rx: 26, fill: INK });
+  svgEl(f3, 'circle', { cx: 460, cy: 520, r: 62, fill: RED });
+  svgEl(f3, 'path', { d: 'M442 490 L496 520 L442 550 Z', fill: '#fff', 'stroke-linejoin': 'round', stroke: '#fff', 'stroke-width': 6 });
+  svgEl(f3, 'rect', { x: 160, y: 600, width: 240, height: 12, rx: 6, fill: '#3f3f46' });
+  svgEl(f3, 'rect', { x: 160, y: 600, width: 130, height: 12, rx: 6, fill: RED });
+
+  // clapperboard
+  const clapWrap = g(illo, { transform: 'translate(770 560) rotate(-10)' });
+  const clap = g(clapWrap); illoParts.push(clap);
+  svgEl(clap, 'rect', { x: -10, y: 50, width: 230, height: 170, rx: 24, fill: '#3f3f46' });
+  const top = g(clap, { transform: 'rotate(-14 -10 50)' });
+  svgEl(top, 'rect', { x: -10, y: 4, width: 230, height: 50, rx: 14, fill: '#ffffff' });
+  for (let i = 0; i < 4; i++) svgEl(top, 'path', { d: `M${20 + i * 55} 4 l30 0 l-24 50 l-30 0 z`, fill: BLACK });
+  svgEl(clap, 'rect', { x: 20, y: 100, width: 170, height: 14, rx: 7, fill: '#52525b' });
+  svgEl(clap, 'rect', { x: 20, y: 140, width: 120, height: 14, rx: 7, fill: '#52525b' });
+
+  // sparkles
+  const star = (cx, cy, r, c) => {
+    const s = g(illo); illoParts.push(s);
+    svgEl(s, 'path', { d: `M${cx} ${cy - r} Q${cx + r * .18} ${cy - r * .18} ${cx + r} ${cy} Q${cx + r * .18} ${cy + r * .18} ${cx} ${cy + r} Q${cx - r * .18} ${cy + r * .18} ${cx - r} ${cy} Q${cx - r * .18} ${cy - r * .18} ${cx} ${cy - r} Z`, fill: c });
+  };
+  star(900, 110, 46, AMBER); star(60, 700, 32, AMBER); star(960, 330, 24, '#ffffff');
+}
+
+/* ---------- Step icons ---------- */
+function icon(kind, svg) {
+  const c = g(svg);
+  if (kind === 'type') { // text box with cursor
+    svgEl(c, 'rect', { x: 45, y: 62, width: 120, height: 86, rx: 20, fill: '#fff' });
+    svgEl(c, 'rect', { x: 64, y: 86, width: 60, height: 12, rx: 6, fill: RED });
+    svgEl(c, 'rect', { x: 64, y: 112, width: 40, height: 12, rx: 6, fill: '#fca5a5' });
+    svgEl(c, 'rect', { x: 134, y: 80, width: 8, height: 50, rx: 4, fill: INK });
+  } else if (kind === 'prompt') { // video camera + spark
+    svgEl(c, 'rect', { x: 40, y: 70, width: 100, height: 76, rx: 20, fill: RED });
+    svgEl(c, 'path', { d: 'M140 96 L172 78 Q176 76 176 81 L176 135 Q176 140 172 138 L140 120 Z', fill: RED });
+    svgEl(c, 'circle', { cx: 72, cy: 100, r: 10, fill: '#fff' });
+    svgEl(c, 'rect', { x: 60, y: 122, width: 60, height: 10, rx: 5, fill: '#fff' });
+  } else if (kind === 'board') { // 2x2 frames
+    [[44, 48], [110, 48], [44, 112], [110, 112]].forEach(([x, y], i) => {
+      svgEl(c, 'rect', { x, y, width: 56, height: 54, rx: 14, fill: i === 0 ? RED : (i === 3 ? INK : '#fff') });
+    });
+    svgEl(c, 'circle', { cx: 150, cy: 70, r: 8, fill: AMBER });
+    svgEl(c, 'path', { d: 'M52 150 L68 130 L84 150 Z', fill: RED });
+  } else if (kind === 'video') { // play + AI spark
+    svgEl(c, 'circle', { cx: 100, cy: 110, r: 56, fill: RED });
+    svgEl(c, 'path', { d: 'M88 86 L126 110 L88 134 Z', fill: '#fff', stroke: '#fff', 'stroke-width': 6, 'stroke-linejoin': 'round' });
+    svgEl(c, 'path', { d: 'M162 44 Q165 60 180 63 Q165 66 162 82 Q159 66 144 63 Q159 60 162 44 Z', fill: AMBER });
+  }
+  return c;
+}
+
+const STEPS = [
+  ['type', 'Masukkan topik', 'Topik atau produk anda di GPT'],
+  ['prompt', 'Dapat prompt video', 'GPT susun babak &amp; dialog'],
+  ['board', 'Siap image storyboard', 'Visual babak demi babak'],
+  ['video', 'Jana video', 'Masukkan dalam Gemini / Flow AI'],
+];
+const B = document.getElementById('B');
+const ROW0 = 330, ROWSTEP = 380, TILE = 210;
+const stepEls = STEPS.map(([kind, label, det], i) => {
+  const row = document.createElement('div');
+  row.className = 'step';
+  row.style.top = (ROW0 + i * ROWSTEP) + 'px';
+  row.innerHTML = `<div class="tile pop"><svg width="210" height="210" viewBox="0 0 210 210"></svg></div>
+    <div class="badge pop">${i + 1}</div>
+    <div class="stext pop"><div class="slabel">${label}</div><div class="sdet">${det}</div></div>`;
+  B.appendChild(row);
+  const ic = icon(kind, row.querySelector('svg'));
+  return { tile: row.querySelector('.tile'), badge: row.querySelector('.badge'), text: row.querySelector('.stext'), icon: ic };
+});
+
+// dotted arrows between tiles, gently curved
+const arrowsSvg = document.getElementById('arrows');
+const arrows = [];
+for (let i = 0; i < 3; i++) {
+  const x = 70 + TILE / 2;
+  const y0 = ROW0 + i * ROWSTEP + TILE + 18, y1 = ROW0 + (i + 1) * ROWSTEP - 22;
+  const p = svgEl(arrowsSvg, 'path', { d: `M${x} ${y0} C${x + 70} ${y0 + 40}, ${x + 70} ${y1 - 60}, ${x} ${y1}`, fill: 'none' });
+  const len = p.getTotalLength();
+  const dots = [];
+  const n = 6;
+  for (let k = 0; k < n; k++) {
+    const pt = p.getPointAtLength(len * k / (n - 0.2));
+    dots.push(svgEl(arrowsSvg, 'circle', { cx: pt.x, cy: pt.y, r: 7, fill: RED }));
+  }
+  const end = p.getPointAtLength(len);
+  const head = svgEl(arrowsSvg, 'path', { d: `M${end.x - 16} ${end.y - 14} L${end.x} ${end.y + 2} L${end.x + 16} ${end.y - 14}`,
+    fill: 'none', stroke: RED, 'stroke-width': 7, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' });
+  dots.push(head);
+  arrows.push(dots);
+}
+
+/* ---------- Fact: 10 GPT bot icons ---------- */
+const bots = document.getElementById('bots');
+const botEls = [];
+for (let i = 0; i < 10; i++) {
+  const b = g(bots, { transform: `translate(${i * 90 + 40} 60)` });
+  const fillParts = [];
+  svgEl(b, 'rect', { x: -2, y: -54, width: 4, height: 14, rx: 2, fill: '#d4d4d8' });
+  fillParts.push(svgEl(b, 'circle', { cx: 0, cy: -54, r: 6, fill: '#d4d4d8' }));
+  fillParts.push(svgEl(b, 'rect', { x: -34, y: -40, width: 68, height: 60, rx: 20, fill: '#d4d4d8' }));
+  fillParts.push(svgEl(b, 'rect', { x: -26, y: 26, width: 52, height: 28, rx: 12, fill: '#d4d4d8' }));
+  svgEl(b, 'circle', { cx: -13, cy: -12, r: 7, fill: '#fff' });
+  svgEl(b, 'circle', { cx: 13, cy: -12, r: 7, fill: '#fff' });
+  svgEl(b, 'rect', { x: -12, y: 4, width: 24, height: 6, rx: 3, fill: '#fff' });
+  botEls.push({ g: b, parts: fillParts });
+}
+
+/* ---------- Compare marks ---------- */
+const cross = document.getElementById('cross');
+const crossC = svgEl(cross, 'circle', { cx: 60, cy: 60, r: 58, fill: '#ef4444' });
+const crossX = svgEl(cross, 'path', { d: 'M38 38 L82 82 M82 38 L38 82', stroke: '#fff', 'stroke-width': 13, 'stroke-linecap': 'round', fill: 'none' });
+const tick = document.getElementById('tick');
+const tickC = svgEl(tick, 'circle', { cx: 60, cy: 60, r: 58, fill: '#16a34a' });
+const tickV = svgEl(tick, 'path', { d: 'M34 62 L53 81 L88 42', stroke: '#fff', 'stroke-width': 13, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', fill: 'none' });
+const tickLen = tickV.getTotalLength();
+tickV.style.strokeDasharray = tickLen; tickV.style.strokeDashoffset = tickLen;
+
+/* ---------- Timeline ---------- */
+const CUES = [];
+const cue = (t, type, p = 0) => CUES.push({ t: +t.toFixed(3), type, p });
+const tl = gsap.timeline({ paused: true });
+const SPRING = 'back.out(2.1)';
+function pop(el, t, pitch, dur = 0.55, from = {}) {
+  tl.fromTo(el, Object.assign({ scale: 0, opacity: 0, transformOrigin: '50% 50%' }, from),
+    { scale: 1, opacity: 1, x: 0, y: 0, rotation: 0, duration: dur, ease: SPRING }, t);
+  if (pitch !== null) cue(t + 0.04, 'pop', pitch);
+}
+
+// Camera: view centre (cx, cy) in poster coords at scale s
+const poster = document.getElementById('poster');
+const cam = { cx: 580, cy: 980, s: 1.0 };
+function applyCam() {
+  poster.style.transform = `translate(${540 - cam.cx * cam.s}px, ${960 - cam.cy * cam.s}px) scale(${cam.s})`;
+}
+const VIEW = {
+  A: { cx: 580, cy: 980, s: 0.99 },
+  B: { cx: 1660, cy: 980, s: 0.99 },
+  C: { cx: 580, cy: 2400, s: 1.0 },
+  D: { cx: 1660, cy: 2400, s: 1.0 },
+  ALL: { cx: 1120, cy: 1934, s: 0.455 },
+};
+Object.assign(cam, { cx: 580, cy: 1000, s: 0.95 });
+function glide(to, t, dur = 0.7, sound = 'whoosh') {
+  tl.to(cam, Object.assign({ duration: dur, ease: 'power2.inOut', onUpdate: applyCam }, VIEW[to]), t);
+  if (sound) cue(t, sound, dur);
+}
+function drift(to, t, dur) { // slow push-in while holding on a section
+  const v = VIEW[to];
+  tl.to(cam, { s: v.s * 1.025, duration: dur, ease: 'none', onUpdate: applyCam }, t);
+}
+
+// 0.0 – 3.0 : title card
+tl.to(cam, Object.assign({ duration: 0.9, ease: 'power2.out', onUpdate: applyCam }, VIEW.A), 0);
+drift('A', 0.9, 2.1);
+pop('#a-pill', 0.15, 0);
+document.querySelectorAll('#A h1 .ln').forEach((ln, i) => pop(ln, 0.35 + i * 0.16, 1 + i, 0.6, { y: 40 }));
+pop('#a-sub', 1.0, null, 0.5, { y: 20 });
+illoParts.forEach((p, i) => pop(p, 1.15 + i * 0.12, 3 + i * 0.5, 0.55));
+
+// 3.0 – 7.4 : steps
+glide('B', 3.0, 0.7);
+drift('B', 3.7, 3.7);
+pop('#b-eye', 3.45, null, 0.45);
+pop('#b-h2', 3.55, 2, 0.5, { y: 30 });
+stepEls.forEach((s, i) => {
+  const t0 = 3.8 + i * 0.9;
+  pop(s.tile, t0, 2 + i * 2);
+  pop(s.icon, t0 + 0.12, null, 0.5);
+  pop(s.badge, t0 + 0.2, 3 + i * 2, 0.5, { rotation: -40 });
+  pop(s.text, t0 + 0.28, null, 0.5, { x: -30, scale: 0.8 });
+  if (i < 3) {
+    arrows[i].forEach((d, k) => {
+      const td = t0 + 0.5 + k * 0.055;
+      tl.fromTo(d, { scale: 0, opacity: 0, transformOrigin: '50% 50%' }, { scale: 1, opacity: 1, duration: 0.25, ease: 'back.out(3)' }, td);
+      cue(td, 'dab', k);
+    });
+  }
+});
+
+// 7.4 – 10.0 : did you know
+glide('C', 7.4, 0.7);
+drift('C', 8.1, 1.9);
+pop('#c-pill', 7.95, 1, 0.45);
+tl.fromTo('#c-big', { scale: 2.2, opacity: 0, y: -60 }, { scale: 1, opacity: 1, y: 0, duration: 0.6, ease: 'back.out(1.8)' }, 8.1);
+cue(8.28, 'bell');
+pop('#c-txt', 8.3, null, 0.5, { x: -30 });
+botEls.forEach((b, i) => {
+  const t = 8.55 + i * 0.12;
+  tl.fromTo(b.g, { scale: 0.6, opacity: 0.0, transformOrigin: '50% 50%' }, { scale: 1, opacity: 1, duration: 0.3, ease: 'back.out(2)' }, 8.35 + i * 0.02);
+  tl.to(b.parts, { attr: { fill: i % 3 === 2 ? AMBER : RED }, duration: 0.12 }, t);
+  tl.fromTo(b.g, { scale: 1 }, { scale: 1.18, duration: 0.09, yoyo: true, repeat: 1, ease: 'power1.out' }, t);
+  cue(t, 'marimba', i);
+});
+pop('#c-note', 9.6, null, 0.45, { y: 20 });
+
+// 10.0 – 12.4 : before vs after
+glide('D', 10.0, 0.7);
+drift('D', 10.7, 1.6);
+pop('#d-eye', 10.5, null, 0.45);
+pop('#old', 10.65, 3, 0.55, { y: 60 });
+pop('#new', 10.85, 5, 0.55, { y: 60 });
+tl.fromTo(crossC, { scale: 0, transformOrigin: '50% 50%' }, { scale: 1, duration: 0.45, ease: 'back.out(2.5)' }, 11.15);
+tl.fromTo(crossX, { scale: 0, rotation: -90, transformOrigin: '50% 50%' }, { scale: 1, rotation: 0, duration: 0.45, ease: 'back.out(2.5)' }, 11.2);
+cue(11.2, 'nope');
+pop('#old .cval', 11.35, null, 0.5);
+tl.fromTo(tickC, { scale: 0, transformOrigin: '50% 50%' }, { scale: 1, duration: 0.45, ease: 'back.out(2.5)' }, 11.75);
+tl.to(tickV, { strokeDashoffset: 0, duration: 0.25, ease: 'power2.out' }, 11.85);
+cue(11.85, 'tick');
+pop('#new .cval', 11.95, 7, 0.55);
+
+// 12.4 – 13.5 : pull back to show whole poster
+tl.to(cam, Object.assign({ duration: 1.1, ease: 'power3.inOut', onUpdate: applyCam }, VIEW.ALL), 12.4);
+cue(12.25, 'swell');
+
+// 13.4 – 15.0 : logo + save button
+tl.fromTo('#logo', { x: -1100, opacity: 1 }, { x: 0, duration: 0.7, ease: 'back.out(1.4)' }, 13.35);
+cue(13.5, 'pop', 6);
+tl.fromTo('#save', { y: 400, scale: 0.8 }, { y: 0, scale: 1, duration: 0.7, ease: 'back.out(1.8)' }, 13.65);
+cue(13.85, 'pop', 9);
+tl.fromTo('#save', { scale: 1 }, { scale: 1.05, duration: 0.25, yoyo: true, repeat: 1, ease: 'sine.inOut' }, 14.35);
+tl.to({}, { duration: 0.01 }, 14.99);
+
+gsap.set('#logo', { x: -1100 });
+gsap.set('#save', { y: 400 });
+tl.seek(0); applyCam();
+
+window.DURATION = 15;
+window.CUES = CUES.sort((a, b) => a.t - b.t);
+window.seekTo = (t) => { tl.seek(t, false); applyCam(); };
+window.READY = document.fonts.ready.then(() => true);
+// Live preview when opened normally in a browser
+if (!navigator.webdriver) { tl.play(); tl.eventCallback('onComplete', () => setTimeout(() => tl.restart(), 1200)); }
+</script>
+</body>
+</html>

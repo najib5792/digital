@@ -1,0 +1,9 @@
+{
+  "name": "gpt-storyboard-infographic",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "render": "node render.mjs && python3 audio.py && ffmpeg -y -i video_silent.mp4 -i audio.wav -c:v copy -c:a aac -b:a 192k -shortest -movflags +faststart gpt-storyboard-infographic.mp4"
+  },
+  "devDependencies": { "playwright": "1.56.1" }
+}
