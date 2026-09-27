@@ -28,12 +28,15 @@ const FONT = "'Montserrat', sans-serif";
 
 // Beat timings (frames @24fps), aligned to the speaker's pauses.
 const BEATS = {
-  hook: [0, 51],
-  tips: [53, 105],
-  shock: [108, 156],
-  must: [158, 195],
-  cta: [197, 240],
+  hook: [0, 81], // "Ramai tak tahu berapa coverage hibah takaful"
+  formula: [83, 106], // "Formulanya simple je."
+  ten: [108, 157], // "Anda perlukan 10 tahun gaji."
+  example: [158, 240], // "Contoh gaji setahun 50,000, ... RM500,000"
 } as const;
+// Absolute frame where "jumlah coverage hibah ... RM500,000" starts.
+const RESULT_AT = 197;
+// Hook question appears on the second phrase ("berapa coverage...").
+const QUESTION_AT = 50;
 
 const boldText: React.CSSProperties = {
   fontFamily: FONT,
@@ -72,12 +75,12 @@ const Background: React.FC = () => {
   // Intro settle + punch-ins on each beat so the talking head never feels static.
   const scale = interpolate(
     frame,
-    [0, 12, BEATS.shock[0], BEATS.shock[0] + 4, BEATS.must[0], BEATS.must[0] + 5, BEATS.cta[0], BEATS.cta[0] + 8],
+    [0, 12, BEATS.ten[0], BEATS.ten[0] + 4, BEATS.example[0], BEATS.example[0] + 5, RESULT_AT, RESULT_AT + 8],
     [1.14, 1.0, 1.0, 1.08, 1.08, 1.03, 1.03, 1.0],
     {extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic)}
   );
-  // Small shake on the "shock" slam.
-  const s = frame - BEATS.shock[0];
+  // Small shake on the "10 tahun" slam.
+  const s = frame - BEATS.ten[0];
   const shake = s >= 0 && s < 8 ? Math.sin(s * 2.4) * (8 - s) * 1.6 : 0;
 
   return (
@@ -209,7 +212,7 @@ const ProgressBar: React.FC = () => {
   );
 };
 
-/* ---------------- Beat 1: Hook ---------------- */
+/* ---------------- Shared pieces ---------------- */
 
 const Word: React.FC<{text: string; delay: number; highlight?: string; size: number; tilt?: number}> = ({
   text,
@@ -257,31 +260,6 @@ const Word: React.FC<{text: string; delay: number; highlight?: string; size: num
   );
 };
 
-const Hook: React.FC = () => {
-  const frame = useCurrentFrame();
-  const dur = BEATS.hook[1] - BEATS.hook[0];
-  const out = exitOut(frame, dur);
-  return (
-    <AbsoluteFill style={{alignItems: 'center', paddingTop: 70, opacity: out, transform: `translateY(${(1 - out) * -60}px)`}}>
-      <div style={{textAlign: 'center'}}>
-        <div>
-          <Word text="Korang" delay={6} size={112} />
-          <Word text="kena" delay={11} size={112} />
-        </div>
-        <div style={{marginTop: 14}}>
-          <Word text="tahu" delay={16} size={132} highlight={C.pink} tilt={-3} />
-          <Word text="ni!" delay={22} size={132} />
-        </div>
-      </div>
-      <Sparkle x={40} y={250} size={80} color={C.yellow} delay={18} />
-      <Sparkle x={960} y={40} size={64} color={C.pink} delay={24} />
-      <Sparkle x={950} y={290} size={46} color={C.white} delay={28} />
-    </AbsoluteFill>
-  );
-};
-
-/* ---------------- Beat 2: Tips sticker ---------------- */
-
 const Bulb: React.FC<{size: number}> = ({size}) => (
   <svg width={size} height={size} viewBox="0 0 64 64">
     <path
@@ -294,55 +272,6 @@ const Bulb: React.FC<{size: number}> = ({size}) => (
   </svg>
 );
 
-const Tips: React.FC = () => {
-  const frame = useCurrentFrame();
-  const {fps} = useVideoConfig();
-  const dur = BEATS.tips[1] - BEATS.tips[0];
-  const s = pop(frame, fps, 0, 8);
-  const wiggle = Math.sin(frame / 4) * 2.5;
-  const out = exitOut(frame, dur);
-  const sub = pop(frame, fps, 8, 12);
-  return (
-    <AbsoluteFill style={{justifyContent: 'flex-end', alignItems: 'center', paddingBottom: 380, opacity: out}}>
-      <div style={{position: 'relative', transform: `scale(${s * (0.6 + 0.4 * out)}) rotate(${-6 + wiggle}deg)`}}>
-        <Bursts color={C.yellow} size={760} />
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 22,
-            backgroundColor: C.pink,
-            border: `10px solid ${C.black}`,
-            borderRadius: 999,
-            padding: '26px 60px 26px 36px',
-            boxShadow: `14px 14px 0 ${C.black}`,
-          }}
-        >
-          <Bulb size={120} />
-          <span style={{...boldText, fontSize: 110, WebkitTextStroke: `12px ${C.black}`}}>Tips Penting</span>
-        </div>
-      </div>
-      <div
-        style={{
-          marginTop: 50,
-          transform: `translateY(${(1 - sub) * 60}px) rotate(3deg)`,
-          opacity: sub,
-          backgroundColor: C.yellow,
-          border: `8px solid ${C.black}`,
-          borderRadius: 16,
-          padding: '12px 34px',
-        }}
-      >
-        <span style={{fontFamily: FONT, fontWeight: 900, fontSize: 64, color: C.black, textTransform: 'uppercase'}}>
-          Dengar sampai habis!
-        </span>
-      </div>
-    </AbsoluteFill>
-  );
-};
-
-/* ---------------- Beat 3: Shock slam ---------------- */
-
 const Slam: React.FC<{text: string; delay: number; size: number; color: string}> = ({text, delay, size, color}) => {
   const frame = useCurrentFrame();
   const t = interpolate(frame, [delay, delay + 5], [0, 1], {
@@ -352,37 +281,11 @@ const Slam: React.FC<{text: string; delay: number; size: number; color: string}>
   });
   const scale = interpolate(t, [0, 1], [3.2, 1]);
   return (
-    <div style={{transform: `scale(${scale})`, opacity: t, textAlign: 'center'}}>
+    <div style={{position: 'relative', transform: `scale(${scale})`, opacity: t, textAlign: 'center'}}>
       <span style={{...boldText, fontSize: size, color, WebkitTextStroke: `16px ${C.black}`}}>{text}</span>
     </div>
   );
 };
-
-const Shock: React.FC = () => {
-  const frame = useCurrentFrame();
-  const dur = BEATS.shock[1] - BEATS.shock[0];
-  const out = exitOut(frame, dur);
-  const flash = interpolate(frame, [0, 2, 6], [0, 0.55, 0], {extrapolateRight: 'clamp'});
-  return (
-    <>
-      <AbsoluteFill style={{backgroundColor: C.white, opacity: flash}} />
-      <AbsoluteFill style={{justifyContent: 'flex-end', alignItems: 'center', paddingBottom: 380, opacity: out, transform: `scale(${0.8 + 0.2 * out})`}}>
-        <div style={{position: 'relative', transform: 'rotate(-4deg)'}}>
-          <Sequence from={0} layout="none">
-            <Bursts color={C.pink} size={900} />
-          </Sequence>
-          <Slam text="Ramai" delay={0} size={170} color={C.white} />
-          <div style={{height: 14}} />
-          <Slam text="tak sedar!" delay={6} size={150} color={C.yellow} />
-        </div>
-        <Sparkle x={70} y={1560} size={80} color={C.pink} delay={10} />
-        <Sparkle x={940} y={1080} size={70} color={C.yellow} delay={14} />
-      </AbsoluteFill>
-    </>
-  );
-};
-
-/* ---------------- Beat 4: Must try + animated check ---------------- */
 
 const Check: React.FC<{size: number}> = ({size}) => {
   const frame = useCurrentFrame();
@@ -407,133 +310,350 @@ const Check: React.FC<{size: number}> = ({size}) => {
   );
 };
 
-const Must: React.FC = () => {
+const Shield: React.FC<{size: number}> = ({size}) => (
+  <svg width={size} height={size} viewBox="0 0 64 64">
+    <path
+      d="M32 4 L56 13 V30 C56 45 46 55 32 60 C18 55 8 45 8 30 V13 Z"
+      fill={C.pink}
+      stroke={C.black}
+      strokeWidth={4}
+      strokeLinejoin="round"
+    />
+    <path
+      d="M32 22 C29 17 20 18 21 26 C22 32 32 38 32 38 C32 38 42 32 43 26 C44 18 35 17 32 22 Z"
+      fill={C.white}
+      stroke={C.black}
+      strokeWidth={3}
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+const money = (n: number) => `RM${Math.round(n).toLocaleString('en-US')}`;
+
+const countUp = (frame: number, from: number, to: number, start: number, len: number) =>
+  interpolate(frame, [start, start + len], [from, to], {
+    extrapolateLeft: 'clamp',
+    extrapolateRight: 'clamp',
+    easing: Easing.out(Easing.cubic),
+  });
+
+const lowerArea = (paddingBottom: number): React.CSSProperties => ({
+  justifyContent: 'flex-end',
+  alignItems: 'center',
+  paddingBottom,
+});
+
+/* ---------------- Beat 1: Hook ---------------- */
+
+const Question: React.FC = () => {
   const frame = useCurrentFrame();
   const {fps} = useVideoConfig();
-  const dur = BEATS.must[1] - BEATS.must[0];
-  const out = exitOut(frame, dur);
-  const slide = pop(frame, fps, 2, 11);
+  const card = pop(frame, fps, 0, 10);
+  const big = pop(frame, fps, 6, 8);
+  const icon = pop(frame, fps, 10, 8);
+  const wiggle = Math.sin(frame / 4) * 2;
   return (
-    <AbsoluteFill style={{justifyContent: 'flex-end', alignItems: 'center', paddingBottom: 380, opacity: out}}>
-      <div style={{display: 'flex', alignItems: 'center', gap: 26}}>
-        <Check size={190} />
-        <div style={{transform: `translateX(${(1 - slide) * 400}px) rotate(-3deg)`, opacity: slide}}>
-          <div
-            style={{
-              backgroundColor: C.white,
-              border: `10px solid ${C.black}`,
-              borderRadius: 24,
-              padding: '14px 36px',
-              boxShadow: `12px 12px 0 ${C.pink}`,
-            }}
-          >
-            <span style={{fontFamily: FONT, fontWeight: 900, fontSize: 118, color: C.black, textTransform: 'uppercase'}}>
-              Wajib
-            </span>
-          </div>
-          <div style={{marginTop: -8, marginLeft: 40}}>
-            <span style={{...boldText, fontSize: 140, color: C.pink}}>Cuba!</span>
-          </div>
+    <AbsoluteFill style={lowerArea(360)}>
+      <div style={{position: 'relative', textAlign: 'center'}}>
+        <div
+          style={{
+            display: 'inline-block',
+            transform: `scale(${card}) rotate(-3deg)`,
+            backgroundColor: C.white,
+            border: `10px solid ${C.black}`,
+            borderRadius: 24,
+            padding: '12px 40px',
+            boxShadow: `12px 12px 0 ${C.pink}`,
+          }}
+        >
+          <span style={{fontFamily: FONT, fontWeight: 900, fontSize: 76, color: C.black, textTransform: 'uppercase', whiteSpace: 'nowrap'}}>
+            Berapa coverage
+          </span>
+        </div>
+        <div style={{marginTop: 18, transform: `scale(${big}) rotate(${2 + wiggle}deg)`}}>
+          <span style={{...boldText, fontSize: 132, color: C.yellow, WebkitTextStroke: `16px ${C.black}`}}>
+            Hibah takaful?
+          </span>
+        </div>
+        <div style={{position: 'absolute', right: -10, top: -120, transform: `scale(${icon}) rotate(${12 + wiggle * 2}deg)`}}>
+          <Shield size={150} />
         </div>
       </div>
     </AbsoluteFill>
   );
 };
 
-/* ---------------- Beat 5: CTA ---------------- */
-
-const Bell: React.FC<{size: number}> = ({size}) => {
+const Hook: React.FC = () => {
   const frame = useCurrentFrame();
-  const ring = Math.sin(frame / 1.6) * 18 * Math.max(0, 1 - ((frame % 24) / 12));
+  const dur = BEATS.hook[1] - BEATS.hook[0];
+  const out = exitOut(frame, dur);
   return (
-    <svg width={size} height={size} viewBox="0 0 64 64" style={{transform: `rotate(${ring}deg)`, transformOrigin: '50% 10%'}}>
-      <path
-        d="M32 6c-10 0-17 8-17 18v12l-6 8h46l-6-8V24c0-10-7-18-17-18z"
-        fill={C.yellow}
-        stroke={C.black}
-        strokeWidth={4}
-        strokeLinejoin="round"
-      />
-      <circle cx={32} cy={52} r={7} fill={C.yellow} stroke={C.black} strokeWidth={4} />
-    </svg>
+    <AbsoluteFill style={{opacity: out}}>
+      <AbsoluteFill style={{alignItems: 'center', paddingTop: 70, transform: `translateY(${(1 - out) * -60}px)`}}>
+        <div style={{textAlign: 'center'}}>
+          <div>
+            <Word text="Ramai" delay={4} size={120} />
+          </div>
+          <div style={{marginTop: 14}}>
+            <Word text="tak" delay={10} size={132} highlight={C.pink} tilt={-3} />
+            <Word text="tahu!" delay={16} size={132} highlight={C.pink} tilt={-3} />
+          </div>
+        </div>
+        <Sparkle x={40} y={250} size={80} color={C.yellow} delay={18} />
+        <Sparkle x={960} y={40} size={64} color={C.pink} delay={24} />
+        <Sparkle x={950} y={290} size={46} color={C.white} delay={28} />
+      </AbsoluteFill>
+      <Sequence from={QUESTION_AT}>
+        <Question />
+      </Sequence>
+    </AbsoluteFill>
   );
 };
 
-const Cta: React.FC = () => {
+/* ---------------- Persistent header from beat 2 ---------------- */
+
+const Header: React.FC = () => {
   const frame = useCurrentFrame();
   const {fps} = useVideoConfig();
-  const panel = pop(frame, fps, 0, 13);
-  const line1 = pop(frame, fps, 5, 9);
-  const line2 = pop(frame, fps, 10, 12);
-  const arrowBob = Math.sin(frame / 3) * 14;
+  const s = pop(frame, fps, 0, 12);
+  const save = pop(frame, fps, RESULT_AT + 14 - BEATS.formula[0], 9);
   return (
-    <AbsoluteFill style={{justifyContent: 'flex-end', alignItems: 'center', paddingBottom: 170}}>
+    <AbsoluteFill style={{alignItems: 'center', paddingTop: 60}}>
       <div
         style={{
-          position: 'relative',
-          width: 920,
-          transform: `translateY(${(1 - panel) * 700}px) rotate(-2deg)`,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 16,
+          transform: `translateY(${(1 - s) * -200}px)`,
           backgroundColor: C.plum,
-          border: `10px solid ${C.black}`,
-          borderRadius: 40,
-          padding: '44px 40px 40px',
-          boxShadow: `16px 16px 0 ${C.pink}`,
-          textAlign: 'center',
+          border: `8px solid ${C.black}`,
+          borderRadius: 999,
+          padding: '12px 40px 12px 20px',
+          boxShadow: `10px 10px 0 ${C.pink}`,
         }}
       >
+        <Shield size={84} />
+        <span style={{fontFamily: FONT, fontWeight: 900, fontSize: 62, color: C.white, textTransform: 'uppercase'}}>
+          Formula <span style={{color: C.yellow}}>hibah</span>
+        </span>
+      </div>
+      <div
+        style={{
+          marginTop: 26,
+          transform: `scale(${save}) rotate(-4deg)`,
+          backgroundColor: C.yellow,
+          border: `6px solid ${C.black}`,
+          borderRadius: 14,
+          padding: '6px 26px',
+        }}
+      >
+        <span style={{fontFamily: FONT, fontWeight: 900, fontSize: 48, color: C.black, textTransform: 'uppercase'}}>
+          Simpan video ni!
+        </span>
+      </div>
+    </AbsoluteFill>
+  );
+};
+
+/* ---------------- Beat 2: Formula simple ---------------- */
+
+const Formula: React.FC = () => {
+  const frame = useCurrentFrame();
+  const {fps} = useVideoConfig();
+  const dur = BEATS.formula[1] - BEATS.formula[0];
+  const s = pop(frame, fps, 0, 8);
+  const wiggle = Math.sin(frame / 3) * 2.5;
+  const out = exitOut(frame, dur, 4);
+  const sub = pop(frame, fps, 6, 11);
+  return (
+    <AbsoluteFill style={{...lowerArea(400), opacity: out}}>
+      <div style={{position: 'relative', transform: `scale(${s * (0.6 + 0.4 * out)}) rotate(${-5 + wiggle}deg)`}}>
+        <Bursts color={C.yellow} size={760} />
+        <div
+          style={{
+            position: 'relative',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 22,
+            backgroundColor: C.pink,
+            border: `10px solid ${C.black}`,
+            borderRadius: 999,
+            padding: '26px 60px 26px 36px',
+            boxShadow: `14px 14px 0 ${C.black}`,
+          }}
+        >
+          <Bulb size={120} />
+          <span style={{...boldText, fontSize: 92, WebkitTextStroke: `12px ${C.black}`}}>Formulanya</span>
+        </div>
+      </div>
+      <div
+        style={{
+          marginTop: 40,
+          transform: `translateY(${(1 - sub) * 60}px) rotate(3deg)`,
+          opacity: sub,
+          backgroundColor: C.yellow,
+          border: `8px solid ${C.black}`,
+          borderRadius: 16,
+          padding: '10px 40px',
+        }}
+      >
+        <span style={{fontFamily: FONT, fontWeight: 900, fontSize: 84, color: C.black, textTransform: 'uppercase'}}>
+          Simple je!
+        </span>
+      </div>
+    </AbsoluteFill>
+  );
+};
+
+/* ---------------- Beat 3: 10 tahun gaji ---------------- */
+
+const Ten: React.FC = () => {
+  const frame = useCurrentFrame();
+  const {fps} = useVideoConfig();
+  const dur = BEATS.ten[1] - BEATS.ten[0];
+  const out = exitOut(frame, dur);
+  const flash = interpolate(frame, [0, 2, 6], [0, 0.55, 0], {extrapolateRight: 'clamp'});
+  const eq = pop(frame, fps, 16, 11);
+  return (
+    <>
+      <AbsoluteFill style={{backgroundColor: C.white, opacity: flash}} />
+      <AbsoluteFill style={{...lowerArea(330), opacity: out, transform: `scale(${0.8 + 0.2 * out})`}}>
+        <div style={{position: 'relative', transform: 'rotate(-4deg)'}}>
+          <Bursts color={C.pink} size={900} />
+          <div style={{position: 'relative', fontFamily: FONT, fontWeight: 800, fontSize: 60, color: C.white, textAlign: 'center', textTransform: 'uppercase', textShadow: '0 4px 12px rgba(0,0,0,0.6)', opacity: pop(frame, fps, 0, 14)}}>
+            Anda perlukan
+          </div>
+          <Slam text="10 tahun" delay={2} size={168} color={C.yellow} />
+          <div style={{height: 10}} />
+          <Slam text="gaji!" delay={8} size={160} color={C.white} />
+        </div>
+        <div
+          style={{
+            marginTop: 44,
+            transform: `scale(${eq}) rotate(2deg)`,
+            backgroundColor: C.plum,
+            border: `8px solid ${C.black}`,
+            borderRadius: 18,
+            padding: '12px 32px',
+            boxShadow: `10px 10px 0 ${C.pink}`,
+          }}
+        >
+          <span style={{fontFamily: FONT, fontWeight: 900, fontSize: 52, color: C.white, textTransform: 'uppercase'}}>
+            Coverage = gaji setahun <span style={{color: C.yellow}}>× 10</span>
+          </span>
+        </div>
+        <Sparkle x={70} y={1560} size={80} color={C.pink} delay={10} />
+        <Sparkle x={940} y={1000} size={70} color={C.yellow} delay={14} />
+      </AbsoluteFill>
+    </>
+  );
+};
+
+/* ---------------- Beat 4: Contoh -> RM500,000 ---------------- */
+
+const Example: React.FC = () => {
+  const frame = useCurrentFrame();
+  const {fps} = useVideoConfig();
+  const r = RESULT_AT - BEATS.example[0]; // result start, relative
+  const tag = pop(frame, fps, 0, 10);
+  const card = pop(frame, fps, 3, 12);
+  const salary = countUp(frame, 0, 50000, 5, 16);
+  const badge = pop(frame, fps, r - 4, 8);
+  const result = pop(frame, fps, r, 11);
+  const total = countUp(frame, 50000, 500000, r + 2, 20);
+  const landed = frame >= r + 22;
+  const glow = landed ? 1 + Math.sin((frame - r - 22) / 3) * 0.03 : 1;
+  return (
+    <AbsoluteFill style={lowerArea(150)}>
+      {/* Salary card */}
+      <div style={{position: 'relative', zIndex: 2, transform: `translateX(${(1 - card) * -900}px) rotate(-2deg)`}}>
         <div
           style={{
             position: 'absolute',
-            top: -70,
-            right: 40,
-            transform: `scale(${line1})`,
+            top: -54,
+            left: -20,
+            zIndex: 2,
+            transform: `scale(${tag}) rotate(-8deg)`,
+            backgroundColor: C.yellow,
+            border: `6px solid ${C.black}`,
+            borderRadius: 12,
+            padding: '4px 22px',
           }}
         >
-          <div
-            style={{
-              backgroundColor: C.white,
-              border: `8px solid ${C.black}`,
-              borderRadius: 999,
-              width: 140,
-              height: 140,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <Bell size={96} />
+          <span style={{fontFamily: FONT, fontWeight: 900, fontSize: 50, color: C.black, textTransform: 'uppercase'}}>Contoh</span>
+        </div>
+        <div
+          style={{
+            width: 800,
+            backgroundColor: C.white,
+            border: `10px solid ${C.black}`,
+            borderRadius: 28,
+            padding: '26px 36px 18px',
+            boxShadow: `12px 12px 0 ${C.black}`,
+            textAlign: 'center',
+          }}
+        >
+          <div style={{fontFamily: FONT, fontWeight: 800, fontSize: 48, color: C.plum, textTransform: 'uppercase'}}>
+            Gaji setahun
           </div>
-        </div>
-        <div style={{transform: `scale(${line1})`}}>
-          <span style={{...boldText, fontSize: 104, WebkitTextStroke: `12px ${C.black}`}}>
-            Simpan <span style={{color: C.yellow}}>&amp;</span> Follow
-          </span>
-        </div>
-        <div style={{marginTop: 22, opacity: line2, transform: `translateY(${(1 - line2) * 30}px)`}}>
-          <span
-            style={{
-              fontFamily: FONT,
-              fontWeight: 800,
-              fontSize: 54,
-              color: C.plum,
-              backgroundColor: C.yellow,
-              padding: '6px 26px',
-              borderRadius: 12,
-              textTransform: 'uppercase',
-            }}
-          >
-            untuk tips seterusnya
-          </span>
+          <div style={{fontFamily: FONT, fontWeight: 900, fontSize: 118, color: C.black, lineHeight: 1.05}}>{money(salary)}</div>
         </div>
       </div>
-      <svg
-        width={110}
-        height={110}
-        viewBox="0 0 64 64"
-        style={{marginTop: 26, transform: `translateY(${arrowBob}px)`, opacity: line2}}
+
+      {/* × 10 badge */}
+      <div
+        style={{
+          margin: '-18px 0',
+          zIndex: 3,
+          transform: `scale(${badge}) rotate(${(1 - badge) * 90}deg)`,
+          width: 150,
+          height: 150,
+          borderRadius: 999,
+          backgroundColor: C.pink,
+          border: `10px solid ${C.black}`,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
       >
-        <path d="M32 58 L8 30 H22 V6 H42 V30 H56 Z" fill={C.pink} stroke={C.black} strokeWidth={4} strokeLinejoin="round" />
-      </svg>
+        <span style={{...boldText, fontSize: 70, WebkitTextStroke: `10px ${C.black}`, textShadow: 'none'}}>×10</span>
+      </div>
+
+      {/* Result card */}
+      <div style={{position: 'relative', zIndex: 1, transform: `scale(${result * glow}) rotate(2deg)`, opacity: result > 0.01 ? 1 : 0}}>
+        {landed ? (
+          <Sequence from={r + 22} layout="none">
+            <Bursts color={C.yellow} size={1100} />
+          </Sequence>
+        ) : null}
+        <div
+          style={{
+            position: 'relative',
+            width: 860,
+            backgroundColor: C.plum,
+            border: `10px solid ${C.black}`,
+            borderRadius: 32,
+            padding: '30px 30px 26px',
+            boxShadow: `16px 16px 0 ${C.pink}`,
+            textAlign: 'center',
+          }}
+        >
+          <div style={{fontFamily: FONT, fontWeight: 800, fontSize: 50, color: C.white, textTransform: 'uppercase'}}>
+            Coverage hibah perlu
+          </div>
+          <div style={{...boldText, fontSize: 128, color: C.yellow, WebkitTextStroke: `14px ${C.black}`, marginTop: 8}}>
+            {money(total)}
+          </div>
+        </div>
+        {landed ? (
+          <div style={{position: 'absolute', right: -20, top: -70}}>
+            <Sequence from={r + 22} layout="none">
+              <Check size={150} />
+            </Sequence>
+          </div>
+        ) : null}
+      </div>
     </AbsoluteFill>
   );
 };
@@ -550,17 +670,17 @@ export const MotionVideo: React.FC = () => {
       <Sequence {...beat('hook')}>
         <Hook />
       </Sequence>
-      <Sequence {...beat('tips')}>
-        <Tips />
+      <Sequence from={BEATS.formula[0]}>
+        <Header />
       </Sequence>
-      <Sequence {...beat('shock')}>
-        <Shock />
+      <Sequence {...beat('formula')}>
+        <Formula />
       </Sequence>
-      <Sequence {...beat('must')}>
-        <Must />
+      <Sequence {...beat('ten')}>
+        <Ten />
       </Sequence>
-      <Sequence {...beat('cta')}>
-        <Cta />
+      <Sequence {...beat('example')}>
+        <Example />
       </Sequence>
       <ProgressBar />
       <Sequence durationInFrames={16}>
