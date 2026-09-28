@@ -6,6 +6,7 @@ import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { GTAOPass } from 'three/addons/postprocessing/GTAOPass.js';
+import { FXAAShader } from 'three/addons/shaders/FXAAShader.js';
 import { Sky } from 'three/addons/objects/Sky.js';
 import { RectAreaLightUniformsLib } from 'three/addons/lights/RectAreaLightUniformsLib.js';
 import { makeMaterials, buildWorld, ROOMS, roomAt, floorAt, W, L, FL, CH, FRONT, BACK } from './house.js';
@@ -965,7 +966,13 @@ function recordBegin(opts = {}) {
   holdScale = opts.holdScale ?? 0.6;
   autoQuality.locked = true;
   gtao.enabled = opts.ao ?? true;
-  if (opts.msaa === false) composer.renderTarget1.samples = composer.renderTarget2.samples = 0;
+  if (opts.msaa === false) {
+    composer.renderTarget1.samples = composer.renderTarget2.samples = 0;
+    // cheap edge smoothing in place of MSAA, applied before the film grade
+    const fxaa = new ShaderPass(FXAAShader);
+    fxaa.material.uniforms.resolution.value.set(1 / renderer.domElement.width, 1 / renderer.domElement.height);
+    composer.insertPass(fxaa, composer.passes.indexOf(grade));
+  }
   rec.shadowEvery = opts.shadowEvery ?? 1;
   if (opts.lean) {
     // software rendering: drop lights that contribute nothing (or little) at golden hour
@@ -1077,10 +1084,13 @@ function compose() {
     const x = 60 * u, y = h - bar - 150 * u;
     const grd = g.createLinearGradient(0, y - 40 * u, 0, h - bar);
     grd.addColorStop(0, 'rgba(0,0,0,0)');
-    grd.addColorStop(1, `rgba(0,0,0,${0.55 * a})`);
+    grd.addColorStop(0.45, `rgba(0,0,0,${0.45 * a})`);
+    grd.addColorStop(1, `rgba(0,0,0,${0.78 * a})`);
     g.fillStyle = grd;
     g.fillRect(0, y - 40 * u, w, h - bar - y + 40 * u);
     g.globalAlpha = a;
+    g.shadowColor = 'rgba(0,0,0,0.7)';
+    g.shadowBlur = 8 * u;
     g.font = `500 ${13 * u}px ${mono}`;
     g.fillStyle = '#c9a36b';
     g.fillText(`${String(tour.i + 1).padStart(2, '0')} / ${STOPS.length}    ${s.meta || ''}`, x, y);
@@ -1097,6 +1107,7 @@ function compose() {
     }
     g.fillText(line.trim(), x, ly);
     g.globalAlpha = 1;
+    g.shadowBlur = 0;
   }
   // closing card + fade
   if (rec.end !== null) {
