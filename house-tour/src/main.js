@@ -125,7 +125,7 @@ const grade = new ShaderPass({
 composer.addPass(grade);
 
 // ---------------- world ----------------
-const audio = new AudioEngine();
+let audio = new AudioEngine();
 let M, world;
 const doorsNear = new Set();
 
@@ -461,11 +461,13 @@ function updateTour(dt, time) {
     look.y += Math.sin(time * 0.23) * 0.08 * k;
     tour.look.copy(look);
     camera.lookAt(look);
-    const holdFor = s.hold ?? 6;
+    const holdFor = (s.hold ?? 6) * holdScale;
     $('#tourProgress').style.transform = `scaleX(${clamp(tour.hold / holdFor, 0, 1)})`;
     if (tour.playing && tour.hold > holdFor) goStop(tour.i + 1);
   }
 }
+
+let holdScale = 1;
 
 // ---------------- narration ----------------
 let narrate = false;
@@ -836,9 +838,15 @@ function updateDoors(dt) {
 // ---------------- loop ----------------
 const clock = new THREE.Clock();
 let introT = 0;
+let manual = false; // true while a video is being recorded frame by frame
 function frame() {
+  if (manual) return;
   const dt = Math.min(0.05, clock.getDelta());
-  const t = clock.elapsedTime;
+  tick(dt, clock.elapsedTime);
+  composer.render(dt);
+  requestAnimationFrame(frame);
+}
+function tick(dt, t) {
   if (mode === 'intro') {
     introT += dt;
     const a = introT * 0.05 + 2.4;
@@ -854,7 +862,7 @@ function frame() {
       controls.target.lerpVectors(camAnim.fromT, camAnim.toT, e);
       camera.lookAt(controls.target);
       if (camAnim.t >= 1) { const d = camAnim.done; camAnim = null; d?.(); }
-    } else controls.update();
+    } else controls.update(dt);
   }
   if (world) {
     updateDoors(dt);
@@ -869,8 +877,6 @@ function frame() {
   beamMat.uniforms.time.value = t;
   if (dustMat) dustMat.uniforms.time.value = t;
   grade.uniforms.time.value = t;
-  composer.render(dt);
-  requestAnimationFrame(frame);
 }
 
 // ---------------- boot ----------------
@@ -942,10 +948,182 @@ $('#startDoll').addEventListener('click', () => begin('orbit'));
   requestAnimationFrame(draw);
 })();
 
+// ---------------- video recording ----------------
+// Drives the guided tour with a fixed timestep, burns captions into each frame and logs every
+// sound cue so the soundtrack can be rendered offline in sync (see record.cjs).
+const rec = { t: 0, events: [], outside: [], out: null, g: null, end: null, night: false };
+const recorder = new Proxy({}, {
+  get: (_, k) => (...a) => {
+    if (k === 'setOutside') { const last = rec.outside[rec.outside.length - 1]; if (!last || last[1] !== a[0]) rec.outside.push([rec.t, a[0]]); }
+    else if (['footstep', 'door', 'whoosh', 'chime', 'lightSwitch'].includes(k)) rec.events.push([k, rec.t, ...a]);
+    else if (k === 'setNight') rec.events.push(['night', rec.t, a[0]]);
+  },
+});
+function recordBegin(opts = {}) {
+  manual = true;
+  audio = recorder;
+  holdScale = opts.holdScale ?? 0.6;
+  autoQuality.locked = true;
+  gtao.enabled = opts.ao ?? true;
+  if (opts.msaa === false) composer.renderTarget1.samples = composer.renderTarget2.samples = 0;
+  rec.shadowEvery = opts.shadowEvery ?? 1;
+  if (opts.lean) {
+    // software rendering: drop lights that contribute nothing (or little) at golden hour
+    for (const l of world.windowLights) l.visible = false;
+    for (const l of world.streetLamps) l.visible = false;
+  }
+  sun.shadow.autoUpdate = rec.shadowEvery === 1;
+  document.body.classList.add('started', 'recording');
+  rec.out = document.createElement('canvas');
+  rec.out.width = renderer.domElement.width;
+  rec.out.height = renderer.domElement.height;
+  rec.g = rec.out.getContext('2d');
+  applyTime(opts.time ?? 'golden', false);
+  camera.position.copy(V(-16, 10, -24));
+  tour.look.copy(V(3.4, 2, 4));
+  setMode('tour');
+  goStop(0);
+  audio.whoosh(0.09, 2.2, 2200);
+}
+function recordStep(dt, render) {
+  rec.t += dt;
+  // finale: once the dollhouse has settled, orbit a while, switch to night, then end
+  if (mode === 'orbit' && !camAnim) {
+    if (rec.end === null) rec.end = rec.t + 9;
+    if (!rec.night && rec.t > rec.end - 5.5) {
+      rec.night = true;
+      applyTime('night', false);
+      for (const l of world.streetLamps) l.visible = true;
+      audio.lightSwitch();
+    }
+    controls.autoRotate = true;
+    controls.autoRotateSpeed = 1.1;
+  }
+  tick(dt, rec.t);
+  rec.frame = (rec.frame ?? -1) + 1;
+  if (!render) return null;
+  if (rec.shadowEvery > 1 && (rec.frame % rec.shadowEvery === 0 || rec.lastShadow !== rec.frame - 1)) sun.shadow.needsUpdate = true;
+  rec.lastShadow = rec.frame;
+  composer.render(dt);
+  compose();
+  return rec.out.toDataURL('image/jpeg', 0.93);
+}
+const recordDone = () => rec.end !== null && rec.t >= rec.end;
+async function soundtrack(duration) {
+  const buf = await new AudioEngine().renderOffline(duration, rec.events, rec.outside);
+  const n = buf.length, L0 = buf.getChannelData(0), R0 = buf.getChannelData(1);
+  const bytes = new Uint8Array(44 + n * 4);
+  const dv = new DataView(bytes.buffer);
+  const str = (o, t) => [...t].forEach((c, i) => dv.setUint8(o + i, c.charCodeAt(0)));
+  str(0, 'RIFF'); dv.setUint32(4, 36 + n * 4, true); str(8, 'WAVE'); str(12, 'fmt ');
+  dv.setUint32(16, 16, true); dv.setUint16(20, 1, true); dv.setUint16(22, 2, true); dv.setUint32(24, buf.sampleRate, true);
+  dv.setUint32(28, buf.sampleRate * 4, true); dv.setUint16(32, 4, true); dv.setUint16(34, 16, true); str(36, 'data'); dv.setUint32(40, n * 4, true);
+  for (let i = 0; i < n; i++) {
+    dv.setInt16(44 + i * 4, clamp(L0[i], -1, 1) * 32767, true);
+    dv.setInt16(46 + i * 4, clamp(R0[i], -1, 1) * 32767, true);
+  }
+  let bin = '';
+  for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+  return btoa(bin);
+}
+function compose() {
+  const g = rec.g, w = rec.out.width, h = rec.out.height, u = h / 720;
+  g.globalAlpha = 1;
+  g.drawImage(renderer.domElement, 0, 0, w, h);
+  // letterbox
+  const bar = Math.round(h * 0.075);
+  g.fillStyle = '#000';
+  g.fillRect(0, 0, w, bar);
+  g.fillRect(0, h - bar, w, bar);
+  const serif = `"Marcellus", Georgia, "Times New Roman", serif`;
+  const sans = `"Jost", "Helvetica Neue", Arial, sans-serif`;
+  const mono = `"IBM Plex Mono", "DejaVu Sans Mono", monospace`;
+  // corner mark
+  g.font = `500 ${13 * u}px ${mono}`;
+  g.fillStyle = 'rgba(201,163,107,0.9)';
+  g.textBaseline = 'middle';
+  g.fillText('TYPE 2A  ·  22 × 70', 36 * u, bar / 2);
+  g.textAlign = 'right';
+  g.fillStyle = 'rgba(239,230,214,0.6)';
+  g.fillText(mode === 'orbit' ? 'DOLLHOUSE' : (roomAt(camera.position.x, -camera.position.z)?.name ?? '').toUpperCase(), w - 36 * u, bar / 2);
+  g.textAlign = 'left';
+  // opening title card
+  const intro = 1 - smooth(3.2, 5, rec.t);
+  if (intro > 0) {
+    g.fillStyle = `rgba(16,13,11,${0.55 * intro})`;
+    g.fillRect(0, bar, w, h - bar * 2);
+    g.globalAlpha = intro * smooth(0.2, 1.4, rec.t);
+    g.textAlign = 'center';
+    g.fillStyle = '#d9b98c';
+    g.font = `400 ${76 * u}px ${serif}`;
+    g.fillText('Unit Layout', w / 2, h * 0.42);
+    g.fillRect(w / 2 - 190 * u, h * 0.42 + 44 * u, 380 * u, 1.2 * u);
+    g.font = `400 ${46 * u}px ${serif}`;
+    g.fillText('22×70 — Type 2A', w / 2, h * 0.42 + 92 * u);
+    g.font = `500 ${14 * u}px ${mono}`;
+    g.fillStyle = 'rgba(239,230,214,0.8)';
+    g.fillText('3 BEDROOMS  ·  2 BATHROOMS  ·  CAR PORCH  ·  6706 × 21336 MM', w / 2, h * 0.42 + 140 * u);
+    g.textAlign = 'left';
+    g.globalAlpha = 1;
+  }
+  // stop caption
+  const s = STOPS[tour.i];
+  let a = 0;
+  if (s && mode === 'tour' && tour.t >= 1) {
+    const holdFor = (s.hold ?? 6) * holdScale;
+    a = smooth(0, 0.7, tour.hold) * (1 - smooth(holdFor - 0.5, holdFor, tour.hold));
+  } else if (s?.dollhouse && rec.end !== null) a = smooth(rec.end - 8.6, rec.end - 7.8, rec.t) * (1 - smooth(rec.end - 3.2, rec.end - 2.5, rec.t));
+  if (s && a > 0) {
+    const x = 60 * u, y = h - bar - 150 * u;
+    const grd = g.createLinearGradient(0, y - 40 * u, 0, h - bar);
+    grd.addColorStop(0, 'rgba(0,0,0,0)');
+    grd.addColorStop(1, `rgba(0,0,0,${0.55 * a})`);
+    g.fillStyle = grd;
+    g.fillRect(0, y - 40 * u, w, h - bar - y + 40 * u);
+    g.globalAlpha = a;
+    g.font = `500 ${13 * u}px ${mono}`;
+    g.fillStyle = '#c9a36b';
+    g.fillText(`${String(tour.i + 1).padStart(2, '0')} / ${STOPS.length}    ${s.meta || ''}`, x, y);
+    g.font = `400 ${44 * u}px ${serif}`;
+    g.fillStyle = '#efe6d6';
+    g.fillText(s.title, x - 2 * u, y + 46 * u);
+    g.font = `300 ${19 * u}px ${sans}`;
+    g.fillStyle = 'rgba(239,230,214,0.88)';
+    const words = s.text.split(' ');
+    let line = '', ly = y + 92 * u;
+    for (const wd of words) {
+      if (g.measureText(line + wd).width > 820 * u) { g.fillText(line.trim(), x, ly); line = ''; ly += 28 * u; }
+      line += wd + ' ';
+    }
+    g.fillText(line.trim(), x, ly);
+    g.globalAlpha = 1;
+  }
+  // closing card + fade
+  if (rec.end !== null) {
+    const f = smooth(rec.end - 2.4, rec.end - 0.2, rec.t);
+    if (f > 0) {
+      g.fillStyle = `rgba(12,10,8,${f})`;
+      g.fillRect(0, 0, w, h);
+      g.globalAlpha = f;
+      g.textAlign = 'center';
+      g.fillStyle = '#d9b98c';
+      g.font = `400 ${56 * u}px ${serif}`;
+      g.fillText('22×70 — Type 2A', w / 2, h * 0.47);
+      g.font = `500 ${14 * u}px ${mono}`;
+      g.fillStyle = 'rgba(239,230,214,0.75)';
+      g.fillText('SINGLE-STOREY TERRACE  ·  3 BED  ·  2 BATH', w / 2, h * 0.47 + 48 * u);
+      g.textAlign = 'left';
+      g.globalAlpha = 1;
+    }
+  }
+}
+
 // small handle for scripted demos / debugging from the console
 window.houseTour = {
   goStop, setMode, applyTime, teleport,
   get world() { return world; },
+  recordBegin, recordStep, recordDone, soundtrack,
+  get recording() { return { t: rec.t, events: rec.events, outside: rec.outside }; },
   get mode() { return mode; },
   snap() {
     updateDoors(0);

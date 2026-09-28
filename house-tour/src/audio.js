@@ -19,7 +19,17 @@ export class AudioEngine {
     if (this.started) { this.ctx.resume(); return; }
     const AC = window.AudioContext || window.webkitAudioContext;
     if (!AC) return;
-    const ctx = (this.ctx = new AC());
+    this.build(new AC());
+    this.nextNoteTime = this.ctx.currentTime + 0.4;
+    this.timer = setInterval(() => this.schedule(), 90);
+    this.ambTimer = setInterval(() => this.ambienceTick(), 250);
+  }
+
+  // Time for new sounds: "now", or a fixed moment while rendering offline.
+  now() { return this.atTime ?? this.ctx.currentTime; }
+
+  build(ctx) {
+    this.ctx = ctx;
     this.started = true;
 
     this.master = ctx.createGain();
@@ -73,10 +83,40 @@ export class AudioEngine {
     this.noiseBuf = this.makeNoise(2);
     this.startPad();
     this.startAmbience();
-    this.nextNoteTime = ctx.currentTime + 0.4;
+    this.nextNoteTime = 0.4;
     this.step = 0;
     this.chordIdx = 0;
-    this.timer = setInterval(() => this.schedule(), 90);
+  }
+
+  // Render the whole soundtrack for a recorded video: score, ambience and every logged cue.
+  async renderOffline(duration, events, outside) {
+    const sr = 44100;
+    const ctx = new OfflineAudioContext(2, Math.ceil(sr * duration), sr);
+    this.build(ctx);
+    this.setMusic(this.musicVol);
+    this.setSfx(this.sfxVol);
+    this.nextNoteTime = 0.3;
+    this.schedule(duration - 3);
+    const level = (t) => { let v = 1; for (const [ot, ov] of outside) if (ot <= t) v = ov; return v; };
+    for (const [t, v] of outside) this.windGain.gain.setTargetAtTime(0.15 + v * 0.85, t, 0.6);
+    let night = false;
+    const nightAt = events.find((e) => e[0] === 'night' && e[2])?.[1] ?? Infinity;
+    for (let t = 0.5; t < duration - 1; t += 0.25) {
+      this.atTime = t;
+      const lv = 0.15 + level(t) * 0.85;
+      night = t >= nightAt;
+      if (night) { if (Math.random() < 0.55) this.cricket(lv); } else if (Math.random() < 0.09) this.bird(lv);
+    }
+    for (const [k, t, ...a] of events) {
+      if (k === 'night' || !(k in this)) continue;
+      this.atTime = t;
+      this[k](...a);
+    }
+    this.atTime = null;
+    // fade out the tail
+    this.master.gain.setValueAtTime(0.9, duration - 2.5);
+    this.master.gain.linearRampToValueAtTime(0, duration - 0.1);
+    return ctx.startRendering();
   }
 
   impulse(sec, decay) {
@@ -199,10 +239,11 @@ export class AudioEngine {
     n.stop(t + 0.05);
   }
 
-  schedule() {
+  schedule(until) {
     const ctx = this.ctx;
     const beat = 60 / 72;
-    while (this.nextNoteTime < ctx.currentTime + 0.4) {
+    const horizon = until ?? ctx.currentTime + 0.4;
+    while (this.nextNoteTime < horizon) {
       const t = this.nextNoteTime;
       const chords = this.chords;
       const ch = chords[this.chordIdx % chords.length];
@@ -243,7 +284,6 @@ export class AudioEngine {
     this.windGain.gain.value = 1;
     g.connect(this.windGain).connect(this.ambBus);
     src.start();
-    this.ambTimer = setInterval(() => this.ambienceTick(), 250);
   }
 
   ambienceTick() {
@@ -259,7 +299,7 @@ export class AudioEngine {
 
   bird(level) {
     const ctx = this.ctx;
-    const t = ctx.currentTime + 0.05;
+    const t = this.now() + 0.05;
     const base = 2200 + Math.random() * 2400;
     const notes = 2 + Math.floor(Math.random() * 5);
     const pan = ctx.createStereoPanner ? ctx.createStereoPanner() : ctx.createGain();
@@ -285,7 +325,7 @@ export class AudioEngine {
 
   cricket(level) {
     const ctx = this.ctx;
-    const t = ctx.currentTime + Math.random() * 0.2;
+    const t = this.now() + Math.random() * 0.2;
     const f = 4200 + Math.random() * 600;
     const o = ctx.createOscillator();
     o.frequency.value = f;
@@ -310,7 +350,7 @@ export class AudioEngine {
   footstep(surface = 'tile') {
     if (!this.started) return;
     const ctx = this.ctx;
-    const t = ctx.currentTime;
+    const t = this.now();
     const src = ctx.createBufferSource();
     src.buffer = this.noiseBuf;
     const f = ctx.createBiquadFilter();
@@ -344,7 +384,7 @@ export class AudioEngine {
   door(open = true) {
     if (!this.started) return;
     const ctx = this.ctx;
-    const t = ctx.currentTime;
+    const t = this.now();
     // creak: sawtooth with wobbling pitch through a resonant bandpass
     const o = ctx.createOscillator();
     o.type = 'sawtooth';
@@ -375,7 +415,7 @@ export class AudioEngine {
   whoosh(vol = 0.08, dur = 1.2, to = 2400) {
     if (!this.started) return;
     const ctx = this.ctx;
-    const t = ctx.currentTime;
+    const t = this.now();
     const s = ctx.createBufferSource();
     s.buffer = this.noiseBuf;
     const f = ctx.createBiquadFilter();
@@ -398,7 +438,7 @@ export class AudioEngine {
   chime() {
     if (!this.started) return;
     const ctx = this.ctx;
-    const t = ctx.currentTime;
+    const t = this.now();
     [[81, 0], [85, 0.09], [88, 0.18]].forEach(([n, dt]) => {
       for (const [m, a] of [[1, 1], [2.76, 0.3], [5.4, 0.12]]) {
         const o = ctx.createOscillator();
@@ -419,7 +459,7 @@ export class AudioEngine {
   click() {
     if (!this.started) return;
     const ctx = this.ctx;
-    const t = ctx.currentTime;
+    const t = this.now();
     const o = ctx.createOscillator();
     o.frequency.setValueAtTime(1800, t);
     o.frequency.exponentialRampToValueAtTime(900, t + 0.04);
@@ -434,7 +474,7 @@ export class AudioEngine {
   lightSwitch() {
     if (!this.started) return;
     const ctx = this.ctx;
-    const t = ctx.currentTime;
+    const t = this.now();
     for (const dt of [0, 0.03]) {
       const s = ctx.createBufferSource();
       s.buffer = this.noiseBuf;
