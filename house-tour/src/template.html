@@ -1,0 +1,291 @@
+<title>Type 2A House Tour</title>
+<meta name="description" content="Interactive 3D tour of the 22 × 70 ft Type 2A single-storey terrace unit.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Marcellus&family=Jost:wght@300;400;500&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    color-scheme: dark;
+    --ink: #16130f;
+    --panel: rgba(22, 19, 16, 0.66);
+    --panel-solid: #1d1915;
+    --line: rgba(233, 222, 202, 0.14);
+    --bone: #efe6d6;
+    --muted: #a99d8a;
+    --gold: #c9a36b;
+    --gold-hi: #e2c18e;
+    --display: 'Marcellus', 'Cormorant', Georgia, serif;
+    --body: 'Jost', 'Futura', 'Avenir Next', system-ui, sans-serif;
+    --mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+    --gut: max(16px, env(safe-area-inset-left, 0px));
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html, body { height: 100%; margin: 0; overflow: hidden; background: var(--ink); color: var(--bone); font: 400 14px/1.5 var(--body); -webkit-font-smoothing: antialiased; }
+  button { font: inherit; color: inherit; }
+  :focus-visible { outline: 2px solid var(--gold-hi); outline-offset: 2px; }
+  #scene { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+
+  /* ---------- intro ---------- */
+  #intro { position: fixed; inset: 0; z-index: 30; display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); background: radial-gradient(120% 90% at 20% 30%, rgba(40,34,28,0.9), rgba(16,13,11,0.97)); transition: opacity 1.4s ease, visibility 1.4s; }
+  body.started #intro { opacity: 0; visibility: hidden; pointer-events: none; }
+  #introArt { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+  .frame { position: absolute; inset: 18px; border: 1px solid rgba(201,163,107,0.45); pointer-events: none; }
+  .frame::after { content: ''; position: absolute; left: -1px; bottom: -1px; width: 32%; height: 4px; background: #8a4b2c; }
+  .intro-copy { position: relative; align-self: center; padding: 48px clamp(28px, 6vw, 88px); display: grid; gap: 22px; max-width: 640px; }
+  .eyebrow { font: 500 11px/1 var(--mono); letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold); }
+  .intro-copy h1 { margin: 0; font: 400 clamp(40px, 6vw, 78px)/1.02 var(--display); color: #d9b98c; text-wrap: balance; }
+  .intro-copy h1 u { text-decoration-thickness: 1px; text-underline-offset: 10px; text-decoration-color: rgba(217,185,140,0.6); }
+  .intro-copy h1 span { display: block; font-size: 0.72em; color: #cda676; margin-top: 8px; }
+  .lede { margin: 0; color: var(--muted); max-width: 46ch; font-size: 16px; font-weight: 300; }
+  .specs { display: grid; grid-template-columns: repeat(4, auto); gap: 6px 22px; justify-content: start; margin: 0; }
+  .specs div { display: grid; gap: 2px; }
+  .specs dt { font: 500 10px/1 var(--mono); letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); }
+  .specs dd { margin: 0; font: 400 22px/1.2 var(--display); color: var(--bone); font-variant-numeric: tabular-nums; }
+  .load { display: grid; gap: 8px; max-width: 360px; }
+  .load .track { height: 2px; background: rgba(233,222,202,0.12); overflow: hidden; }
+  #loadBar { height: 100%; background: var(--gold); transform-origin: left; transform: scaleX(0); transition: transform 0.4s ease; }
+  #loadStatus { font: 400 11px/1 var(--mono); letter-spacing: 0.08em; color: var(--muted); }
+  .cta { display: flex; flex-wrap: wrap; gap: 10px; }
+  .btn { appearance: none; border: 1px solid rgba(201,163,107,0.55); background: transparent; color: var(--bone); padding: 12px 18px; font: 500 13px/1 var(--body); letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; transition: background 0.2s, color 0.2s, border-color 0.2s; }
+  .btn:hover:not(:disabled) { background: rgba(201,163,107,0.14); border-color: var(--gold-hi); }
+  .btn.primary { background: var(--gold); color: #1b1611; border-color: var(--gold); }
+  .btn.primary:hover:not(:disabled) { background: var(--gold-hi); }
+  .btn:disabled { opacity: 0.35; cursor: progress; }
+  .note { font: 400 11px/1.5 var(--mono); color: var(--muted); letter-spacing: 0.04em; margin: 0; }
+  .intro-plan { position: relative; align-self: center; justify-self: center; padding: 40px; }
+  .intro-plan svg { height: min(78vh, 720px); width: auto; filter: drop-shadow(0 30px 60px rgba(0,0,0,0.45)); }
+
+  /* ---------- HUD ---------- */
+  .hud { position: fixed; z-index: 10; opacity: 0; transition: opacity 0.8s ease 0.6s; pointer-events: none; }
+  body.started .hud { opacity: 1; }
+  .hud > * { pointer-events: auto; }
+  .glass { background: var(--panel); backdrop-filter: blur(14px) saturate(1.2); -webkit-backdrop-filter: blur(14px) saturate(1.2); border: 1px solid var(--line); }
+  #tl { top: calc(env(safe-area-inset-top, 0px) + 16px); left: var(--gut); display: grid; gap: 2px; pointer-events: none; }
+  #tl .eyebrow { font-size: 10px; text-shadow: 0 1px 6px rgba(0,0,0,0.8); }
+  #roomName { font: 400 clamp(26px, 3.4vw, 40px)/1.05 var(--display); color: var(--bone); text-shadow: 0 2px 18px rgba(0,0,0,0.55); }
+  #roomName.swap { animation: swap 0.7s ease; }
+  @keyframes swap { from { opacity: 0; transform: translateY(6px); letter-spacing: 0.04em; } }
+  #roomSize { font: 400 12px/1.2 var(--mono); color: var(--gold-hi); text-shadow: 0 1px 8px rgba(0,0,0,0.7); font-variant-numeric: tabular-nums; }
+
+  #tr { top: calc(env(safe-area-inset-top, 0px) + 16px); right: var(--gut); display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+  .seg { display: flex; padding: 3px; gap: 2px; }
+  .seg button { appearance: none; border: 0; background: transparent; padding: 8px 12px; font: 500 12px/1 var(--body); letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); cursor: pointer; white-space: nowrap; }
+  .seg button:hover { color: var(--bone); }
+  .seg button[aria-pressed="true"] { background: rgba(201,163,107,0.18); color: var(--gold-hi); box-shadow: inset 0 0 0 1px rgba(201,163,107,0.5); }
+  .row { display: flex; gap: 8px; }
+  .icon { appearance: none; width: 38px; height: 38px; display: grid; place-items: center; cursor: pointer; color: var(--bone); padding: 0; }
+  .icon:hover { color: var(--gold-hi); }
+  .icon svg { width: 18px; height: 18px; }
+  #muteBtn[aria-pressed="true"] .on, #muteBtn[aria-pressed="false"] .off { display: none; }
+  #settings { padding: 14px 16px; display: grid; gap: 12px; width: 240px; }
+  #settings label { display: grid; gap: 6px; font: 500 10px/1 var(--mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+  #settings label.check { grid-template-columns: auto 1fr; align-items: center; gap: 10px; }
+  #settings input[type="range"] { accent-color: var(--gold); width: 100%; }
+  #settings input[type="checkbox"] { accent-color: var(--gold); width: 16px; height: 16px; margin: 0; }
+  #settings .keys { font: 400 11px/1.6 var(--mono); color: var(--muted); letter-spacing: 0.02em; text-transform: none; margin: 0; border-top: 1px solid var(--line); padding-top: 10px; }
+  #settings kbd { font: inherit; color: var(--bone); border: 1px solid var(--line); padding: 0 4px; }
+
+  #bl { left: var(--gut); bottom: calc(env(safe-area-inset-bottom, 0px) + 16px); padding: 8px; display: grid; gap: 6px; }
+  #minimap { width: 92px; height: 260px; display: block; cursor: crosshair; }
+  #bl .eyebrow { font-size: 9px; text-align: center; color: var(--muted); letter-spacing: 0.16em; }
+
+  #tourbar { left: 50%; bottom: calc(env(safe-area-inset-bottom, 0px) + 16px); transform: translateX(-50%); width: min(620px, calc(100vw - 2 * var(--gut) - 128px)); display: none; }
+  body[data-mode="tour"] #tourbar, body.finale #tourbar { display: block; }
+  #caption { padding: 16px 18px 12px; display: grid; gap: 6px; }
+  #caption.in > * { animation: rise 0.9s cubic-bezier(.2,.7,.2,1) both; }
+  #caption.in > *:nth-child(2) { animation-delay: 0.08s; }
+  #caption.in > *:nth-child(3) { animation-delay: 0.16s; }
+  @keyframes rise { from { opacity: 0; transform: translateY(8px); } }
+  .caphead { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+  #capIndex { font: 500 11px/1 var(--mono); letter-spacing: 0.14em; color: var(--gold); font-variant-numeric: tabular-nums; }
+  #capMeta { font: 400 11px/1 var(--mono); color: var(--muted); text-align: right; }
+  #capTitle { margin: 0; font: 400 26px/1.1 var(--display); color: var(--bone); }
+  #capText { margin: 0; color: #d6ccbb; font-weight: 300; font-size: 15px; max-width: 62ch; }
+  .controls { display: flex; align-items: center; gap: 6px; padding: 0 12px 12px; }
+  .controls .icon { width: 34px; height: 34px; border: 1px solid var(--line); background: transparent; }
+  .controls .icon:disabled { opacity: 0.3; cursor: default; }
+  #playBtn[data-state="playing"] .play, #playBtn[data-state="paused"] .pause { display: none; }
+  .progress { flex: 1; height: 2px; background: rgba(233,222,202,0.14); overflow: hidden; margin-left: 6px; }
+  #tourProgress { height: 100%; background: var(--gold); transform-origin: left; transform: scaleX(0); }
+  #stops { display: flex; gap: 4px; overflow-x: auto; padding: 0 12px 12px; scrollbar-width: none; }
+  #stops::-webkit-scrollbar { display: none; }
+  #stops button { appearance: none; border: 1px solid var(--line); background: transparent; color: var(--muted); padding: 5px 9px; font: 400 11px/1 var(--body); letter-spacing: 0.04em; white-space: nowrap; cursor: pointer; }
+  #stops button:hover { color: var(--bone); }
+  #stops button[aria-current="true"] { color: #1b1611; background: var(--gold); border-color: var(--gold); }
+
+  #walkHelp { left: 50%; bottom: calc(env(safe-area-inset-bottom, 0px) + 16px); transform: translateX(-50%); padding: 10px 14px; font: 400 12px/1.4 var(--mono); color: var(--muted); display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; max-width: calc(100vw - 2 * var(--gut) - 128px); }
+  #walkHelp b { color: var(--bone); font-weight: 500; }
+  body:not([data-mode="walk"]) #walkHelp { display: none; }
+
+  #joystick { position: fixed; z-index: 11; right: calc(var(--gut) + 4px); bottom: calc(env(safe-area-inset-bottom, 0px) + 96px); width: 112px; height: 112px; border-radius: 50%; border: 1px solid rgba(233,222,202,0.3); background: rgba(22,19,16,0.35); display: none; touch-action: none; }
+  #knob { position: absolute; left: 50%; top: 50%; width: 44px; height: 44px; margin: -22px; border-radius: 50%; background: rgba(201,163,107,0.8); }
+  @media (pointer: coarse) { body.started[data-mode="walk"] #joystick { display: block; } }
+
+  #labels { position: fixed; inset: 0; z-index: 9; pointer-events: none; opacity: 0; transition: opacity 0.5s; }
+  #labels.on { opacity: 1; }
+  #labels.on .label { pointer-events: auto; }
+  .label { position: absolute; left: 0; top: 0; appearance: none; border: 1px solid var(--line); background: rgba(22,19,16,0.72); color: var(--bone); padding: 5px 9px 5px 7px; font: 500 11px/1 var(--body); letter-spacing: 0.06em; text-transform: uppercase; display: flex; align-items: center; gap: 6px; cursor: pointer; white-space: nowrap; transition: opacity 0.3s, background 0.2s; backdrop-filter: blur(6px); }
+  .label:hover { background: rgba(201,163,107,0.9); color: #1b1611; }
+  .label .dot { width: 8px; height: 8px; border-radius: 50%; }
+
+  .bars::before, .bars::after { content: ''; position: fixed; left: 0; right: 0; height: 7vh; background: #000; z-index: 5; transition: transform 1.2s cubic-bezier(.6,0,.2,1); pointer-events: none; }
+  .bars::before { top: 0; transform: translateY(-100%); }
+  .bars::after { bottom: 0; transform: translateY(100%); }
+  body[data-mode="tour"] .bars::before, body[data-mode="tour"] .bars::after { transform: none; }
+
+  #flash { position: fixed; inset: 0; z-index: 20; pointer-events: none; background: radial-gradient(circle at 50% 40%, rgba(255,236,200,0.35), rgba(255,236,200,0)); opacity: 0; }
+  #flash.go { animation: flash 0.9s ease-out; }
+  @keyframes flash { 20% { opacity: 1; } }
+
+  @media (max-width: 760px) {
+    #intro { grid-template-columns: 1fr; overflow-y: auto; }
+    .intro-plan { display: none; }
+    .intro-copy { padding: 56px 28px 40px; }
+    .specs { grid-template-columns: repeat(2, auto); }
+    #tourbar { width: calc(100vw - 2 * var(--gut)); bottom: calc(env(safe-area-inset-bottom, 0px) + 12px); }
+    #capText { font-size: 13px; }
+    #capTitle { font-size: 21px; }
+    #bl { bottom: auto; top: calc(env(safe-area-inset-top, 0px) + 96px); padding: 6px; }
+    #minimap { width: 58px; height: 170px; }
+    .seg button { padding: 7px 8px; font-size: 11px; }
+    #walkHelp { display: none !important; }
+    body[data-mode="tour"] #bl { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+  }
+</style>
+
+<canvas id="scene" aria-label="3D view of the house"></canvas>
+<div class="bars" aria-hidden="true"></div>
+<div id="flash" aria-hidden="true"></div>
+<div id="labels"></div>
+
+<section id="intro" aria-label="Welcome">
+  <canvas id="introArt" aria-hidden="true"></canvas>
+  <div class="frame" aria-hidden="true"></div>
+  <div class="intro-copy">
+    <div class="eyebrow">Single-storey terrace · Interactive 3D tour</div>
+    <h1><u>Unit Layout</u><span>22×70 — Type 2A</span></h1>
+    <p class="lede">Walk the whole home, from the gate to the back yard, with furnished rooms, live daylight and an ambient score.</p>
+    <dl class="specs">
+      <div><dt>Lot</dt><dd>6706 × 21336</dd></div>
+      <div><dt>Bedrooms</dt><dd>3</dd></div>
+      <div><dt>Bathrooms</dt><dd>2</dd></div>
+      <div><dt>Parking</dt><dd>Car porch</dd></div>
+    </dl>
+    <div class="load" role="status" aria-live="polite">
+      <div class="track"><div id="loadBar"></div></div>
+      <div id="loadStatus">Preparing</div>
+    </div>
+    <div class="cta">
+      <button class="btn primary" id="startTour" type="button" disabled>Start guided tour</button>
+      <button class="btn" id="startWalk" type="button" disabled>Walk freely</button>
+      <button class="btn" id="startDoll" type="button" disabled>Dollhouse</button>
+    </div>
+    <p class="note">Sound on for the score and effects. Everything runs in your browser.</p>
+  </div>
+  <div class="intro-plan" aria-hidden="true">
+    <svg viewBox="0 0 300 960" xmlns="http://www.w3.org/2000/svg" font-family="Jost, sans-serif" font-size="15" text-anchor="middle">
+      <g transform="translate(20 40)">
+        <rect x="0" y="0" width="260" height="880" fill="#e9e6e1"/>
+        <rect x="0" y="0" width="260" height="72" fill="#dcdcdc"/>
+        <rect x="6" y="80" width="112" height="146" fill="#f2de3a"/>
+        <rect x="124" y="80" width="66" height="116" fill="#2e8b45"/>
+        <rect x="124" y="80" width="130" height="236" fill="#f6b98f"/>
+        <rect x="124" y="80" width="66" height="116" fill="#2e8b45"/>
+        <rect x="6" y="232" width="112" height="390" fill="#f4a9c6"/>
+        <rect x="124" y="322" width="130" height="112" fill="#f2de3a"/>
+        <rect x="124" y="440" width="130" height="52" fill="#2e8b45"/>
+        <rect x="124" y="498" width="130" height="124" fill="#f2de3a"/>
+        <rect x="0" y="628" width="260" height="252" fill="#dcdcdc"/>
+        <g fill="none" stroke="#2a2622" stroke-width="5">
+          <rect x="3" y="77" width="254" height="548"/>
+          <path d="M121 80v150M121 322v300M121 232H6M124 322h130M124 437h130M124 495h130M190 80v116h-66"/>
+        </g>
+        <g fill="#2a2622">
+          <text x="62" y="160">BED 2</text><text x="157" y="142" font-size="12">B2</text><text x="200" y="262">KITCHEN</text>
+          <text x="62" y="330">DINING</text><text x="62" y="470">LIVING</text><text x="190" y="385">BED 3</text>
+          <text x="190" y="472" font-size="12">B1</text><text x="190" y="565">BED 1</text><text x="130" y="42">YARD</text>
+          <text x="130" y="720">CAR PORCH</text><text x="130" y="820">DRIVEWAY</text>
+        </g>
+      </g>
+      <g font-family="IBM Plex Mono, monospace" font-size="12" fill="#c9a36b">
+        <text x="150" y="26">6706 / 22'</text>
+      </g>
+    </svg>
+  </div>
+</section>
+
+<div class="hud" id="tl">
+  <div class="eyebrow">Type 2A · 22 × 70</div>
+  <div id="roomName" aria-live="polite">Type 2A</div>
+  <div id="roomSize"></div>
+</div>
+
+<div class="hud" id="tr">
+  <div class="seg glass" role="group" aria-label="View mode">
+    <button type="button" data-mode="tour" aria-pressed="false">Tour</button>
+    <button type="button" data-mode="walk" aria-pressed="false">Walk</button>
+    <button type="button" data-mode="orbit" aria-pressed="false">Dollhouse</button>
+  </div>
+  <div class="seg glass" role="group" aria-label="Time of day">
+    <button type="button" data-time="day" aria-pressed="false">Day</button>
+    <button type="button" data-time="golden" aria-pressed="true">Golden</button>
+    <button type="button" data-time="night" aria-pressed="false">Night</button>
+  </div>
+  <div class="row">
+    <button class="icon glass" id="planBtn" type="button" aria-label="Top-down floor plan" title="Floor plan">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="3" width="16" height="18"/><path d="M4 11h9M13 3v12M13 15h7"/></svg>
+    </button>
+    <button class="icon glass" id="muteBtn" type="button" aria-pressed="false" aria-label="Mute" title="Sound (M)">
+      <svg class="on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12"/></svg>
+      <svg class="off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M17 9l5 6M22 9l-5 6"/></svg>
+    </button>
+    <button class="icon glass" id="fullBtn" type="button" aria-label="Fullscreen" title="Fullscreen (F)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg>
+    </button>
+    <button class="icon glass" id="settingsBtn" type="button" aria-label="Settings" aria-expanded="false" aria-controls="settings" title="Settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>
+    </button>
+  </div>
+  <div id="settings" class="glass" hidden>
+    <label for="musicVol">Music<input id="musicVol" type="range" min="0" max="1" step="0.01" value="0.55"></label>
+    <label for="sfxVol">Effects &amp; ambience<input id="sfxVol" type="range" min="0" max="1" step="0.01" value="0.8"></label>
+    <label class="check" for="narration"><input id="narration" type="checkbox">Spoken narration</label>
+    <label class="check" for="aoToggle"><input id="aoToggle" type="checkbox" checked>Ambient occlusion</label>
+    <p class="keys"><kbd>1</kbd> tour · <kbd>2</kbd> walk · <kbd>3</kbd> dollhouse<br><kbd>T</kbd> time of day · <kbd>M</kbd> mute · <kbd>F</kbd> fullscreen<br><kbd>Space</kbd> pause · <kbd>←</kbd><kbd>→</kbd> stops</p>
+  </div>
+</div>
+
+<div class="hud glass" id="bl">
+  <canvas id="minimap" aria-label="Floor plan minimap. Click a room to walk there."></canvas>
+  <div class="eyebrow">Tap to go</div>
+</div>
+
+<div class="hud glass" id="tourbar">
+  <div id="caption">
+    <div class="caphead"><span id="capIndex">01 / 13</span><span id="capMeta"></span></div>
+    <h2 id="capTitle">Arrival</h2>
+    <p id="capText"></p>
+  </div>
+  <div class="controls">
+    <button class="icon" id="prevBtn" type="button" aria-label="Previous stop"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <button class="icon" id="playBtn" type="button" aria-label="Pause tour" data-state="playing">
+      <svg class="pause" viewBox="0 0 24 24" fill="currentColor"><rect x="7" y="5" width="3.5" height="14"/><rect x="13.5" y="5" width="3.5" height="14"/></svg>
+      <svg class="play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5l11 7-11 7z"/></svg>
+    </button>
+    <button class="icon" id="nextBtn" type="button" aria-label="Next stop"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 5l7 7-7 7"/></svg></button>
+    <div class="progress"><div id="tourProgress"></div></div>
+  </div>
+  <div id="stops" aria-label="Tour stops"></div>
+</div>
+
+<div class="hud glass" id="walkHelp" hidden>
+  <span><b>WASD</b> move</span><span><b>Mouse</b> look (click to lock)</span><span><b>Shift</b> run</span><span><b>Minimap</b> jump to a room</span>
+</div>
+
+<div id="joystick" aria-label="Move"><div id="knob"></div></div>
+
+<script>/*__BUNDLE__*/</script>
