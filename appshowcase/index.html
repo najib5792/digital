@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>GETQUOTE App Showcase</title>
+<style>
+  @font-face { font-family: 'Jakarta'; font-weight: 200 800; font-display: block; src: url(fonts/PlusJakartaSans.woff2) format('woff2'); }
+  :root {
+    --bg: #f3f1ff; --indigo: #5b5bf6; --peach: #ff8a65; --ink: #151632;
+    --mute: #6b6d8f; --line: #e6e4f5; --soft: #eef0ff; --card: #ffffff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 100%; height: 100%; background: #e9e6fb; overflow: hidden; }
+  body { font-family: 'Jakarta', sans-serif; color: var(--ink); -webkit-font-smoothing: antialiased; }
+  #stage { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; overflow: hidden; background: var(--bg); transform-origin: 0 0; }
+  .abs { position: absolute; }
+  .g { background: linear-gradient(90deg, #5b5bf6, #9b7cf4 55%, #ff8a65); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+  /* backdrop */
+  .blob { position: absolute; border-radius: 50%; }
+  #glowA { width: 1100px; height: 1100px; background: radial-gradient(circle, rgba(91,91,246,.30), rgba(91,91,246,0) 65%); }
+  #glowB { width: 1000px; height: 1000px; background: radial-gradient(circle, rgba(255,138,101,.30), rgba(255,138,101,0) 65%); }
+  #glowC { width: 800px; height: 800px; background: radial-gradient(circle, rgba(155,124,244,.22), rgba(155,124,244,0) 65%); }
+  #dots { inset: 0; background-image: radial-gradient(rgba(21,22,50,.07) 1.6px, transparent 1.6px); background-size: 36px 36px;
+          -webkit-mask-image: radial-gradient(ellipse at 50% 60%, #000 20%, transparent 70%); mask-image: radial-gradient(ellipse at 50% 60%, #000 20%, transparent 70%); }
+
+  /* headline */
+  #brand { left: 50%; top: 104px; transform: translateX(-50%); display: flex; align-items: center; gap: 14px; padding: 12px 24px 12px 14px; border-radius: 40px;
+           background: rgba(255,255,255,.7); border: 1px solid rgba(91,91,246,.14); box-shadow: 0 10px 30px rgba(91,91,246,.10); font-weight: 800; font-size: 24px; letter-spacing: 3px; }
+  #brand .mk { width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg, #5b5bf6, #9b7cf4 60%, #ff8a65); display: grid; place-items: center; color: #fff; font-size: 17px; letter-spacing: 0; }
+  .head { left: 60px; right: 60px; top: 200px; text-align: center; }
+  .head h1 { font-size: 86px; line-height: 1.06; font-weight: 800; letter-spacing: -2.5px; }
+  .head p { margin-top: 24px; font-size: 34px; line-height: 1.35; font-weight: 500; color: var(--mute); }
+
+  /* 3D world */
+  #world { position: absolute; inset: 0; perspective: 2600px; perspective-origin: 540px 1100px; }
+  .p3 { transform-style: preserve-3d; }
+  #shadow { left: 290px; top: 1705px; width: 500px; height: 90px; border-radius: 50%; background: radial-gradient(ellipse at center, rgba(40,32,110,.30), rgba(40,32,110,0) 70%); }
+  #rig { position: absolute; left: 270px; top: 590px; width: 540px; height: 1110px; }
+  #phone { position: absolute; inset: 0; }
+  .frame { position: absolute; inset: 0; border-radius: 76px; padding: 14px;
+           background: linear-gradient(145deg, #2b2d4a, #121328 45%, #2a2c47);
+           box-shadow: inset 0 0 0 2px rgba(255,255,255,.10), 0 60px 90px -30px rgba(40,32,110,.45), 0 30px 60px -20px rgba(91,91,246,.25); }
+  .frame:after { content: ''; position: absolute; right: -4px; top: 250px; width: 5px; height: 110px; border-radius: 3px; background: #2b2d4a; }
+  .screen { position: relative; width: 100%; height: 100%; border-radius: 62px; overflow: hidden; background: #f7f7fc; }
+  .island { position: absolute; left: 50%; top: 18px; width: 128px; height: 38px; margin-left: -64px; background: #0b0c18; border-radius: 22px; z-index: 20; }
+  .sbar { position: absolute; left: 40px; right: 36px; top: 22px; display: flex; justify-content: space-between; font-weight: 700; font-size: 19px; z-index: 19; }
+  .scr { position: absolute; inset: 0; background: #f7f7fc; padding: 84px 26px 0; }
+
+  /* app ui */
+  .card { background: #fff; border-radius: 26px; box-shadow: 0 8px 24px rgba(40,32,110,.07); border: 1px solid #efedf9; }
+  .btn { position: absolute; left: 26px; right: 26px; top: 930px; height: 84px; border-radius: 24px; background: var(--indigo); color: #fff; display: flex; align-items: center; justify-content: center; gap: 12px;
+         font-weight: 800; font-size: 24px; box-shadow: 0 16px 30px -10px rgba(91,91,246,.6); }
+  .nav { display: flex; align-items: center; gap: 16px; height: 60px; font-weight: 800; font-size: 26px; }
+  .nav .bk { width: 48px; height: 48px; border-radius: 16px; background: #fff; border: 1px solid var(--line); display: grid; place-items: center; font-size: 26px; color: var(--ink); }
+  .lbl { font-size: 15px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--mute); margin-bottom: 8px; }
+  .inp { height: 62px; border-radius: 18px; background: #fff; border: 1.5px solid var(--line); display: flex; align-items: center; padding: 0 20px; font-size: 22px; font-weight: 600; position: relative; }
+  .inp.on { border-color: var(--indigo); box-shadow: 0 0 0 4px rgba(91,91,246,.12); }
+  .seg { height: 62px; border-radius: 18px; background: #fff; border: 1.5px solid var(--line); display: flex; position: relative; padding: 5px; }
+  .seg span { flex: 1; display: grid; place-items: center; font-size: 20px; font-weight: 700; color: var(--mute); position: relative; z-index: 2; }
+  .seg span.on { color: #fff; }
+  .seg .hl { position: absolute; top: 5px; bottom: 5px; left: 5px; width: calc(50% - 5px); border-radius: 13px; background: var(--indigo); z-index: 1; }
+  .fld { margin-bottom: 20px; }
+  .av { border-radius: 50%; display: grid; place-items: center; color: #fff; font-weight: 800; }
+  .row { display: flex; align-items: center; gap: 16px; padding: 16px 18px; margin-bottom: 12px; }
+  .row .t { flex: 1; min-width: 0; }
+  .row b { display: block; font-size: 20px; font-weight: 800; }
+  .row small { display: block; font-size: 16px; color: var(--mute); font-weight: 500; margin-top: 2px; }
+  .row .pr { font-size: 20px; font-weight: 800; text-align: right; white-space: nowrap; }
+  .row .pr small { font-size: 14px; }
+  .pill { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 12px; font-size: 15px; font-weight: 800; }
+  .ripple { position: absolute; width: 60px; height: 60px; margin: -30px 0 0 -30px; border-radius: 50%; background: rgba(91,91,246,.35); z-index: 30; pointer-events: none; }
+  .plan { position: relative; border: 2px solid transparent; }
+  .plan.sel { border-color: var(--indigo); background: #f4f4ff; }
+  .plan .ck { width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--line); display: grid; place-items: center; color: #fff; font-size: 16px; font-weight: 900; }
+  .plan.sel .ck { background: var(--indigo); border-color: var(--indigo); }
+  .ic { width: 58px; height: 58px; border-radius: 18px; display: grid; place-items: center; }
+
+  /* pop-out cards */
+  .pcw { position: absolute; }
+  .pc { background: #fff; border-radius: 28px; padding: 24px 26px; border: 1px solid rgba(91,91,246,.10);
+        box-shadow: 0 40px 70px -20px rgba(40,32,110,.35), 0 12px 24px -8px rgba(40,32,110,.18); }
+  .pc .k { font-size: 16px; font-weight: 700; color: var(--mute); letter-spacing: .5px; }
+
+  /* fingertip */
+  #finger { left: 0; top: 0; width: 120px; height: 300px; margin-left: -60px; margin-top: -18px; transform-origin: 50% 18px; pointer-events: none; }
+  #finger .f { position: absolute; inset: 0; border-radius: 60px 60px 50px 50px; background: linear-gradient(100deg, #e9b294, #f6cdb4 40%, #e8ab8c 85%);
+               box-shadow: inset -10px -6px 18px rgba(170,90,60,.25), 0 30px 40px -12px rgba(40,32,110,.35); }
+  #finger .n { position: absolute; left: 26px; top: 14px; width: 68px; height: 78px; border-radius: 34px 34px 26px 26px; background: linear-gradient(180deg, #fde8dc, #f5cdb8); opacity: .9; }
+
+  /* laptop */
+  #laptop { left: 80px; top: 770px; width: 920px; height: 620px; }
+  .lid { position: absolute; left: 0; top: 0; width: 920px; height: 580px; border-radius: 30px; background: linear-gradient(145deg, #2b2d4a, #121328 50%, #26284a); padding: 22px;
+         box-shadow: 0 60px 90px -30px rgba(40,32,110,.45); transform-origin: 50% 100%; }
+  .lscreen { position: relative; width: 100%; height: 100%; border-radius: 12px; overflow: hidden; background: #f7f7fc; }
+  .lbase { position: absolute; left: -50px; top: 578px; width: 1020px; height: 30px; border-radius: 4px 4px 26px 26px; background: linear-gradient(180deg, #d9d8ea, #b9b7d0); box-shadow: 0 30px 40px -12px rgba(40,32,110,.35); }
+  .lbase:after { content: ''; position: absolute; left: 50%; top: 0; width: 160px; height: 10px; margin-left: -80px; border-radius: 0 0 10px 10px; background: #a9a7c2; }
+  #lshadow { left: 60px; top: 1380px; width: 960px; height: 80px; border-radius: 50%; background: radial-gradient(ellipse at center, rgba(40,32,110,.28), rgba(40,32,110,0) 70%); }
+  .side { position: absolute; left: 0; top: 0; bottom: 0; width: 76px; background: #1d1e3f; display: flex; flex-direction: column; align-items: center; gap: 22px; padding-top: 20px; }
+  .side i { width: 30px; height: 30px; border-radius: 9px; background: rgba(255,255,255,.14); display: block; }
+  .side i.on { background: var(--indigo); }
+  .dmain { position: absolute; left: 76px; right: 0; top: 0; bottom: 0; padding: 20px 22px; }
+  .dh { display: flex; justify-content: space-between; align-items: center; font-weight: 800; font-size: 22px; }
+  .dh small { font-size: 14px; color: var(--mute); font-weight: 600; }
+  .dstats { display: flex; gap: 14px; margin-top: 16px; }
+  .dstats .card { flex: 1; padding: 14px 16px; border-radius: 16px; }
+  .dstats small { font-size: 12px; font-weight: 700; color: var(--mute); letter-spacing: .5px; }
+  .dstats b { display: block; font-size: 30px; font-weight: 800; margin-top: 2px; }
+  .dgrid { display: flex; gap: 14px; margin-top: 14px; }
+  .drow { display: flex; align-items: center; gap: 12px; height: 56px; padding: 0 12px; border-radius: 12px; font-size: 15px; font-weight: 700; margin-bottom: 6px; background: #fff; border: 1px solid #efedf9; }
+  .drow em { font-style: normal; color: var(--mute); font-weight: 500; font-size: 13px; }
+  .drow .wa { margin-left: auto; padding: 6px 12px; border-radius: 10px; background: var(--soft); color: var(--indigo); font-size: 12px; font-weight: 800; white-space: nowrap; }
+  #cursor { left: 0; top: 0; width: 34px; height: 44px; pointer-events: none; }
+  #tapHint { position: fixed; right: 16px; bottom: 16px; padding: 10px 16px; border-radius: 999px; background: rgba(21,22,50,.85); color: #fff; font: 700 14px 'Jakarta'; cursor: pointer; z-index: 10; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="blob" id="glowA"></div>
+  <div class="blob" id="glowB"></div>
+  <div class="blob" id="glowC"></div>
+  <div class="abs" id="dots"></div>
+
+  <div class="abs" id="brand"><span class="mk">GQ</span>GETQUOTE</div>
+  <div class="abs head" id="h1"><h1>Takaful quotes<br>in <span class="g">seconds.</span></h1><p>Your own GETQUOTE link,<br>ready for every client.</p></div>
+  <div class="abs head" id="h2"><h1>Every plan,<br><span class="g">priced instantly.</span></h1><p>5 Hibah plans, medical cards<br>and add-on riders.</p></div>
+  <div class="abs head" id="h3"><h1>Leads land straight<br>in <span class="g">WhatsApp.</span></h1><p>Every quote reaches you<br>the moment it's sent.</p></div>
+  <div class="abs head" id="h4"><h1>Track every lead from<br><span class="g">one dashboard.</span></h1><p>See who asked, what they chose,<br>and follow up fast.</p></div>
+
+  <div class="abs" id="shadow"></div>
+  <div class="abs" id="lshadow"></div>
+
+  <div id="world">
+    <!-- ================= LAPTOP ================= -->
+    <div class="abs p3" id="laptop">
+      <div class="lbase"></div>
+      <div class="lid p3" id="lid">
+        <div class="lscreen">
+          <div class="side"><i class="on"></i><i></i><i></i><i></i></div>
+          <div class="dmain">
+            <div class="dh"><span>Leads Dashboard</span><small>GETQUOTE · Ejen Najib</small></div>
+            <div class="dstats">
+              <div class="card"><small>LEADS</small><b id="dL">0</b></div>
+              <div class="card"><small>QUOTES SENT</small><b id="dQ">0</b></div>
+              <div class="card"><small>CONVERSION</small><b id="dC" style="color:#5b5bf6">0%</b></div>
+            </div>
+            <div class="dgrid">
+              <div class="card" style="width:250px;height:300px;border-radius:16px;padding:14px 16px;position:relative">
+                <small style="font-size:12px;font-weight:700;color:#6b6d8f">THIS WEEK</small>
+                <div id="dbars" style="position:absolute;left:16px;right:16px;bottom:16px;height:220px;display:flex;align-items:flex-end;gap:10px"></div>
+              </div>
+              <div style="flex:1;position:relative;height:300px;overflow:hidden" id="dlist"></div>
+            </div>
+          </div>
+          <svg id="cursor" class="abs" viewBox="0 0 34 44"><path d="M3 2 L3 34 L11 26 L17 40 L23 37 L17 24 L29 24 Z" fill="#151632" stroke="#fff" stroke-width="2.5" stroke-linejoin="round"/></svg>
+          <div class="ripple" id="rpL"></div>
+        </div>
+        <div class="pcw p3" id="c5w" style="left:430px;top:40px">
+          <div class="pc" id="c5" style="width:420px;display:flex;gap:16px;align-items:center">
+            <div class="av" style="width:60px;height:60px;background:#ff8a65;font-size:22px">AR</div>
+            <div style="flex:1"><div class="k">NEW LEAD · JUST NOW</div><div style="font-weight:800;font-size:24px;margin-top:2px">Aisyah Rahman</div><div style="font-size:17px;color:#6b6d8f;font-weight:600">Hibah Nova · RM61.35/bln</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= PHONE ================= -->
+    <div class="p3" id="rig">
+      <div class="p3" id="phone">
+        <div class="frame">
+          <div class="screen" id="screen">
+            <div class="island"></div>
+            <div class="sbar"><span>9:41</span><span>●●● ▮</span></div>
+
+            <!-- S1 HOME -->
+            <div class="scr" id="S1">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px">
+                <div><div style="font-size:20px;color:#6b6d8f;font-weight:600">Selamat pagi,</div><div style="font-size:36px;font-weight:800;letter-spacing:-.5px">Najib 👋</div></div>
+                <div style="display:flex;gap:12px;align-items:center">
+                  <div style="width:52px;height:52px;border-radius:18px;background:#fff;border:1px solid #e6e4f5;display:grid;place-items:center">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#151632" stroke-width="2.2" stroke-linecap="round"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>
+                  </div>
+                  <div class="av" style="width:56px;height:56px;background:linear-gradient(135deg,#5b5bf6,#9b7cf4);font-size:20px">NJ</div>
+                </div>
+              </div>
+              <div class="card" style="margin-top:24px;padding:22px 22px 10px">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start">
+                  <div><div style="font-size:17px;font-weight:700;color:#6b6d8f">Leads minggu ini</div><div style="font-size:50px;font-weight:800;letter-spacing:-1px;line-height:1.1">128</div></div>
+                  <span class="pill" style="background:#fff1ec;color:#e8643e">▲ 32%</span>
+                </div>
+                <svg viewBox="0 0 420 150" width="100%" height="150" style="display:block;margin-top:6px">
+                  <defs><linearGradient id="ag" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5b5bf6" stop-opacity=".28"/><stop offset="1" stop-color="#5b5bf6" stop-opacity="0"/></linearGradient></defs>
+                  <path d="M0,120 C40,112 60,90 100,96 C140,102 160,70 200,66 C240,62 260,84 300,58 C340,32 370,40 420,18 L420,150 L0,150 Z" fill="url(#ag)"/>
+                  <path id="aline" d="M0,120 C40,112 60,90 100,96 C140,102 160,70 200,66 C240,62 260,84 300,58 C340,32 370,40 420,18" fill="none" stroke="#5b5bf6" stroke-width="5" stroke-linecap="round"/>
+                  <circle cx="420" cy="18" r="8" fill="#ff8a65" stroke="#fff" stroke-width="4"/>
+                </svg>
+              </div>
+              <div style="margin:26px 4px 12px;display:flex;justify-content:space-between;font-weight:800;font-size:22px"><span>Quotation terkini</span><span style="color:#5b5bf6;font-size:17px">Lihat semua</span></div>
+              <div class="card row"><div class="av" style="width:52px;height:52px;background:#ff8a65;font-size:18px">FZ</div><div class="t"><b>Farid Zain</b><small>Hibah Evo</small></div><div class="pr">RM50.00<small>/bln</small></div></div>
+              <div class="card row"><div class="av" style="width:52px;height:52px;background:#5b5bf6;font-size:18px">ML</div><div class="t"><b>Mei Ling</b><small>Medical Card 200</small></div><div class="pr">RM88.20<small>/bln</small></div></div>
+              <div class="card row"><div class="av" style="width:52px;height:52px;background:#9b7cf4;font-size:18px">RK</div><div class="t"><b>Rajesh Kumar</b><small>Hibah Chinta</small></div><div class="pr">RM64.80<small>/bln</small></div></div>
+              <div class="btn" id="b1"><span style="font-size:32px;font-weight:600;line-height:0">+</span> Buat Quotation Baru</div>
+            </div>
+
+            <!-- S2 FORM -->
+            <div class="scr" id="S2">
+              <div class="nav"><div class="bk">‹</div>Quotation Baru</div>
+              <div style="display:flex;justify-content:space-between;font-size:16px;font-weight:700;color:#6b6d8f;margin-top:14px"><span>Maklumat pelanggan</span><span>Langkah 1 / 2</span></div>
+              <div style="height:8px;border-radius:4px;background:#e6e4f5;margin:10px 0 30px"><div style="width:50%;height:100%;border-radius:4px;background:linear-gradient(90deg,#5b5bf6,#ff8a65)"></div></div>
+              <div class="fld"><div class="lbl">Nama</div><div class="inp" id="i1"><span id="tName"></span></div></div>
+              <div class="fld"><div class="lbl">Tarikh lahir</div><div class="inp" id="i2"><span id="tDob"></span><span class="pill abs" id="ageChip" style="right:12px;background:#fff1ec;color:#e8643e">Umur 32</span></div></div>
+              <div class="fld"><div class="lbl">Jantina</div><div class="seg"><div class="hl" id="hlG"></div><span id="g1">Lelaki</span><span id="g2">Perempuan</span></div></div>
+              <div class="fld"><div class="lbl">Merokok</div><div class="seg"><div class="hl" id="hlS"></div><span id="s1">Tidak</span><span id="s2">Ya</span></div></div>
+              <div class="fld"><div class="lbl">Pekerjaan</div><div class="inp" id="i3"><span id="tJob"></span></div></div>
+              <div class="btn" id="b2">Kira Sekarang →</div>
+            </div>
+
+            <!-- S3 PLANS -->
+            <div class="scr" id="S3">
+              <div class="nav"><div class="bk">‹</div>Pilih Pelan</div>
+              <div style="font-size:17px;font-weight:600;color:#6b6d8f;margin:12px 0 22px">Aisyah · 32 tahun · Tidak merokok</div>
+              <div id="plans"></div>
+              <div class="btn" id="b3" style="background:#c9c8e0;box-shadow:none">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="#fff"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.1-4.5-3.9-4.7-4.1-.1-.2-1.1-1.5-1.1-2.8s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.9 2.1c.1.2.1.4 0 .5l-.4.6-.4.4c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.4 2.4 1.5.3.1.5.1.7-.1l.9-1.1c.2-.3.4-.2.7-.1l2 1c.3.1.5.2.5.3.1.2.1.6-.1 1.2z"/></svg>
+                Hantar ke WhatsApp</div>
+            </div>
+
+            <!-- S4 SUCCESS -->
+            <div class="scr" id="S4">
+              <div style="height:60px"></div>
+              <div style="position:relative;width:170px;height:170px;margin:40px auto 0">
+                <div class="abs" id="okRing" style="inset:0;border-radius:50%;border:3px solid #5b5bf6"></div>
+                <svg class="abs" id="okC" style="inset:0" viewBox="0 0 170 170">
+                  <circle cx="85" cy="85" r="78" fill="#5b5bf6"/>
+                  <path id="okTick" d="M52 88 L76 110 L120 64" fill="none" stroke="#fff" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+              <div id="okT" style="text-align:center;margin-top:36px"><div style="font-size:40px;font-weight:800;letter-spacing:-1px">Lead dihantar!</div>
+                <div style="font-size:20px;color:#6b6d8f;font-weight:500;margin-top:10px;line-height:1.4">Aisyah akan dihubungi terus<br>melalui WhatsApp.</div></div>
+              <div class="card" id="okCard" style="margin-top:34px;padding:8px 24px">
+                <div style="display:flex;justify-content:space-between;padding:16px 0;border-bottom:1px solid #efedf9;font-size:19px"><span style="color:#6b6d8f;font-weight:600">Pelan</span><b>Hibah Nova</b></div>
+                <div style="display:flex;justify-content:space-between;padding:16px 0;border-bottom:1px solid #efedf9;font-size:19px"><span style="color:#6b6d8f;font-weight:600">Caruman</span><b>RM61.35 / bln</b></div>
+                <div style="display:flex;justify-content:space-between;padding:16px 0;font-size:19px"><span style="color:#6b6d8f;font-weight:600">Ejen</span><b>Najib</b></div>
+              </div>
+              <div class="btn" id="b4" style="background:#fff;color:#5b5bf6;border:2px solid #5b5bf6;box-shadow:none">Kembali ke Utama</div>
+            </div>
+
+            <div class="ripple" id="rp1"></div><div class="ripple" id="rp2"></div><div class="ripple" id="rp3"></div><div class="ripple" id="rp4"></div><div class="ripple" id="rp5"></div>
+          </div>
+        </div>
+
+        <!-- pop-out cards, living in the phone's 3D space -->
+        <div class="pcw p3" id="c1w" style="left:230px;top:300px">
+          <div class="pc" id="c1" style="width:360px">
+            <div class="k">CONVERSION RATE</div>
+            <div style="display:flex;align-items:baseline;gap:10px;margin-top:4px"><b style="font-size:46px;font-weight:800;letter-spacing:-1px">24.8%</b><span class="pill" style="background:#eef0ff;color:#5b5bf6">▲ 4.1</span></div>
+            <div style="display:flex;gap:10px;align-items:flex-end;height:90px;margin-top:14px" id="c1bars"></div>
+          </div>
+        </div>
+        <div class="pcw p3" id="c2w" style="left:-90px;top:430px">
+          <div class="pc" id="c2" style="width:370px;display:flex;gap:18px;align-items:center">
+            <div class="av" style="width:78px;height:78px;background:linear-gradient(135deg,#5b5bf6,#9b7cf4);font-size:26px;box-shadow:0 0 0 5px #fff1ec">NJ</div>
+            <div><div style="font-weight:800;font-size:26px">Najib</div><div style="font-size:16px;color:#6b6d8f;font-weight:600">Ejen Takaful Berdaftar</div>
+              <div style="margin-top:6px;color:#ff8a65;font-size:18px;letter-spacing:2px">★★★★★ <span style="color:#151632;font-weight:800;letter-spacing:0">4.9</span></div></div>
+          </div>
+        </div>
+        <div class="pcw p3" id="c3w" style="left:210px;top:520px">
+          <div class="pc" id="c3" style="width:360px">
+            <div class="k">HIBAH NOVA · BULANAN</div>
+            <div style="font-size:52px;font-weight:800;letter-spacing:-1.5px;margin-top:2px">RM61<span style="font-size:30px">.35</span></div>
+            <div style="display:flex;gap:8px;margin-top:10px"><span class="pill" style="background:#fff1ec;color:#e8643e">+ Waiver</span><span class="pill" style="background:#eef0ff;color:#5b5bf6">Umur 1–60</span></div>
+          </div>
+        </div>
+        <div class="pcw p3" id="c4w" style="left:20px;top:110px">
+          <div class="pc" id="c4" style="width:500px;display:flex;gap:16px;align-items:center;padding:20px 22px">
+            <div style="width:62px;height:62px;border-radius:18px;background:#25d366;display:grid;place-items:center;flex:none">
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="#fff"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.1-4.5-3.9-4.7-4.1-.1-.2-1.1-1.5-1.1-2.8s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.9 2.1c.1.2.1.4 0 .5l-.4.6-.4.4c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.4 2.4 1.5.3.1.5.1.7-.1l.9-1.1c.2-.3.4-.2.7-.1l2 1c.3.1.5.2.5.3.1.2.1.6-.1 1.2z"/></svg>
+            </div>
+            <div style="flex:1;min-width:0">
+              <div style="display:flex;justify-content:space-between"><span class="k">WHATSAPP</span><span class="k">now</span></div>
+              <div style="font-weight:800;font-size:22px;margin-top:2px">Aisyah Rahman</div>
+              <div style="font-size:17px;color:#6b6d8f;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Salam, saya berminat dengan Hibah Nova…</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="abs p3" id="finger"><div class="f"></div><div class="n"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="tapHint">▶ Play with sound</div>
+
+<script>
+/* Deterministic timeline: every frame is a pure function of t (see ../showreel for the engine's origin). */
+const W = 1080, H = 1920, FPS = 60, BPM = 112, DUR = 14 * 4 * 60 / BPM; // 14 bars = exactly 30 s, so music and picture loop together
+const $ = s => document.querySelector(s);
+const $$ = s => typeof s === 'string' ? [...document.querySelectorAll(s)] : (Array.isArray(s) ? s.flatMap(x => $$(x)) : [s]);
+const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+const lerp = (a, b, p) => a + (b - a) * p;
+const prog = (t, a, d) => clamp((t - a) / d);
+const TAU = Math.PI * 2;
+const EASE = {
+  lin: t => t,
+  outCubic: t => 1 - Math.pow(1 - t, 3),
+  inCubic: t => t * t * t,
+  inOutCubic: t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2,
+  outQuint: t => 1 - Math.pow(1 - t, 5),
+  inOutQuint: t => t < .5 ? 16 * t ** 5 : 1 - Math.pow(-2 * t + 2, 5) / 2,
+  outBack: t => { const c = 1.4; return 1 + (c + 1) * Math.pow(t - 1, 3) + c * Math.pow(t - 1, 2); },
+};
+const DEF = { x: 0, y: 0, z: 0, s: 1, r: 0, rx: 0, ry: 0, o: 1, br: 1 };
+const TF = ['x', 'y', 'z', 's', 'r', 'rx', 'ry'];
+const REG = new Map(), HOOKS = [];
+function tw(sel, start, dur, props, ease = 'outCubic') {
+  $$(sel).forEach(el => {
+    let r = REG.get(el); if (!r) REG.set(el, r = {});
+    for (const k in props) { const v = props[k]; const [from, to] = Array.isArray(v) ? v : [null, v]; (r[k] = r[k] || []).push({ start, dur, from, to, ease: EASE[ease] }); }
+  });
+}
+const on = fn => HOOKS.push(fn);
+function finalize() { for (const r of REG.values()) for (const k in r) { r[k].sort((a, b) => a.start - b.start); let p = DEF[k]; for (const x of r[k]) { if (x.from === null) x.from = p; p = x.to; } } }
+function valAt(list, t) {
+  if (t < list[0].start) return list[0].from;
+  let c = list[0]; for (const x of list) { if (t >= x.start) c = x; else break; }
+  return lerp(c.from, c.to, c.ease(c.dur <= 0 ? 1 : clamp((t - c.start) / c.dur)));
+}
+function applyAll(t) {
+  for (const [el, r] of REG) {
+    const v = { ...DEF }; for (const k in r) v[k] = valAt(r[k], t);
+    if (TF.some(k => k in r)) el.style.transform = `translate3d(${v.x}px,${v.y}px,${v.z}px) rotateX(${v.rx}deg) rotateY(${v.ry}deg) rotate(${v.r}deg) scale(${v.s})`;
+    if ('o' in r) { el.style.opacity = v.o; el.style.visibility = v.o < .002 ? 'hidden' : 'visible'; }
+    if ('br' in r) el.style.filter = v.br < .999 ? `brightness(${v.br})` : 'none';
+  }
+}
+const typed = (s, t, a, b) => s.slice(0, Math.round(prog(t, a, b - a) * s.length));
+
+/* sound cues: soundtrack.py reads these (render.mjs dumps them to cues.json) */
+const CUES = [];
+const cue = (t, type) => CUES.push({ t: +t.toFixed(3), type });
+
+/* ---------------- backdrop (periods divide 30 s so the loop is seamless) ---------------- */
+on(t => {
+  const a = TAU * t / DUR;
+  $('#glowA').style.transform = `translate(${-200 + 120 * Math.sin(a)}px, ${380 + 140 * Math.cos(a)}px)`;
+  $('#glowB').style.transform = `translate(${420 + 110 * Math.cos(2 * a)}px, ${1040 + 120 * Math.sin(a)}px)`;
+  $('#glowC').style.transform = `translate(${300 + 160 * Math.sin(3 * a)}px, ${-200 + 80 * Math.cos(2 * a)}px)`;
+});
+
+/* ---------------- headlines: still, readable, gentle crossfades ---------------- */
+const HEADS = [['#h1', -1, 7.25], ['#h2', 7.45, 12.95], ['#h3', 13.15, 17.85], ['#h4', 18.05, 27.2]];
+HEADS.forEach(([id, a, b], i) => {
+  if (i) tw(id, a, .7, { o: [0, 1], y: [24, 0] }, 'outCubic'); else tw(id, 0, .01, { o: [1, 1], y: [0, 0] });
+  tw(id, b, .4, { o: 0, y: -16 }, 'inOutCubic');
+});
+tw('#h1', 27.4, .8, { o: [0, 1], y: [24, 0] }, 'outCubic');
+
+/* ---------------- phone rig: float, tilt, bob ---------------- */
+// rig offsets for the laptop section (phone steps aside to the front-right)
+tw('#rig', 17.7, 1.1, { x: [0, 250], y: [0, 350], s: [1, .6] }, 'inOutQuint');
+tw('#rig', 25.1, 1.1, { x: 0, y: 0, s: 1 }, 'inOutQuint');
+on(t => {
+  const a = TAU * t / DUR;
+  const bob = 16 * Math.sin(6 * a);                  // 5 s period
+  const ry = -13 + 6 * Math.sin(3 * a);              // 10 s period
+  const rx = 7 + 3 * Math.sin(4 * a + 1);            // 7.5 s period
+  const rz = 1.2 * Math.sin(2 * a);
+  $('#phone').style.transform = `translateY(${bob}px) rotateX(${rx}deg) rotateY(${ry}deg) rotateZ(${rz}deg)`;
+  // soft shadow follows the phone
+  const rig = REG.get($('#rig')), rs = valAt(rig.s, t), rxo = valAt(rig.x, t), ryo = valAt(rig.y, t);
+  const k = 1 - bob / 90;
+  $('#shadow').style.transform = `translate(${rxo}px, ${ryo + 605 * (rs - 1)}px) scale(${k * rs})`;
+  $('#shadow').style.opacity = .85 + bob / 60;
+});
+
+/* ---------------- screens & navigation ---------------- */
+const SW = 512;
+function push(from, to, t) {  // iOS-style push: new screen from the right, old one parallaxes left
+  tw(to, t, .62, { x: [SW, 0] }, 'inOutQuint');
+  tw(from, t, .62, { x: [0, -150], br: [1, .88] }, 'inOutQuint');
+  cue(t, 'whoosh');
+}
+function back(from, to, t) {
+  tw(from, t, .62, { x: SW }, 'inOutQuint');
+  tw(to, t, .62, { x: 0, br: 1 }, 'inOutQuint');
+  cue(t, 'whoosh');
+}
+['#S2', '#S3', '#S4'].forEach(s => tw(s, 0, .01, { x: [SW, SW] }));
+push('#S1', '#S2', 4.0);
+push('#S2', '#S3', 7.55);
+push('#S3', '#S4', 13.05);
+// covered screens hide so the back navigation lands on Home, then everything resets for the loop
+tw(['#S2', '#S3'], 13.8, .01, { o: [1, 0] }, 'lin');
+back('#S4', '#S1', 27.1);
+tw(['#S2', '#S3'], 29.9, .01, { x: SW, br: 1 }, 'lin');
+tw(['#S2', '#S3'], 29.92, .01, { o: 1 }, 'lin');
+
+/* ---------------- taps: fingertip + ripple + button press ---------------- */
+const TAPS = [
+  { t: 3.75, x: 270, y: 986, btn: '#b1', rp: '#rp1' },
+  { t: 7.3, x: 270, y: 986, btn: '#b2', rp: '#rp2' },
+  { t: 9.6, x: 330, y: 367, btn: null, rp: '#rp3' },
+  { t: 12.8, x: 270, y: 986, btn: '#b3', rp: '#rp4' },
+  { t: 26.85, x: 270, y: 986, btn: '#b4', rp: '#rp5' },
+];
+TAPS.forEach(({ t, x, y, btn, rp }) => {
+  tw('#finger', t - .8, .7, { x: [x + 230, x], y: [y + 470, y], z: [260, 46], rx: [-10, -10], o: [0, 1] }, 'outQuint');
+  tw('#finger', t - .07, .07, { z: 10, s: .95 }, 'inCubic');
+  tw('#finger', t, .18, { z: 46, s: 1 }, 'outCubic');
+  tw('#finger', t + .2, .65, { x: x + 250, y: y + 500, z: 260, o: 0 }, 'inOutCubic');
+  const rel = [x - 14, y - 14]; // screen coords
+  const el = $(rp); el.style.left = rel[0] + 'px'; el.style.top = rel[1] + 'px';
+  tw(rp, t, .7, { s: [0, 7], o: [.9, 0] }, 'outCubic');
+  tw(rp, 0, .01, { o: [0, 0] });
+  if (btn) { tw(btn, t - .06, .06, { s: [1, .96] }, 'inCubic'); tw(btn, t, .3, { s: 1 }, 'outBack'); }
+  cue(t, 'tap');
+});
+tw('#finger', 0, .01, { o: [0, 0], rx: [-10, -10] });
+
+/* ---------------- S2 form fill ---------------- */
+on(t => {
+  $('#tName').textContent = typed('Aisyah Rahman', t, 4.55, 5.05);
+  $('#tDob').textContent = typed('12 / 05 / 1994', t, 5.15, 5.55);
+  $('#tJob').textContent = typed('Guru', t, 6.05, 6.25);
+  $('#i1').classList.toggle('on', t > 4.5 && t < 5.1);
+  $('#i2').classList.toggle('on', t > 5.1 && t < 5.65);
+  $('#i3').classList.toggle('on', t > 6.0 && t < 6.5);
+  $('#g1').classList.toggle('on', t < 5.78); $('#g2').classList.toggle('on', t >= 5.78);
+  $('#s1').classList.toggle('on', true);
+});
+tw('#ageChip', 5.6, .45, { s: [0, 1], o: [0, 1] }, 'outBack');
+tw('#hlG', 5.7, .35, { x: [0, 222] }, 'inOutCubic');
+
+/* ---------------- S3 plans ---------------- */
+const PLANS = [
+  ['Hibah Nova 150', 'Perlindungan asas', 38.40, '#eef0ff', '#5b5bf6'],
+  ['Hibah Nova', 'Waiver / CI add-on', 52.10, '#fff1ec', '#ff8a65'],
+  ['Hibah Chinta', 'Untuk keluarga', 64.80, '#f3edff', '#9b7cf4'],
+  ['Hibah Inspirasi', 'Kadar tersendiri', 71.25, '#eef0ff', '#5b5bf6'],
+  ['Hibah Evo', 'Caruman tetap', 50.00, '#fff1ec', '#ff8a65'],
+];
+PLANS.forEach(([n, d, p, bg, fg], i) => {
+  const r = document.createElement('div'); r.className = 'card row plan'; r.id = 'pl' + i; r.style.padding = '14px 16px';
+  r.innerHTML = `<div class="ic" style="background:${bg}"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="${fg}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 5-3.5 8.5-7 10-3.5-1.5-7-5-7-10V6z"/></svg></div>
+    <div class="t"><b>${n}</b><small>${d}${i === 1 ? ' <span class="pill" id="wv" style="background:#fff1ec;color:#e8643e;padding:2px 8px;font-size:13px">+ Waiver</span>' : ''}</small></div>
+    <div class="pr">RM<span id="pp${i}">0.00</span><small>/bln</small></div><div class="ck">✓</div>`;
+  $('#plans').appendChild(r);
+  tw(r, 7.85 + i * .07, .6, { y: [40, 0], o: [0, 1] }, 'outQuint');
+});
+tw('#wv', 10.0, .4, { s: [0, 1] }, 'outBack');
+tw('#wv', 0, .01, { s: [0, 0] });
+on(t => {
+  PLANS.forEach(([, , p], i) => {
+    let v = p * EASE.outCubic(prog(t, 7.95 + i * .07, .9));
+    if (i === 1) v = lerp(v, 61.35, EASE.inOutCubic(prog(t, 10.0, .5)));
+    $('#pp' + i).textContent = v.toFixed(2);
+  });
+  $('#pl1').classList.toggle('sel', t >= 9.62);
+  const b3 = $('#b3'), en = t >= 9.62;
+  b3.style.background = en ? '#5b5bf6' : '#c9c8e0';
+  b3.style.boxShadow = en ? '0 16px 30px -10px rgba(91,91,246,.6)' : 'none';
+});
+
+/* ---------------- S4 success ---------------- */
+tw('#okC', 13.35, .6, { s: [.3, 1], o: [0, 1] }, 'outBack');
+tw('#okRing', 13.5, 1.0, { s: [1, 1.6], o: [.8, 0] }, 'outCubic');
+tw('#okRing', 0, .01, { o: [0, 0] });
+tw('#okT', 13.55, .6, { y: [24, 0], o: [0, 1] }, 'outQuint');
+tw('#okCard', 13.7, .6, { y: [30, 0], o: [0, 1] }, 'outQuint');
+tw('#b4', 13.85, .5, { o: [0, 1] }, 'outCubic');
+on(t => { const L = 110; $('#okTick').style.strokeDasharray = L; $('#okTick').style.strokeDashoffset = L * (1 - EASE.inOutCubic(prog(t, 13.5, .45))); });
+cue(13.5, 'ding');
+
+/* ---------------- pop-out cards: rise toward the camera, float, sink back ---------------- */
+function popCard(id, a, b, float = 1) {
+  tw(id, a, .75, { z: [0, 190], s: [.82, 1], o: [0, 1], y: [30, 0] }, 'outBack');
+  tw(id, b, .6, { z: 0, s: .82, o: 0, y: 30 }, 'inOutCubic');
+  cue(a, 'pop'); cue(b, 'sink');
+  on(t => { const k = prog(t, a, .75) * (1 - prog(t, b, .6)); $(id + 'w').style.transform = `translate3d(0, ${Math.sin((t - a) * 2.6) * 10 * k}px, 0) rotateY(${Math.sin((t - a) * 1.7) * 3 * k}deg)`; });
+}
+popCard('#c1', 1.0, 3.0);
+popCard('#c2', 5.0, 6.75);
+popCard('#c3', 10.35, 12.2);
+popCard('#c4', 15.0, 17.15);
+cue(15.08, 'chime');
+popCard('#c5', 20.95, 22.9);
+[.45, .6, .52, .75, .66, .88, 1].forEach((h, i) => {
+  const b = document.createElement('div'); b.style.cssText = `flex:1;height:${h * 100}%;border-radius:8px 8px 4px 4px;background:${i === 6 ? '#ff8a65' : '#5b5bf6'};opacity:${i === 6 ? 1 : .35 + i * .08};transform-origin:50% 100%`;
+  $('#c1bars').appendChild(b); tw(b, 1.25 + i * .05, .5, { s: [.2, 1] }, 'outBack');
+});
+
+/* ---------------- laptop: dashboard section ---------------- */
+tw('#laptop', 0, .01, { o: [0, 0] });
+tw('#laptop', 17.85, 1.1, { y: [560, 0], rx: [28, 9], o: [0, 1] }, 'inOutQuint');
+tw('#laptop', 25.0, 1.0, { y: 600, rx: 26, o: 0 }, 'inOutQuint');
+tw('#lshadow', 0, .01, { o: [0, 0] }); tw('#lshadow', 18.2, .9, { o: 1, s: [.6, 1] }, 'outCubic'); tw('#lshadow', 25.0, .7, { o: 0 }, 'inOutCubic');
+cue(17.85, 'whoosh'); cue(25.05, 'whoosh');
+const DB = [.5, .62, .55, .78, .7, .9, 1];
+DB.forEach((h, i) => {
+  const b = document.createElement('div'); b.style.cssText = `flex:1;height:${h * 100}%;border-radius:8px 8px 3px 3px;background:${i === 6 ? '#ff8a65' : '#5b5bf6'};opacity:${i === 6 ? 1 : .4 + i * .08};transform-origin:50% 100%`;
+  $('#dbars').appendChild(b); tw(b, 18.7 + i * .06, .6, { s: [0, 1] }, 'outBack');
+});
+const LEADS = [['AR', 'Aisyah Rahman', 'Hibah Nova', '#ff8a65'], ['FZ', 'Farid Zain', 'Hibah Evo', '#5b5bf6'], ['ML', 'Mei Ling', 'Medical Card', '#9b7cf4'], ['RK', 'Rajesh Kumar', 'Hibah Chinta', '#5b5bf6'], ['SH', 'Siti Hajar', 'Hibah Nova 150', '#ff8a65']];
+LEADS.forEach(([ini, n, p, c], i) => {
+  const r = document.createElement('div'); r.className = 'drow abs'; r.style.left = 0; r.style.right = 0; r.style.top = (i * 62) + 'px';
+  r.innerHTML = `<div class="av" style="width:34px;height:34px;background:${c};font-size:12px">${ini}</div><div>${n} <em>· ${p}</em></div><span class="wa" id="${i ? '' : 'waBtn'}">WhatsApp</span>`;
+  $('#dlist').appendChild(r);
+  if (i === 0) { r.id = 'newRow'; tw(r, 20.55, .7, { y: [-70, 0], o: [0, 1] }, 'outQuint'); }
+  else { tw(r, 18.75 + i * .07, .5, { x: [60, 0], o: [0, 1] }, 'outQuint'); tw(r, 20.55, .7, { y: [-62, 0] }, 'outQuint'); }
+});
+cue(20.6, 'chime');
+on(t => {
+  const n = v => Math.round(v).toLocaleString('en-US');
+  const c = EASE.outCubic(prog(t, 18.7, 1.2));
+  $('#dL').textContent = n(127 * c + (t >= 20.6 ? 1 : 0));
+  $('#dQ').textContent = n(342 * c);
+  $('#dC').textContent = (24.8 * c).toFixed(1) + '%';
+  const nr = $('#newRow'); const hl = prog(t, 20.6, .3) * (1 - prog(t, 24.8, .4));
+  nr.style.background = `rgba(255,241,236,${hl})`; nr.style.borderColor = hl > .5 ? '#ffd2c2' : '#efedf9';
+  const wa = $('#waBtn'), done = t >= 24.0;
+  wa.textContent = done ? 'Dihubungi ✓' : 'WhatsApp';
+  wa.style.background = done ? '#5b5bf6' : '#eef0ff'; wa.style.color = done ? '#fff' : '#5b5bf6';
+});
+// cursor glides to the new lead's WhatsApp button and clicks
+const CUR = [760, 262];
+tw('#cursor', 0, .01, { o: [0, 0] });
+tw('#cursor', 22.9, 1.0, { x: [560, CUR[0]], y: [470, CUR[1]], o: [0, 1] }, 'inOutCubic');
+tw('#cursor', 23.97, .06, { s: .85 }, 'inCubic'); tw('#cursor', 24.03, .2, { s: 1 }, 'outBack');
+tw('#cursor', 24.4, .5, { x: CUR[0] + 60, y: CUR[1] + 80, o: 0 }, 'inOutCubic');
+$('#rpL').style.left = (CUR[0] + 4) + 'px'; $('#rpL').style.top = (CUR[1] + 4) + 'px';
+tw('#rpL', 0, .01, { o: [0, 0] }); tw('#rpL', 24.0, .6, { s: [0, 3], o: [.8, 0] }, 'outCubic');
+cue(24.0, 'tap');
+
+finalize();
+CUES.sort((a, b) => a.t - b.t);
+window.seek = t => { t = ((t % DUR) + DUR) % DUR; for (const h of HOOKS) h(t); applyAll(t); };
+Object.assign(window, { W, H, FPS, DUR, BPM, CUES, OUT: 'app-showcase.mp4' });
+
+/* ---------------- live playback ---------------- */
+const CAPTURE = new URLSearchParams(location.search).has('capture');
+function fit() { const s = Math.min(innerWidth / W, innerHeight / H), st = $('#stage'); st.style.transform = `scale(${s})`; st.style.left = (innerWidth - W * s) / 2 + 'px'; st.style.top = (innerHeight - H * s) / 2 + 'px'; }
+if (CAPTURE) { $('#tapHint').remove(); window.seek(0); }
+else {
+  fit(); addEventListener('resize', fit);
+  let t0 = performance.now(), audio = null;
+  const tick = now => { window.seek((now - t0) / 1000); requestAnimationFrame(tick); };
+  document.fonts.ready.then(() => requestAnimationFrame(tick));
+  $('#tapHint').onclick = () => { audio = audio || new Audio('soundtrack.m4a'); audio.loop = true; audio.currentTime = 0; audio.play().catch(() => {}); t0 = performance.now(); $('#tapHint').remove(); };
+}
+</script>
+</body>
+</html>
