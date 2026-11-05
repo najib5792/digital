@@ -1,0 +1,46 @@
+{
+ "main-bg": "radial-gradient(circle at 85% 0%,#FFFFFF 0%,#F3F4F6 55%,#E9EAEC 100%)",
+ "main": "#F3F4F6",
+ "hook-bg": "radial-gradient(circle at 30% 20%,#E30220 0%,#BE0000 100%)",
+ "hook-ink": "#FFFFFF",
+ "alt-bg": "radial-gradient(circle at 30% 20%,#34303A 0%,#252024 100%)",
+ "alt-ink": "#FFFFFF",
+ "ink": "#252024",
+ "mute": "#8A878C",
+ "accent": "#E30220",
+ "accent2": "#FFFFFF",
+ "accent-ink": "#FFFFFF",
+ "card": "#FFFFFF",
+ "card-ink": "#252024",
+ "panel": "#DDDDDD",
+ "paper": "#FFFFFF",
+ "line": "#DDDDDD",
+ "pill-bg": "#252024",
+ "pill-ink": "#FFFFFF",
+ "badge-bg": "#E30220",
+ "badge-ink": "#FFFFFF",
+ "pill-num": "#E30220",
+ "shadow": "0 16px 40px rgba(190,0,0,.14)",
+ "tiles": [
+  [
+   "#E30220",
+   "#FFFFFF"
+  ],
+  [
+   "#252024",
+   "#FFFFFF"
+  ],
+  [
+   "#DDDDDD",
+   "#252024"
+  ],
+  [
+   "#BE0000",
+   "#FFFFFF"
+  ],
+  [
+   "#F3F4F6",
+   "#252024"
+  ]
+ ]
+}

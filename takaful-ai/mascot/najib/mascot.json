@@ -1,0 +1,76 @@
+{
+ "poses": {
+  "think": "pose_think.png",
+  "point": "pose_point.png",
+  "phone": "pose_phone.png",
+  "thumbs": "pose_thumbs.png",
+  "wave": "pose_wave.png",
+  "explain": "pose_explain.png",
+  "stop": "pose_stop.png",
+  "shock": "pose_shock.png"
+ },
+ "mouths": {
+  "A": "mouth_A.png",
+  "B": "mouth_B.png",
+  "C": "mouth_C.png",
+  "D": "mouth_D.png",
+  "E": "mouth_E.png",
+  "F": "mouth_F.png",
+  "G": "mouth_G.png",
+  "H": "mouth_H.png",
+  "X": "mouth_X.png"
+ },
+ "anchor": {
+  "think": [
+   150,
+   211,
+   67
+  ],
+  "point": [
+   150,
+   166,
+   67
+  ],
+  "phone": [
+   150,
+   166,
+   67
+  ],
+  "thumbs": [
+   150,
+   209,
+   67
+  ],
+  "wave": [
+   150,
+   191,
+   67
+  ],
+  "explain": [
+   150,
+   212,
+   67
+  ],
+  "stop": [
+   150,
+   189,
+   67
+  ],
+  "shock": [
+   150,
+   219,
+   67
+  ]
+ },
+ "patch": {
+  "think": "#D0906C",
+  "point": "#D0936D",
+  "phone": "#CD8D68",
+  "thumbs": "#CF946D",
+  "wave": "#BA764F",
+  "explain": "#B4784E",
+  "stop": "#C6986F",
+  "shock": "#C39471"
+ },
+ "avatar_pose": "wave"
+}
