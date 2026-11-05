@@ -23,54 +23,54 @@
  "anchor": {
   "think": [
    150,
-   211,
-   67
+   206,
+   46
   ],
   "point": [
    150,
-   166,
-   67
+   161,
+   46
   ],
   "phone": [
    150,
-   166,
-   67
+   161,
+   46
   ],
   "thumbs": [
    150,
-   209,
-   67
+   204,
+   46
   ],
   "wave": [
    150,
-   191,
-   67
+   186,
+   46
   ],
   "explain": [
    150,
-   212,
-   67
+   207,
+   46
   ],
   "stop": [
    150,
-   189,
-   67
+   184,
+   46
   ],
   "shock": [
    150,
-   219,
-   67
+   214,
+   46
   ]
  },
  "patch": {
-  "think": "#D0906C",
-  "point": "#D0936D",
-  "phone": "#CD8D68",
-  "thumbs": "#CF946D",
-  "wave": "#BA764F",
-  "explain": "#B4784E",
-  "stop": "#C6986F",
-  "shock": "#C39471"
+  "think": "#DA986C",
+  "point": "#DA976C",
+  "phone": "#D9976C",
+  "thumbs": "#D7966D",
+  "wave": "#DE9C72",
+  "explain": "#DE9B71",
+  "stop": "#DF9C72",
+  "shock": "#B58463"
  },
  "avatar_pose": "wave"
 }
