@@ -3,116 +3,248 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Checklist Setup Akaun AI — Hari 2 · Takaful x AI</title>
-<meta name="description" content="Checklist percuma untuk ejen takaful: setup akaun chatbot AI dalam 2 minit, 3 langkah, plus tips jaga data klien.">
-<meta property="og:title" content="Checklist Setup Akaun AI untuk Ejen Takaful">
-<meta property="og:description" content="3 langkah, 2 minit, percuma. Plus prompt pertama siap copy.">
+<title>Panduan Penuh Setup AI untuk Ejen Takaful — Hari 2 · Takaful x AI</title>
+<meta name="description" content="Panduan langkah demi langkah daftar ChatGPT, Claude dan Gemini percuma, tetapan privasi, 5 prompt pertama untuk ejen takaful dan checklist PDPA.">
+<meta property="og:title" content="Panduan Penuh Setup AI untuk Ejen Takaful">
+<meta property="og:description" content="ChatGPT, Claude, Gemini: cara daftar, tetapan privasi, 5 prompt siap copy.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{--red:#E30220;--red2:#BE0000;--ink:#252024;--grey:#DDDDDD;--bg:#F3F4F6;--mute:#6E6A70}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.55;-webkit-font-smoothing:antialiased}
-.wrap{max-width:560px;margin:0 auto;padding:0 20px}
-header{background:var(--ink);color:#fff;padding:28px 0 34px;position:relative;overflow:hidden}
-header:after{content:"";position:absolute;right:-60px;top:-60px;width:200px;height:200px;border-radius:50%;background:var(--red);opacity:.9}
+body{font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.6;-webkit-font-smoothing:antialiased}
+.wrap{max-width:600px;margin:0 auto;padding:0 18px}
+header{background:var(--ink);color:#fff;padding:26px 0 30px;position:relative;overflow:hidden}
+header:after{content:"";position:absolute;right:-120px;top:-120px;width:230px;height:230px;border-radius:50%;background:var(--red);opacity:.85}
 .tag{display:inline-block;font:600 12px/1 Inter;letter-spacing:.08em;text-transform:uppercase;background:var(--red);color:#fff;padding:7px 10px;border-radius:6px;position:relative;z-index:1}
-h1{font:800 32px/1.12 Poppins,sans-serif;margin:16px 0 10px;position:relative;z-index:1}
-h1 em{font-style:normal;color:var(--red)}
-.lead{color:#cfcbd0;font-size:16px;position:relative;z-index:1}
-.progress{margin-top:20px;background:#3a353b;border-radius:99px;height:8px;position:relative;z-index:1}
+h1{font:800 30px/1.15 Poppins,sans-serif;margin:16px 0 10px;position:relative;z-index:1}
+h1 em{font-style:normal;color:#fff;background:linear-gradient(transparent 62%,var(--red) 62%);padding:0 2px}
+.lead{color:#cfcbd0;font-size:15.5px;position:relative;z-index:1}
+.toc{margin-top:16px;display:flex;flex-wrap:wrap;gap:8px;position:relative;z-index:1}
+.toc a{font:600 13px Inter;color:#fff;background:#3a353b;padding:7px 11px;border-radius:99px;text-decoration:none}
+.progress{margin-top:18px;background:#3a353b;border-radius:99px;height:8px;position:relative;z-index:1}
 .progress i{display:block;height:100%;width:0;background:var(--red);border-radius:99px;transition:width .3s}
 .ptext{font-size:13px;color:#cfcbd0;margin-top:8px;position:relative;z-index:1}
-main{padding:24px 0 40px}
-.card{background:#fff;border-radius:16px;padding:20px;margin-bottom:16px;box-shadow:0 10px 30px rgba(190,0,0,.07)}
-.step{display:flex;gap:14px;align-items:flex-start}
-.num{flex:0 0 40px;height:40px;border-radius:10px;background:var(--red);color:#fff;font:800 18px/40px Poppins;text-align:center}
-h2{font:700 19px/1.25 Poppins,sans-serif;margin-bottom:6px}
-.card p{color:var(--mute);font-size:15px}
-ul.check{list-style:none;margin-top:12px}
+main{padding:22px 0 36px}
+h2{font:800 22px/1.25 Poppins,sans-serif;margin:26px 0 12px}
+h2 small{display:block;font:600 12px Inter;letter-spacing:.08em;text-transform:uppercase;color:var(--red);margin-bottom:4px}
+h3{font:700 17px/1.3 Poppins,sans-serif;margin-bottom:6px}
+.card{background:#fff;border-radius:16px;padding:18px;margin-bottom:14px;box-shadow:0 10px 30px rgba(190,0,0,.07)}
+.card p,.card li{font-size:15px}
+.mute{color:var(--mute)}
+ol.steps{margin:10px 0 0 20px}
+ol.steps li{margin:6px 0}
+code,.kbd{font:600 13.5px ui-monospace,Menlo,monospace;background:var(--bg);padding:2px 6px;border-radius:6px}
+.tabs{display:flex;gap:6px;margin-bottom:12px}
+.tabs button{flex:1;border:2px solid var(--ink);background:#fff;color:var(--ink);border-radius:10px;padding:10px 6px;font:700 14px Poppins;cursor:pointer}
+.tabs button.on{background:var(--ink);color:#fff}
+.pane{display:none}.pane.on{display:block}
+.pill{display:inline-block;font:600 12px Inter;background:var(--bg);border-radius:99px;padding:4px 10px;margin:8px 6px 0 0}
+.tip{border-left:4px solid var(--red);background:#fff5f6;border-radius:10px;padding:12px 14px;margin-top:12px;font-size:14.5px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:9px 6px;border-bottom:1px solid var(--grey);vertical-align:top}
+th{font:700 13px Poppins}
+ul.check{list-style:none;margin-top:10px}
 ul.check li{margin:8px 0}
 ul.check label{display:flex;gap:10px;align-items:flex-start;cursor:pointer;font-size:15px}
 ul.check input{appearance:none;flex:0 0 22px;height:22px;border:2px solid var(--red);border-radius:6px;margin-top:1px;display:grid;place-content:center;cursor:pointer}
 ul.check input:checked{background:var(--red)}
 ul.check input:checked:after{content:"✓";color:#fff;font-weight:700;font-size:14px}
 ul.check input:checked + span{color:var(--mute);text-decoration:line-through}
-.prompt{background:var(--ink);color:#fff;border-radius:12px;padding:16px;margin-top:12px;font:500 14px/1.55 ui-monospace,Menlo,monospace;white-space:pre-wrap}
-button.copy{margin-top:10px;background:var(--red);color:#fff;border:0;border-radius:10px;padding:11px 16px;font:600 14px Inter;cursor:pointer}
+.prompt{background:var(--ink);color:#fff;border-radius:12px;padding:14px;margin-top:10px;font:500 13.5px/1.6 ui-monospace,Menlo,monospace;white-space:pre-wrap}
+button.copy{margin-top:8px;background:var(--red);color:#fff;border:0;border-radius:10px;padding:10px 14px;font:600 14px Inter;cursor:pointer}
 button.copy.done{background:#1f8a4c}
 .warn{background:var(--red);color:#fff}
-.warn h2{color:#fff}
-.warn p{color:#ffe1e5}
-.warn ul{margin:10px 0 0 18px;font-size:15px}
+.warn .mute,.warn li{color:#ffe1e5}
+.warn ul{margin:8px 0 0 18px}
+details{background:#fff;border-radius:14px;padding:14px 16px;margin-bottom:10px;box-shadow:0 6px 20px rgba(190,0,0,.05)}
+summary{font:700 15px Poppins;cursor:pointer}
+details p{margin-top:8px;font-size:14.5px;color:var(--mute)}
 .cta{background:var(--ink);color:#fff;text-align:center}
-.cta h2{color:#fff}
 .cta p{color:#cfcbd0}
-.cta a{display:inline-block;margin-top:14px;background:var(--red);color:#fff;text-decoration:none;font:700 15px Poppins;padding:13px 22px;border-radius:12px}
+.cta a{display:inline-block;margin-top:12px;background:var(--red);color:#fff;text-decoration:none;font:700 15px Poppins;padding:13px 22px;border-radius:12px}
 footer{text-align:center;font-size:12px;color:var(--mute);padding:0 20px 30px}
 </style>
 </head>
 <body>
 <header>
   <div class="wrap">
-    <span class="tag">Hari 2 / 30 · Takaful x AI</span>
-    <h1>Setup akaun AI kau, <em>siap 2 minit.</em></h1>
-    <p class="lead">Checklist untuk ejen takaful. Percuma, tak payah kad kredit. Tick setiap langkah bila dah siap.</p>
+    <span class="tag">Hari 2 / 30 · Bonus video</span>
+    <h1>Panduan penuh setup AI <em>untuk ejen takaful</em></h1>
+    <p class="lead">Video tunjuk 3 langkah ringkas. Page ni bagi detail penuh: cara daftar ChatGPT, Claude &amp; Gemini, tetapan privasi, 5 prompt pertama siap copy, dan apa nak buat kalau tersangkut.</p>
+    <nav class="toc">
+      <a href="#gmail">1. Gmail</a><a href="#pilih">2. Pilih AI</a><a href="#daftar">3. Daftar</a><a href="#privasi">4. Privasi</a><a href="#prompt">5. Prompt</a><a href="#pdpa">6. PDPA</a><a href="#faq">Masalah?</a>
+    </nav>
     <div class="progress"><i id="bar"></i></div>
-    <p class="ptext" id="ptext">0 / 7 siap</p>
+    <p class="ptext" id="ptext">0 siap</p>
   </div>
 </header>
+
 <main class="wrap">
-  <section class="card"><div class="step"><div class="num">1</div><div>
-    <h2>Daftar akaun</h2>
-    <p>Buka laman chatbot AI pilihan kau dan tekan daftar.</p>
-    <ul class="check">
-      <li><label><input type="checkbox"><span>Buka laman chatbot AI dan tekan <b>Daftar</b> / Sign up</span></label></li>
-      <li><label><input type="checkbox"><span>Daftar guna emel Gmail kau (paling cepat)</span></label></li>
-    </ul>
-  </div></div></section>
 
-  <section class="card"><div class="step"><div class="num">2</div><div>
-    <h2>Sahkan &amp; siap</h2>
-    <p>Pilih plan percuma dulu. Upgrade nanti bila dah biasa.</p>
+  <h2 id="gmail"><small>Langkah 1</small>Sediakan satu Gmail</h2>
+  <div class="card">
+    <p>Ketiga-tiga AI ni boleh daftar guna akaun Google. Paling cepat, sekali klik.</p>
+    <div class="tip"><b>Tip ejen:</b> buat satu Gmail khas untuk kerja takaful (contoh <code>nama.takaful@gmail.com</code>). Senang asingkan chat kerja dengan chat peribadi.</div>
+    <ol class="steps">
+      <li>Belum ada? Pergi <code>accounts.google.com</code> → <b>Create account</b>.</li>
+      <li>Isi nama, pilih alamat Gmail, kata laluan, dan sahkan nombor telefon.</li>
+      <li>Hidupkan pengesahan 2 langkah (2-Step Verification) dalam tetapan keselamatan Google.</li>
+    </ol>
     <ul class="check">
-      <li><label><input type="checkbox"><span>Sahkan emel (semak inbox / spam)</span></label></li>
-      <li><label><input type="checkbox"><span>Isi nama, pilih plan <b>percuma</b></span></label></li>
+      <li><label><input type="checkbox"><span>Ada Gmail untuk kerja</span></label></li>
+      <li><label><input type="checkbox"><span>2-Step Verification dah hidup</span></label></li>
     </ul>
-  </div></div></section>
+  </div>
 
-  <section class="card"><div class="step"><div class="num">3</div><div>
-    <h2>Taip arahan pertama</h2>
-    <p>Copy prompt ni, tampal dalam chatbot, tekan enter.</p>
+  <h2 id="pilih"><small>Langkah 2</small>Pilih AI mana nak mula</h2>
+  <div class="card">
+    <p class="mute">Semua ada plan percuma, tak perlu kad kredit. Mula dengan satu dulu, nanti boleh cuba yang lain.</p>
+    <table>
+      <tr><th>AI</th><th>Sesuai untuk ejen bila…</th><th>Laman</th></tr>
+      <tr><td><b>ChatGPT</b></td><td>Nak serba boleh: caption, skrip, idea content, gambar ringkas</td><td><code>chatgpt.com</code></td></tr>
+      <tr><td><b>Claude</b></td><td>Nak tulisan panjang yang sedap dibaca: artikel, ringkas dokumen, mesej follow-up</td><td><code>claude.ai</code></td></tr>
+      <tr><td><b>Gemini</b></td><td>Dah guna Gmail/Google Docs, nak AI yang sambung terus dengan Google</td><td><code>gemini.google.com</code></td></tr>
+    </table>
+    <div class="tip">Tak pasti? Mula dengan <b>ChatGPT</b>. Paling ramai guna, banyak tutorial BM.</div>
+  </div>
+
+  <h2 id="daftar"><small>Langkah 3</small>Daftar, step by step</h2>
+  <div class="card">
+    <div class="tabs" role="tablist">
+      <button class="on" data-pane="gpt">ChatGPT</button><button data-pane="claude">Claude</button><button data-pane="gemini">Gemini</button>
+    </div>
+
+    <div class="pane on" id="gpt">
+      <h3>ChatGPT (OpenAI)</h3>
+      <ol class="steps">
+        <li>Buka <code>chatgpt.com</code> di browser.</li>
+        <li>Tekan <b>Sign up</b> (atau <b>Sign up for free</b>).</li>
+        <li>Pilih <b>Continue with Google</b> dan pilih Gmail kerja kau. (Boleh juga guna emel biasa, Microsoft atau Apple.)</li>
+        <li>Kalau daftar guna emel: buka inbox, tekan link pengesahan.</li>
+        <li>Isi nama dan tarikh lahir, tekan teruskan.</li>
+        <li>Siap. Kau terus masuk plan <b>Free</b>. Tak payah bayar apa-apa.</li>
+      </ol>
+      <span class="pill">App: Play Store / App Store "ChatGPT"</span><span class="pill">Kadang-kadang minta no. telefon</span>
+      <ul class="check">
+        <li><label><input type="checkbox"><span>Akaun ChatGPT siap</span></label></li>
+        <li><label><input type="checkbox"><span>Install app ChatGPT di phone</span></label></li>
+      </ul>
+    </div>
+
+    <div class="pane" id="claude">
+      <h3>Claude (Anthropic)</h3>
+      <ol class="steps">
+        <li>Buka <code>claude.ai</code> di browser.</li>
+        <li>Tekan <b>Sign up</b>.</li>
+        <li>Pilih <b>Continue with Google</b>, atau masukkan emel. Kalau guna emel, Claude hantar kod/link ke inbox untuk sahkan.</li>
+        <li>Setuju dengan terma, isi nama.</li>
+        <li>Pilih guna untuk peribadi dan plan <b>Free</b>.</li>
+        <li>Siap. Plan percuma ada had mesej harian, dan had tu reset sendiri.</li>
+      </ol>
+      <span class="pill">App: Play Store / App Store "Claude"</span><span class="pill">Tak perlu kad kredit</span>
+      <ul class="check">
+        <li><label><input type="checkbox"><span>Akaun Claude siap</span></label></li>
+      </ul>
+    </div>
+
+    <div class="pane" id="gemini">
+      <h3>Gemini (Google)</h3>
+      <ol class="steps">
+        <li>Buka <code>gemini.google.com</code>.</li>
+        <li>Tekan <b>Sign in</b> di atas kanan, pilih Gmail kerja kau.</li>
+        <li>Baca dan setuju terma bila diminta.</li>
+        <li>Siap. Tak payah daftar akaun baru, sebab Gemini guna akaun Google kau terus.</li>
+      </ol>
+      <span class="pill">App: "Google Gemini" (Android / iOS)</span><span class="pill">Percuma dengan akaun Google</span>
+      <ul class="check">
+        <li><label><input type="checkbox"><span>Dah sign in Gemini</span></label></li>
+      </ul>
+    </div>
+  </div>
+
+  <h2 id="privasi"><small>Langkah 4</small>Tetapan privasi (2 minit)</h2>
+  <div class="card">
+    <p>Sebagai ejen, kau pegang maklumat orang. Buat ni sekali, terus selamat.</p>
+    <ol class="steps">
+      <li><b>ChatGPT:</b> buka <b>Settings</b> → <b>Data controls</b> → matikan pilihan untuk bantu tambah baik model ("Improve the model for everyone").</li>
+      <li><b>Claude:</b> buka <b>Settings</b> → <b>Privacy</b> → matikan pilihan bantu tambah baik Claude.</li>
+      <li><b>Gemini:</b> semak tetapan aktiviti (Gemini Apps Activity) dalam akaun Google kau, pilih ikut selesa.</li>
+      <li>Tambah "arahan tetap" (custom instructions / personalisation) supaya AI kenal kau. Copy contoh bawah ni.</li>
+    </ol>
+    <div class="prompt" id="ci">Saya ejen takaful di Malaysia. Tulis dalam Bahasa Melayu santai, ayat pendek, mesra. Sasaran saya: keluarga muda, pekerja swasta dan peniaga kecil. Jangan janji pulangan atau buat dakwaan produk yang tak pasti. Kalau tak pasti fakta, tanya saya dulu.</div>
+    <button class="copy" data-for="ci">Copy arahan tetap</button>
+    <p class="mute" style="font-size:13px;margin-top:8px">Nama menu mungkin berubah sikit ikut versi app. Cari di Settings kalau tak jumpa.</p>
+    <ul class="check">
+      <li><label><input type="checkbox"><span>Tetapan privasi dah semak</span></label></li>
+      <li><label><input type="checkbox"><span>Arahan tetap dah tampal</span></label></li>
+    </ul>
+  </div>
+
+  <h2 id="prompt"><small>Langkah 5</small>5 prompt pertama untuk ejen</h2>
+  <div class="card">
+    <p class="mute">Copy, tampal, tukar bahagian dalam [kurungan]. Cuba sekurang-kurangnya satu hari ni.</p>
+
+    <h3 style="margin-top:12px">1. Caption Facebook</h3>
     <div class="prompt" id="p1">Tulis caption Facebook pasal takaful hibah, gaya santai, 3 ayat. Sasaran: ibu bapa muda di Malaysia. Akhiri dengan soalan untuk pembaca.</div>
-    <button class="copy" data-for="p1">Copy prompt</button>
-    <ul class="check">
-      <li><label><input type="checkbox"><span>Dah cuba prompt pertama</span></label></li>
-      <li><label><input type="checkbox"><span>Simpan chat tu, nanti guna semula</span></label></li>
-    </ul>
-  </div></div></section>
+    <button class="copy" data-for="p1">Copy</button>
 
-  <section class="card warn">
-    <h2>Tips penting: jaga data klien</h2>
-    <p>Jangan sesekali masukkan benda ni dalam mana-mana AI:</p>
+    <h3 style="margin-top:16px">2. Terangkan produk dengan mudah</h3>
+    <div class="prompt" id="p2">Terangkan beza MRTT dan MLTT macam bercakap dengan kawan di kedai kopi. Maksimum 6 ayat, guna contoh rumah RM300,000 (contoh sahaja).</div>
+    <button class="copy" data-for="p2">Copy</button>
+
+    <h3 style="margin-top:16px">3. Mesej follow-up WhatsApp</h3>
+    <div class="prompt" id="p3">Tulis 3 versi mesej WhatsApp follow-up untuk prospek yang dah terima quotation 3 hari lepas tapi senyap. Nada sopan, tak memaksa, maksimum 3 ayat setiap satu.</div>
+    <button class="copy" data-for="p3">Copy</button>
+
+    <h3 style="margin-top:16px">4. Idea content sebulan</h3>
+    <div class="prompt" id="p4">Bagi 30 idea content media sosial untuk ejen takaful di Malaysia. Campur: tips kewangan, mitos takaful, kisah pelanggan (tanpa nama), dan soalan lazim. Format jadual: hari, idea, format (video/gambar/teks).</div>
+    <button class="copy" data-for="p4">Copy</button>
+
+    <h3 style="margin-top:16px">5. Ringkas brochure</h3>
+    <div class="prompt" id="p5">Saya tampal teks brochure di bawah. Ringkaskan jadi 5 point mudah untuk prospek, bahasa santai, tanpa ubah fakta. Tandakan apa-apa yang perlu saya sahkan dengan syarikat.
+[tampal teks brochure di sini]</div>
+    <button class="copy" data-for="p5">Copy</button>
+
+    <ul class="check">
+      <li><label><input type="checkbox"><span>Dah cuba sekurang-kurangnya 1 prompt</span></label></li>
+      <li><label><input type="checkbox"><span>Dah cuba kelima-lima</span></label></li>
+    </ul>
+  </div>
+
+  <h2 id="pdpa"><small>Langkah 6</small>Checklist PDPA ejen</h2>
+  <div class="card warn">
+    <h3>Jangan masukkan dalam mana-mana AI:</h3>
     <ul>
-      <li>Nombor IC</li>
-      <li>Rekod perubatan</li>
-      <li>Nama &amp; nombor telefon klien</li>
+      <li>Nombor IC / pasport</li>
+      <li>Rekod perubatan, keputusan ujian, sejarah penyakit klien</li>
+      <li>Nama penuh + nombor telefon + alamat klien</li>
+      <li>Screenshot WhatsApp klien yang tak di-blur</li>
+      <li>Nombor polisi atau akaun bank</li>
     </ul>
+    <p class="mute" style="margin-top:10px">Guna data rekaan bila nak contoh: "Encik A, 35 tahun, 2 anak". Fakta produk sentiasa sahkan dengan brochure / syarikat, bukan jawapan AI.</p>
     <ul class="check">
-      <li><label><input type="checkbox"><span>Faham. Data klien kekal rahsia (PDPA).</span></label></li>
+      <li><label><input type="checkbox"><span style="color:#fff">Faham. Data klien kekal rahsia.</span></label></li>
     </ul>
-  </section>
+  </div>
 
-  <section class="card cta">
-    <h2>Esok, Hari 3</h2>
+  <h2 id="faq"><small>Tersangkut?</small>Masalah biasa</h2>
+  <details><summary>Emel pengesahan tak sampai</summary><p>Semak folder Spam / Promotions. Tunggu 2–3 minit, kemudian tekan hantar semula. Atau daftar semula guna "Continue with Google", tak perlu emel pengesahan.</p></details>
+  <details><summary>Dia minta nombor telefon</summary><p>Sesetengah AI minta nombor telefon sebagai langkah keselamatan. Guna nombor Malaysia kau sendiri. Kod SMS biasanya sampai dalam seminit.</p></details>
+  <details><summary>Keluar mesej "limit reached"</summary><p>Plan percuma ada had penggunaan. Tunggu had reset (biasanya beberapa jam), atau sambung kerja di AI lain sementara.</p></details>
+  <details><summary>Jawapan AI salah fakta</summary><p>Biasa berlaku. AI boleh "yakin tapi salah". Untuk apa-apa angka, caj, pengecualian atau syarat produk, rujuk dokumen rasmi syarikat.</p></details>
+  <details><summary>Nak bayar plan berbayar ke?</summary><p>Belum perlu. Guna plan percuma 2–4 minggu dulu. Bila dah guna hari-hari dan selalu kena had, baru fikir upgrade.</p></details>
+
+  <section class="card cta" style="margin-top:20px">
+    <h3 style="color:#fff">Esok, Hari 3</h3>
     <p>Prompt caption takaful yang tak bunyi macam brochure. Follow supaya tak terlepas.</p>
     <a href="https://www.threads.net/@najibnasarudin" target="_blank" rel="noopener">Follow @najibnasarudin</a>
   </section>
 </main>
-<footer>Siri 30 hari Takaful x AI oleh Najib Nasarudin. Panduan umum, bukan nasihat kewangan.</footer>
+<footer>Siri 30 hari Takaful x AI oleh Najib Nasarudin. Panduan umum, bukan nasihat kewangan. Nama menu app mungkin berubah ikut versi.</footer>
 <script>
 (function(){
-  var boxes=[].slice.call(document.querySelectorAll('ul.check input')),key='tkai-hari2';
+  var boxes=[].slice.call(document.querySelectorAll('ul.check input')),key='tkai-hari2-v2';
   var saved=[];try{saved=JSON.parse(localStorage.getItem(key)||'[]')}catch(e){}
   boxes.forEach(function(b,i){b.checked=!!saved[i];b.addEventListener('change',upd)});
   function upd(){var s=boxes.map(function(b){return b.checked}),n=s.filter(Boolean).length;
@@ -120,10 +252,14 @@ footer{text-align:center;font-size:12px;color:var(--mute);padding:0 20px 30px}
     document.getElementById('ptext').textContent=n+' / '+boxes.length+' siap'+(n===boxes.length?' 🎉':'');
     try{localStorage.setItem(key,JSON.stringify(s))}catch(e){}}
   upd();
-  document.querySelectorAll('button.copy').forEach(function(btn){btn.addEventListener('click',function(){
+  document.querySelectorAll('.tabs button').forEach(function(t){t.addEventListener('click',function(){
+    document.querySelectorAll('.tabs button').forEach(function(x){x.classList.remove('on')});
+    document.querySelectorAll('.pane').forEach(function(x){x.classList.remove('on')});
+    t.classList.add('on');document.getElementById(t.dataset.pane).classList.add('on')})});
+  document.querySelectorAll('button.copy').forEach(function(btn){var label=btn.textContent;btn.addEventListener('click',function(){
     var t=document.getElementById(btn.dataset.for).textContent;
-    function ok(){btn.textContent='Dah copy ✓';btn.classList.add('done');setTimeout(function(){btn.textContent='Copy prompt';btn.classList.remove('done')},2000)}
-    if(navigator.clipboard){navigator.clipboard.writeText(t).then(ok,ok)}else{var r=document.createRange();r.selectNode(document.getElementById(btn.dataset.for));getSelection().removeAllRanges();getSelection().addRange(r);try{document.execCommand('copy')}catch(e){}ok()}
+    function ok(){btn.textContent='Dah copy ✓';btn.classList.add('done');setTimeout(function(){btn.textContent=label;btn.classList.remove('done')},2000)}
+    if(navigator.clipboard){navigator.clipboard.writeText(t).then(ok,ok)}else{ok()}
   })});
 })();
 </script>
